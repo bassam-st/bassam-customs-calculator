@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بسّام الشتيمي للتخليص الجمركي – حاسبة الرسوم</title>
+  <meta name="theme-color" content="#17a34a" />
+  <style>
+    :root{
+      --bg:#f6f8fb;              /* خلفية عامة فاتحة */
+      --card:#ffffff;            /* بطاقات بيضاء */
+      --text:#0f172a;            /* نص أساسي داكن */
+      --muted:#6b7280;           /* نص ثانوي */
+      --border:#e5e7eb;          /* حدود ناعمة */
+      --accent:#22c55e;          /* أخضر أساسي */
+      --accent-2:#0ea5a7;        /* تركواز مساعد */
+      --accent-3:#3b82f6;        /* أزرق ثانوي للأزرار */
+      --shadow:0 10px 30px rgba(15,23,42,.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Kufi Arabic", Tahoma, Arial, sans-serif;
+      line-height:1.6;
+    }
+    .wrap{max-width:860px; margin:28px auto; padding:0 14px;}
+    /* رأس أنيق بتدرج أخضر/تركواز */
+    .hero{
+      background:linear-gradient(135deg, #22c55e, #0ea5a7);
+      color:#04311b; border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:18px; display:flex; gap:14px; align-items:center; justify-content:space-between;
+    }
+    .brand{
+      display:flex; gap:14px; align-items:center;
+    }
+    /* شعار افتراضي: يمكن استبداله بصورة لاحقًا */
+    .logo{
+      width:56px; height:56px; border-radius:14px; background:#fff;
+      display:grid; place-items:center; box-shadow:0 6px 24px rgba(0,0,0,.08);
+    }
+    .logo svg{display:block}
+    h1{margin:0; font-size:22px; color:#052e16}
+    .sub{color:#0b3b30; font-size:13px}
+    .phone{direction:ltr; font-weight:700}
+
+    .grid{display:grid; gap:14px}
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:18px; box-shadow:var(--shadow);
+    }
+    label{display:block; font-size:14px; color:var(--muted); margin-bottom:6px}
+    input[type="number"]{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+      background:#fff; color:var(--text); font-size:16px; outline: none;
+    }
+
+    /* أزرار اختيار الفئة كرُقَع جميلة */
+    .tier-wrap{display:flex; gap:10px; flex-wrap:wrap}
+    .tier{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+      background:#ecfeff; color:#065f5b; border:1px solid #cffafe;
+      padding:9px 14px; border-radius:999px; transition:.2s ease;
+    }
+    .tier[data-active="true"]{
+      background:#065f5b; color:#ecfeff; border-color:#065f5b;
+    }
+    .tier input{accent-color:#065f5b}
+
+    .result{
+      background:#f8fafc; border:1px dashed #d1d5db; border-radius:14px; padding:14px;
+    }
+    .big{font-size:34px; font-weight:800; color:#0f172a}
+    .muted{color:var(--muted); font-size:13px}
+
+    .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .btn{
+      border:none; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+    .btn-copy{background:#ecfccb; color:#365314}
+    .btn-print{background:#e0e7ff; color:#1e3a8a}
+    .btn-wa{background:#dcfce7; color:#065f46}
+    .hint{display:none; font-size:13px; color:#059669}
+    .show{display:inline}
+
+    footer{margin-top:16px; text-align:center; color:#94a3b8; font-size:12px}
+
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b1222; --card:#0e162a; --text:#e5e7eb; --muted:#9aa3b2; --border:#1f2a40; --shadow:0 8px 28px rgba(0,0,0,.35); }
+      .result{background:#0b1222; border-color:#23314c}
+      .tier{background:#0d2f31; color:#8ee7e9; border-color:#164e52}
+      .tier[data-active="true"]{background:#0ea5a7; color:#042f2f; border-color:#0ea5a7}
+      .btn-copy{background:#274e13; color:#d1fae5}
+      .btn-print{background:#1f2a40; color:#c7d2fe}
+      .btn-wa{background:#0b3b30; color:#bbf7d0}
+      .hero{color:#052e16}
+      h1{color:#052e16}
+    }
+
+    /* طباعة أنظف */
+    @media print{
+      body{background:#fff}
+      .hero, .actions, .hint, footer{display:none !important}
+      .card{border:none; box-shadow:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- رأس + شعار محسّن -->
+    <section class="hero">
+      <div class="brand">
+        <!-- شعار افتراضي؛ يمكنك لاحقًا استبداله بصورة: <img src="./assets/logo.png" alt="الشعار" class="logo" width="56" height="56"> -->
+        <div class="logo" aria-hidden="true">
+          <!-- شارة SVG ملساء بحرفي (بـش) -->
+          <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="شعار">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#0ea5a7"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="42" height="42" rx="10" fill="url(#g)"/>
+            <text x="21" y="27" text-anchor="middle" font-family="Tahoma, 'Noto Kufi Arabic', sans-serif"
+                  font-size="16" font-weight="800" fill="#052e16">بـش</text>
+          </svg>
+        </div>
+        <div>
+          <h1>بسّام الشتيمي للتخليص الجمركي</h1>
+          <div class="sub">للاستفسار وخدمات التخليص: <span class="phone">00967771997809</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div style="height:14px"></div>
+
+    <!-- بطاقة الحاسبة -->
+    <section class="card grid">
+      <div>
+        <label>قيمة السلعة (بالدولار USD)</label>
+        <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
+      </div>
+
+      <div>
+        <label>اختر الفئة الجمركية</label>
+        <div class="tier-wrap" id="tierWrap">
+          <label class="tier" data-active="true"><input type="radio" name="tier" value="0.205" checked> 5% (فئة خمسة بالمئة)</label>
+          <label class="tier"><input type="radio" name="tier" value="0.2506"> 10% (فئة عشرة بالمئة)</label>
+        </div>
+      </div>
+
+      <div>
+        <label>الرسوم الجمركية (ريال يمني)</label>
+        <div class="result">
+          <div class="big" id="duty">0</div>
+          <div class="muted" id="formula">—</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-copy" id="copy">نسخ النتيجة</button>
+        <button class="btn btn-print" id="printBtn">طباعة / حفظ PDF</button>
+        <button class="btn btn-wa" id="waBtn">مشاركة واتساب</button>
+        <span class="hint" id="copied">✔ تم النسخ</span>
+      </div>
+    </section>
+
+    <footer>
+      المعادلة: الرسوم = قيمة السلعة × 750 × معامل الفئة — مثال: 2000 × 750 × 0.205 = 307,500 ر.ي
+    </footer>
+  </div>
+
+  <script>
+    // ثوابت
+    const FIXED_RATE = 750; // سعر الصرف ثابت ومخفي
+    const usd      = document.getElementById('usd');
+    const duty     = document.getElementById('duty');
+    const formula  = document.getElementById('formula');
+    const tierWrap = document.getElementById('tierWrap');
+    const copyBtn  = document.getElementById('copy');
+    const copied   = document.getElementById('copied');
+    const printBtn = document.getElementById('printBtn');
+    const waBtn    = document.getElementById('waBtn');
+
+    function activeFactor(){
+      const sel = tierWrap.querySelector('input[name="tier"]:checked');
+      return sel ? parseFloat(sel.value) : 0;
+    }
+    function formatNumber(n){
+      return new Intl.NumberFormat('ar-YE', {maximumFractionDigits: 2}).format(n || 0);
+    }
+    function recalc(){
+      const v = parseFloat(usd.value || '0');
+      const f = activeFactor();
+      const res = v * FIXED_RATE * f;
+      duty.textContent = formatNumber(res);
+      // لا نظهر أرقام الفئة للمستخدم؛ فقط نعرض المعادلة للتوضيح
+      formula.textContent = `${v || 0} × 750 × ${f === 0.205 ? 'فئة 5%' : f === 0.2506 ? 'فئة 10%' : f}`;
+      // تفعيل مظهر الفئة المختارة
+      tierWrap.querySelectorAll('.tier').forEach(t => t.dataset.active = (t.querySelector('input').checked ? 'true' : 'false'));
+    }
+
+    // تفعيل الحساب الفوري
+    ['input','change'].forEach(evt=>{
+      usd.addEventListener(evt, recalc);
+      tierWrap.addEventListener(evt, recalc);
+    });
+    usd.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); recalc(); } });
+
+    function buildSummary(){
+      return `قيمة السلعة: ${usd.value || '0'} USD\nالفئة: ${activeFactor() === 0.205 ? '5%' : '10%'}\nالرسوم: ${duty.textContent} ريال\n— بسّام الشتيمي للتخليص الجمركي — 00967771997809`;
+    }
+
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(buildSummary());
+        copied.classList.add('show');
+        setTimeout(()=>copied.classList.remove('show'), 1500);
+      }catch(e){}
+    });
+
+    printBtn.addEventListener('click', ()=> window.print());
+
+    waBtn.addEventListener('click', ()=>{
+      const phoneIntl = '967771997809'; // Yemen without leading 00
+      const url = `https://wa.me/${phoneIntl}?text=${encodeURIComponent(buildSummary())}`;
+      window.open(url, '_blank');
+    });
+
+    recalc(); // تهيئة
+  </script>
+</body>
+</html>
