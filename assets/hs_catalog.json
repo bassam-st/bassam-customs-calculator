@@ -1,102 +1,102 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>البنود الجمركية</title>
-<style>
-  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .top{background:#16a34a;color:#fff;padding:14px 16px;font-size:18px;font-weight:700;text-align:center}
-  .wrap{max-width:880px;margin:16px auto;padding:0 12px}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
-  input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:#fff}
-  .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
-  .info{flex:1}
-  .name{font-weight:700;color:#0f172a}
-  .code{font-size:13px;color:#475569;margin-top:2px}
-  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn-green{background:#16a34a;color:#fff}
-  .muted{color:#64748b;font-size:13px}
-  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
-</style>
-</head>
-<body>
-  <div class="top">📋 البنود الجمركية</div>
-  <div class="wrap">
-    <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
-
-    <div class="card">
-      <input id="q" placeholder="اكتب اسم الصنف بالعربية... مثال: بطاريات، ملابس، رولات تغليف، شبك حديد" autofocus />
-      <div class="muted" style="margin-top:6px">يمكنك البحث باسم الصنف بالعربية أو برقم البند الجمركي</div>
-    </div>
-
-    <div class="card" id="results">
-      <div class="muted">ابدأ بالكتابة لعرض البنود...</div>
-    </div>
-  </div>
-
-<script>
-  const HS_URL = './assets/hs_catalog.json';
-  let HS = [];
-
-  // — تحميل البيانات —
-  async function loadHS(){
-    try{
-      const res = await fetch(HS_URL);
-      HS = await res.json();
-    }catch{ HS = []; }
-  }
-
-  // — تطبيع الأحرف العربية —
-  function normalizeArabic(s){
-    if(!s) return "";
-    return s.replace(/[أإآا]/g,'ا')
-            .replace(/ى/g,'ي')
-            .replace(/ة/g,'ه')
-            .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]+/g,' ')
-            .trim();
-  }
-
-  function matches(item, query){
-    const q = normalizeArabic(query);
-    const name = normalizeArabic(item.name || '');
-    const code = String(item.code || '');
-    return name.includes(q) || code.startsWith(q);
-  }
-
-  function render(list, query){
-    const box = document.getElementById('results');
-    if(!list.length){
-      box.innerHTML = '<div class="muted">لم يتم العثور على بنود مطابقة...</div>';
-      return;
-    }
-
-    box.innerHTML = list.slice(0,200).map(x => `
-      <div class="item">
-        <div class="info">
-          <div class="name">${x.name}</div>
-          <div class="code">البند الجمركي: ${x.code}</div>
-        </div>
-        <button class="btn btn-green" onclick="goCalc('${x.code}')">استخدام</button>
-      </div>
-    `).join('');
-  }
-
-  function goCalc(code){
-    location.href = './index.html?hs=' + code;
-  }
-
-  const q = document.getElementById('q');
-  q.addEventListener('input', ()=>{
-    const query = q.value.trim();
-    const filtered = HS.filter(x => matches(x, query));
-    render(filtered, query);
-  });
-
-  (async ()=>{
-    await loadHS();
-    render([], '');
-  })();
-</script>
-</body>
-</html>
+[
+  { "code": "340120", "name": "صابون للاستخدام المنزلي" },
+  { "code": "350610", "name": "غراء صناعي" },
+  { "code": "380850", "name": "مبيد حشري" },
+  { "code": "392010", "name": "رولات تغليف شفافة" },
+  { "code": "392020", "name": "رولات تغليف مطبوعة" },
+  { "code": "392190", "name": "ألواح بلاستيكية" },
+  { "code": "392310", "name": "علب بلاستيكية" },
+  { "code": "392330", "name": "قوارير بلاستيكية" },
+  { "code": "392350", "name": "أكياس بلاستيكية" },
+  { "code": "392390", "name": "منتجات بلاستيكية متنوعة" },
+  { "code": "400122", "name": "مطاط طبيعي" },
+  { "code": "401110", "name": "إطارات سيارات" },
+  { "code": "401693", "name": "جوانات مطاطية" },
+  { "code": "420212", "name": "حقائب سفر" },
+  { "code": "420222", "name": "حقائب يدوية جلدية" },
+  { "code": "440710", "name": "أخشاب منشورة" },
+  { "code": "441011", "name": "ألواح خشب مضغوط" },
+  { "code": "480257", "name": "ورق طباعة" },
+  { "code": "481920", "name": "علب كرتونية" },
+  { "code": "490199", "name": "كتب ومطبوعات" },
+  { "code": "540233", "name": "خيوط نايلون" },
+  { "code": "550320", "name": "ألياف بوليستر" },
+  { "code": "560392", "name": "أقمشة غير منسوجة" },
+  { "code": "570239", "name": "سجاد منزلي" },
+  { "code": "580631", "name": "أقمشة دانتيل" },
+  { "code": "590310", "name": "أقمشة مطلية بالبلاستيك" },
+  { "code": "610510", "name": "قمصان قطنية رجالية" },
+  { "code": "610910", "name": "ملابس داخلية قطنية" },
+  { "code": "611020", "name": "ملابس قطنية جاهزة" },
+  { "code": "620342", "name": "سراويل قطنية" },
+  { "code": "630260", "name": "ستائر منزلية" },
+  { "code": "640399", "name": "أحذية جلدية" },
+  { "code": "650500", "name": "قبعات منسوجة" },
+  { "code": "681099", "name": "أنابيب أسمنتية" },
+  { "code": "700711", "name": "زجاج نوافذ" },
+  { "code": "701090", "name": "قوارير زجاجية" },
+  { "code": "720839", "name": "صفائح حديد" },
+  { "code": "721049", "name": "لفائف صاج مجلفن" },
+  { "code": "721420", "name": "أسياخ حديد تسليح" },
+  { "code": "730890", "name": "هياكل حديدية" },
+  { "code": "731210", "name": "شبك حديد" },
+  { "code": "731815", "name": "مسامير وبراغي" },
+  { "code": "740400", "name": "خردة نحاس" },
+  { "code": "740811", "name": "أسلاك نحاسية" },
+  { "code": "760110", "name": "ألمنيوم خام" },
+  { "code": "760429", "name": "قضبان ألمنيوم" },
+  { "code": "761699", "name": "منتجات ألمنيوم متنوعة" },
+  { "code": "780199", "name": "رصاص صناعي" },
+  { "code": "790111", "name": "زنك خام" },
+  { "code": "800110", "name": "قصدير خام" },
+  { "code": "820559", "name": "عدد يدوية" },
+  { "code": "830241", "name": "إطارات مرايا معدنية" },
+  { "code": "840991", "name": "قطع غيار محركات" },
+  { "code": "841459", "name": "مراوح صناعية" },
+  { "code": "841810", "name": "ثلاجات منزلية" },
+  { "code": "841850", "name": "مبردات مياه" },
+  { "code": "842119", "name": "فلاتر صناعية" },
+  { "code": "842542", "name": "رافعات شوكية" },
+  { "code": "843149", "name": "قطع غيار معدات ثقيلة" },
+  { "code": "844331", "name": "طابعات ليزر" },
+  { "code": "847130", "name": "أجهزة كمبيوتر محمولة" },
+  { "code": "847150", "name": "أجهزة كمبيوتر مكتبية" },
+  { "code": "847160", "name": "ماسحات ضوئية" },
+  { "code": "847170", "name": "أقراص صلبة" },
+  { "code": "850110", "name": "محركات كهربائية" },
+  { "code": "850440", "name": "إنفرترات طاقة شمسية" },
+  { "code": "850720", "name": "بطاريات ليثيوم" },
+  { "code": "850780", "name": "بطاريات طاقة قابلة للصيانة" },
+  { "code": "851220", "name": "مصابيح سيارات" },
+  { "code": "851712", "name": "هواتف محمولة" },
+  { "code": "851762", "name": "أجهزة راوتر وإنترنت" },
+  { "code": "852349", "name": "وسائط تخزين بيانات" },
+  { "code": "852580", "name": "كاميرات مراقبة" },
+  { "code": "852852", "name": "شاشات عرض" },
+  { "code": "853690", "name": "مفاتيح كهربائية" },
+  { "code": "854449", "name": "أسلاك كهربائية معزولة" },
+  { "code": "854890", "name": "أجزاء كهربائية أخرى" },
+  { "code": "870210", "name": "شاحنات نقل" },
+  { "code": "870322", "name": "سيارات ركوب" },
+  { "code": "870421", "name": "شاحنات خفيفة" },
+  { "code": "870422", "name": "شاحنات ثقيلة" },
+  { "code": "870540", "name": "رافعات سيارات" },
+  { "code": "870899", "name": "قطع غيار السيارات" },
+  { "code": "871200", "name": "دراجات هوائية" },
+  { "code": "900410", "name": "نظارات طبية" },
+  { "code": "901839", "name": "معدات طبية متنوعة" },
+  { "code": "902519", "name": "أجهزة قياس حرارة" },
+  { "code": "903089", "name": "أجهزة تحكم إلكترونية" },
+  { "code": "910211", "name": "ساعات يد رقمية" },
+  { "code": "940130", "name": "كراسي مكتبية" },
+  { "code": "940350", "name": "أثاث خشبي منزلي" },
+  { "code": "940540", "name": "مصابيح إنارة منزلية" },
+  { "code": "950300", "name": "ألعاب أطفال" },
+  { "code": "950662", "name": "كرات قدم" },
+  { "code": "960321", "name": "فرشاة أسنان" },
+  { "code": "960810", "name": "أقلام حبر" },
+  { "code": "961700", "name": "ولاّعات" },
+  { "code": "970300", "name": "تحف فنية" },
+  { "code": "980100", "name": "طرود بريدية" },
+  { "code": "999999", "name": "بضائع متنوعة أخرى" }
+]
