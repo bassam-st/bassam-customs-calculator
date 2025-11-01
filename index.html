@@ -1,201 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>بسّام الشتيمي للتخليص الجمركي – حاسبة الرسوم</title>
-  <meta name="theme-color" content="#22c55e" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./assets/icon-192.png" />
-  <style>
-    :root {
-      --bg: #f6f8fb;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --accent: #22c55e;
-      --accent-2: #0ea5a7;
-      --accent-3: #3b82f6;
-      --shadow: 0 8px 20px rgba(0,0,0,0.06);
-      --radius: 16px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: var(--bg); color: var(--text);
-      font-family: system-ui, "Segoe UI", "Noto Kufi Arabic", sans-serif;
-      line-height: 1.6;
-    }
-    .wrap { max-width: 860px; margin: 28px auto; padding: 0 14px; }
-    .hero {
-      background: linear-gradient(135deg, #22c55e, #0ea5a7);
-      color: #052e16; border-radius: var(--radius); box-shadow: var(--shadow);
-      padding: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
-    }
-    .logo {
-      width: 56px; height: 56px; border-radius: 14px;
-      background: #fff; display: grid; place-items: center;
-      box-shadow: 0 6px 12px rgba(0,0,0,.08);
-    }
-    h1 { margin: 0; font-size: 22px; color: #052e16; }
-    .sub { color: #083b2e; font-size: 13px; }
-    .phone { direction: ltr; font-weight: 700; }
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
-      margin-top: 16px;
-    }
-    label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
-    input[type="number"] {
-      width: 100%; padding: 12px 14px; border-radius: 12px;
-      border: 1px solid var(--border); background: #fff; color: #111827; font-size: 16px;
-      outline: none;
-    }
-    .tier-wrap { display: flex; gap: 10px; flex-wrap: wrap; }
-    .tier {
-      display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-      background: #ecfeff; color: #065f5b; border: 1px solid #cffafe;
-      padding: 9px 14px; border-radius: 999px; transition: .2s;
-    }
-    .tier[data-active="true"] {
-      background: #065f5b; color: #ecfeff; border-color: #065f5b;
-    }
-    .result {
-      background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 14px;
-    }
-    .big { font-size: 34px; font-weight: 800; color: #065f46; }
-    .muted { color: var(--muted); font-size: 13px; }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
-    .btn {
-      border: none; border-radius: 12px; padding: 12px 16px;
-      font-weight: 700; cursor: pointer; box-shadow: var(--shadow);
-    }
-    .btn-copy { background: #22c55e; color: #052e16; }
-    .btn-print { background: #3b82f6; color: #eff6ff; }
-    .btn-wa { background: #16a34a; color: #ffffff; }
-    .hint { display: none; font-size: 13px; color: #059669; }
-    .show { display: inline; }
-    footer {
-      margin-top: 16px; text-align: center; color: #64748b; font-size: 12px;
-    }
-    @media print {
-      body { background: #fff; }
-      .hero, .actions, .hint, footer { display: none !important; }
-      .card { border: none; box-shadow: none; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بسام الشتيمي للتخليص الجمركي</title>
+<style>
+  body {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    background: #f1f5f9;
+    margin: 0;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(90deg, #16a34a, #0d9488);
+    color: white;
+    text-align: center;
+    padding: 18px;
+    border-radius: 0 0 18px 18px;
+  }
+  .header h1 { margin: 6px 0; font-size: 22px; }
+  .header .phone { font-size: 14px; }
+  .container {
+    max-width: 420px;
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  label { font-size: 14px; color: #334155; display:block; margin-bottom:6px; }
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 16px;
+    color: #0f172a;
+    background: #f8fafc;
+  }
+  .radio-group { display:flex; gap:10px; margin:10px 0; }
+  .radio {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    text-align:center;
+    font-weight:600;
+    cursor:pointer;
+    border: 2px solid #94a3b8;
+    color:#0f172a;
+    background:#f1f5f9;
+    transition:0.2s;
+  }
+  .radio.active {
+    background:#0d9488;
+    color:white;
+    border-color:#0d9488;
+  }
+  .result-box {
+    background:#ecfdf5;
+    border:1px solid #10b981;
+    color:#065f46;
+    font-weight:bold;
+    font-size:32px;
+    text-align:center;
+    padding:18px;
+    border-radius:12px;
+    margin-top:10px;
+    direction:ltr;
+    unicode-bidi:plaintext;
+  }
+  .formula {
+    text-align:center;
+    color:#475569;
+    font-size:13px;
+    margin-top:6px;
+  }
+  .buttons {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn {
+    flex:1;
+    padding:12px;
+    font-weight:bold;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    transition:0.2s;
+  }
+  .btn-green { background:#16a34a; color:white; }
+  .btn-green:hover { background:#15803d; }
+  .btn-blue { background:#2563eb; color:white; }
+  .btn-blue:hover { background:#1d4ed8; }
+  .note {
+    text-align:center;
+    font-size:13px;
+    color:#475569;
+    margin-top:15px;
+    line-height:1.6;
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <div style="display:flex;gap:14px;align-items:center">
-        <div class="logo">
-          <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#0ea5a7"/>
-              </linearGradient>
-            </defs>
-            <rect x="0" y="0" width="42" height="42" rx="10" fill="url(#g)"/>
-            <text x="21" y="27" text-anchor="middle"
-              font-family="Tahoma, 'Noto Kufi Arabic', sans-serif"
-              font-size="16" font-weight="800" fill="#052e16">بـش</text>
-          </svg>
-        </div>
-        <div>
-          <h1>بسّام الشتيمي للتخليص الجمركي</h1>
-          <div class="sub">للاستفسار وخدمات التخليص: <span class="phone">00967771997809</span></div>
-        </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <label>قيمة السلعة (بالدولار USD)</label>
-      <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
+<div class="header">
+  <h1>بسام الشتيمي للتخليص الجمركي</h1>
+  <div class="phone">للاستفسار وخدمات التخليص: 00967771997809</div>
+</div>
 
-      <label>اختر الفئة الجمركية</label>
-      <div class="tier-wrap" id="tierWrap">
-        <label class="tier" data-active="true">
-          <input type="radio" name="tier" value="0.2075" checked> 5% (فئة خمسة بالمئة)
-        </label>
-        <label class="tier">
-          <input type="radio" name="tier" value="0.265"> 10% (فئة عشرة بالمئة)
-        </label>
-      </div>
+<div class="container">
+  <label>قيمة السلعة (بالدولار USD)</label>
+  <input id="itemValue" type="number" placeholder="أدخل القيمة مثال: 1000" />
 
-      <label>الرسوم الجمركية (ريال يمني)</label>
-      <div class="result">
-        <div class="big" id="duty">0</div>
-        <div class="muted" id="formula">—</div>
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-copy" id="copy">نسخ النتيجة</button>
-        <button class="btn btn-print" id="printBtn">طباعة / حفظ PDF</button>
-        <button class="btn btn-wa" id="waBtn">مشاركة واتساب</button>
-        <span class="hint" id="copied">✔ تم النسخ</span>
-      </div>
-    </section>
-
-    <footer>
-      المعادلة: الرسوم = قيمة السلعة × 750 × معامل الفئة — مثال: 2000 × 750 × 0.2075 = 311,250 ر.ي
-    </footer>
+  <label style="margin-top:10px;">اختر الفئة الجمركية</label>
+  <div class="radio-group">
+    <div class="radio active" data-factor="0.2075">5% (فئة خمسة بالمئة)</div>
+    <div class="radio" data-factor="0.265">10% (فئة عشرة بالمئة)</div>
   </div>
 
-  <script>
-    const FIXED_RATE = 750;
-    const usd = document.getElementById('usd');
-    const duty = document.getElementById('duty');
-    const formula = document.getElementById('formula');
-    const tierWrap = document.getElementById('tierWrap');
-    const copyBtn = document.getElementById('copy');
-    const copied = document.getElementById('copied');
-    const printBtn = document.getElementById('printBtn');
-    const waBtn = document.getElementById('waBtn');
+  <label style="margin-top:10px;">الرسوم الجمركية (ريال يمني)</label>
+  <div class="result-box" id="result">0</div>
+  <div class="formula" id="formula">—</div>
 
-    function activeFactor() {
-      const sel = tierWrap.querySelector('input[name="tier"]:checked');
-      return sel ? parseFloat(sel.value) : 0;
-    }
-    function formatNumber(n) {
-      return new Intl.NumberFormat('ar-YE', { maximumFractionDigits: 2 }).format(n || 0);
-    }
-    function recalc() {
-      const v = parseFloat(usd.value || '0');
-      const f = activeFactor();
-      const res = v * FIXED_RATE * f;
-      duty.textContent = formatNumber(res);
-      formula.textContent = `${v || 0} × 750 × ${(f === 0.2075 ? 'فئة 5%' : f === 0.265 ? 'فئة 10%' : f)}`;
-      tierWrap.querySelectorAll('.tier').forEach(t => {
-        t.dataset.active = t.querySelector('input').checked ? 'true' : 'false';
-      });
-    }
-    ['input','change'].forEach(evt=>{
-      usd.addEventListener(evt,recalc);
-      tierWrap.addEventListener(evt,recalc);
+  <div class="buttons">
+    <button class="btn btn-blue" id="pdfBtn">طباعة / حفظ PDF</button>
+    <button class="btn btn-green" id="copyBtn">نسخ النتيجة</button>
+    <button class="btn btn-green" id="whatsappBtn">مشاركة واتساب</button>
+  </div>
+
+  <div class="note">
+    المعادلة: <b>الرسوم = قيمة السلعة × 750 × معامل الفئة</b><br>
+    مثال: 2000 × 750 × 0.2075 = 311,250 ريال
+  </div>
+</div>
+
+<script>
+  const itemValue = document.getElementById('itemValue');
+  const radios = document.querySelectorAll('.radio');
+  const result = document.getElementById('result');
+  const formula = document.getElementById('formula');
+
+  const FIXED_RATE = 750;
+  let factor = 0.2075;
+
+  function formatNumber(n) {
+    return new Intl.NumberFormat('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n || 0);
+  }
+
+  function calc() {
+    const val = parseFloat(itemValue.value || '0');
+    const duty = val * FIXED_RATE * factor;
+    result.textContent = formatNumber(duty);
+    const pct = (factor === 0.2075) ? '5%' : '10%';
+    formula.textContent = `${pct} فئة × ${FIXED_RATE} × ${val}`;
+  }
+
+  itemValue.addEventListener('input', calc);
+  radios.forEach(r => {
+    r.addEventListener('click', ()=>{
+      radios.forEach(x=>x.classList.remove('active'));
+      r.classList.add('active');
+      factor = parseFloat(r.dataset.factor);
+      calc();
     });
-    usd.addEventListener('keydown', e=>{
-      if(e.key==='Enter'){ e.preventDefault(); recalc(); }
-    });
-    function buildSummary() {
-      const f = activeFactor();
-      const fLabel = (f===0.2075?'5%':'10%');
-      return `قيمة السلعة: ${usd.value||'0'} USD\nالفئة: ${fLabel}\nالرسوم: ${duty.textContent} ريال\n— بسّام الشتيمي للتخليص الجمركي — 00967771997809`;
-    }
-    copyBtn.addEventListener('click', async ()=>{
-      try {
-        await navigator.clipboard.writeText(buildSummary());
-        copied.classList.add('show');
-        setTimeout(()=>copied.classList.remove('show'),1500);
-      } catch(e){}
-    });
-    printBtn.addEventListener('click', ()=>window.print());
-    waBtn.addEventListener('click', ()=>{
-      const phoneIntl = '967771997809';
-      const url = `https://wa.me/${phoneIntl}?text=${encodeURIComponent(buildSummary())}`;
-      window.open(url,'_blank');
-    });
-    recalc();
-  </script>
+  });
+
+  // نسخ النتيجة
+  document.getElementById('copyBtn').addEventListener('click', ()=>{
+    const text = `الرسوم الجمركية: ${result.textContent} ريال يمني`;
+    navigator.clipboard.writeText(text);
+    alert('✅ تم نسخ النتيجة بنجاح');
+  });
+
+  // مشاركة واتساب
+  document.getElementById('whatsappBtn').addEventListener('click', ()=>{
+    const msg = `💰 نتيجة الحاسبة الجمركية:\nقيمة السلعة: ${itemValue.value} USD\nالفئة: ${(factor===0.2075)?'5%':'10%'}\nالرسوم: ${result.textContent} ريال يمني.`;
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  });
+
+  // حفظ PDF (اختياري)
+  document.getElementById('pdfBtn').addEventListener('click', ()=>{
+    window.print();
+  });
+</script>
+
 </body>
 </html>
