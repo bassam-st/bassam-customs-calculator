@@ -5,104 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>بسام الشتيمي للتخليص الجمركي</title>
 <style>
-  body {
-    font-family: 'Noto Kufi Arabic', sans-serif;
-    background: #f1f5f9;
-    margin: 0;
-    padding: 0;
-  }
-  .header {
-    background: linear-gradient(90deg, #16a34a, #0d9488);
-    color: white;
-    text-align: center;
-    padding: 18px;
-    border-radius: 0 0 18px 18px;
-  }
-  .header h1 { margin: 6px 0; font-size: 22px; }
-  .header .phone { font-size: 14px; }
-  .container {
-    max-width: 420px;
-    background: white;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  }
-  label { font-size: 14px; color: #334155; display:block; margin-bottom:6px; }
-  input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 16px;
-    color: #0f172a;
-    background: #f8fafc;
-  }
-  .radio-group { display:flex; gap:10px; margin:10px 0; }
-  .radio {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    text-align:center;
-    font-weight:600;
-    cursor:pointer;
-    border: 2px solid #94a3b8;
-    color:#0f172a;
-    background:#f1f5f9;
-    transition:0.2s;
-  }
-  .radio.active {
-    background:#0d9488;
-    color:white;
-    border-color:#0d9488;
-  }
-  .result-box {
-    background:#ecfdf5;
-    border:1px solid #10b981;
-    color:#065f46;
-    font-weight:bold;
-    font-size:32px;
-    text-align:center;
-    padding:18px;
-    border-radius:12px;
-    margin-top:10px;
-    direction:ltr;
-    unicode-bidi:plaintext;
-  }
-  .formula {
-    text-align:center;
-    color:#475569;
-    font-size:13px;
-    margin-top:6px;
-  }
-  .buttons {
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
-    gap:10px;
-    margin-top:18px;
-  }
-  .btn {
-    flex:1;
-    padding:12px;
-    font-weight:bold;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:15px;
-    transition:0.2s;
-  }
-  .btn-green { background:#16a34a; color:white; }
-  .btn-green:hover { background:#15803d; }
-  .btn-blue { background:#2563eb; color:white; }
-  .btn-blue:hover { background:#1d4ed8; }
-  .note {
-    text-align:center;
-    font-size:13px;
-    color:#475569;
-    margin-top:15px;
-    line-height:1.6;
-  }
+  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
+  .header{background:linear-gradient(90deg,#16a34a,#0d9488);color:#fff;text-align:center;padding:18px;border-radius:0 0 18px 18px}
+  .header h1{margin:6px 0;font-size:22px}
+  .header .phone{font-size:14px}
+  .container{max-width:520px;background:#fff;margin:20px auto;padding:20px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+  label{font-size:14px;color:#334155;display:block;margin-bottom:6px}
+  input{width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:16px;color:#0f172a;background:#f8fafc}
+  .radio-group{display:flex;gap:10px;margin:10px 0}
+  .radio{flex:1;padding:10px;border-radius:10px;text-align:center;font-weight:600;cursor:pointer;border:2px solid #94a3b8;color:#0f172a;background:#f1f5f9;transition:.2s}
+  .radio.active{background:#0d9488;color:#fff;border-color:#0d9488}
+  .result-box{background:#ecfdf5;border:1px solid #10b981;color:#065f46;font-weight:bold;font-size:32px;text-align:center;padding:18px;border-radius:12px;margin-top:10px;direction:ltr;unicode-bidi:plaintext}
+  .formula{text-align:center;color:#475569;font-size:13px;margin-top:6px}
+  .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .btn{flex:1;padding:12px;font-weight:bold;border:none;border-radius:10px;cursor:pointer;font-size:15px;transition:.2s}
+  .btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
+  .btn-blue{background:#2563eb;color:#fff}.btn-blue:hover{background:#1d4ed8}
+  .btn-gray{background:#e2e8f0;color:#0f172a}
+  .nav{display:flex;gap:10px;margin:16px 0}
+  .nav a{flex:1;text-decoration:none;text-align:center;padding:10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font-weight:700}
+  .note{text-align:center;font-size:13px;color:#475569;margin-top:15px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -113,8 +35,15 @@
 </div>
 
 <div class="container">
+
+  <!-- أزرار التنقل الجديدة -->
+  <div class="nav">
+    <a href="./hs.html">🔎 البنود الجمركية</a>
+    <a href="./prices.html">💲 الأسعار</a>
+  </div>
+
   <label>قيمة السلعة (بالدولار USD)</label>
-  <input id="itemValue" type="number" placeholder="أدخل القيمة مثال: 1000" />
+  <input id="itemValue" type="number" placeholder="أدخل القيمة مثال: 2000" />
 
   <label style="margin-top:10px;">اختر الفئة الجمركية</label>
   <div class="radio-group">
@@ -147,46 +76,40 @@
   const FIXED_RATE = 750;
   let factor = 0.2075;
 
-  function formatNumber(n) {
-    return new Intl.NumberFormat('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n || 0);
-  }
+  // قراءة قيمة قادمة من صفحة الأسعار (query param: value)
+  const params = new URLSearchParams(location.search);
+  const qVal = params.get('value');
+  if(qVal){ itemValue.value = qVal; }
 
-  function calc() {
-    const val = parseFloat(itemValue.value || '0');
+  function formatNumber(n){
+    return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+  }
+  function calc(){
+    const val = parseFloat(itemValue.value||'0');
     const duty = val * FIXED_RATE * factor;
     result.textContent = formatNumber(duty);
-    const pct = (factor === 0.2075) ? '5%' : '10%';
+    const pct = (factor===0.2075)?'5%':'10%';
     formula.textContent = `${pct} فئة × ${FIXED_RATE} × ${val}`;
   }
-
   itemValue.addEventListener('input', calc);
-  radios.forEach(r => {
-    r.addEventListener('click', ()=>{
+  radios.forEach(r=>{
+    r.addEventListener('click',()=>{
       radios.forEach(x=>x.classList.remove('active'));
       r.classList.add('active');
       factor = parseFloat(r.dataset.factor);
       calc();
     });
   });
-
-  // نسخ النتيجة
-  document.getElementById('copyBtn').addEventListener('click', ()=>{
+  document.getElementById('copyBtn').addEventListener('click',()=>{
     const text = `الرسوم الجمركية: ${result.textContent} ريال يمني`;
-    navigator.clipboard.writeText(text);
-    alert('✅ تم نسخ النتيجة بنجاح');
+    navigator.clipboard.writeText(text); alert('✅ تم نسخ النتيجة بنجاح');
   });
-
-  // مشاركة واتساب
-  document.getElementById('whatsappBtn').addEventListener('click', ()=>{
+  document.getElementById('whatsappBtn').addEventListener('click',()=>{
     const msg = `💰 نتيجة الحاسبة الجمركية:\nقيمة السلعة: ${itemValue.value} USD\nالفئة: ${(factor===0.2075)?'5%':'10%'}\nالرسوم: ${result.textContent} ريال يمني.`;
-    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`; window.open(url,'_blank');
   });
-
-  // حفظ PDF (اختياري)
-  document.getElementById('pdfBtn').addEventListener('click', ()=>{
-    window.print();
-  });
+  document.getElementById('pdfBtn').addEventListener('click',()=>window.print());
+  calc();
 </script>
 
 </body>
