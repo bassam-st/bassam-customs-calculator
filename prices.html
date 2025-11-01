@@ -7,7 +7,7 @@
 <style>
   body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
   .top{background:#2563eb;color:#fff;padding:14px 16px}
-  .wrap{max-width:860px;margin:16px auto;padding:0 12px}
+  .wrap{max-width:880px;margin:16px auto;padding:0 12px}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
   .row{display:grid;grid-template-columns:1fr 160px 140px;gap:10px}
   label{display:block;font-size:13px;color:#475569;margin-bottom:4px}
@@ -18,12 +18,17 @@
   .btn-blue{background:#2563eb;color:#fff}
   .btn-green{background:#16a34a;color:#fff}
   .btn-gray{background:#e2e8f0;color:#0f172a}
+  .btn-orange{background:#f97316;color:#fff}
+  .btn-red{background:#ef4444;color:#fff}
   .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1}
   .muted{color:#64748b;font-size:12px}
   .tag{display:inline-block;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;padding:2px 8px;border-radius:999px;font-size:12px;margin-inline-start:6px}
   .nav{margin:10px 0}
   .nav a{display:inline-block;margin-left:8px;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
   @media(max-width:640px){.row{grid-template-columns:1fr}}
+  .owner-bar{display:flex;gap:8px;align-items:center}
+  .owner-bar input{max-width:200px}
+  .owner-hint{font-size:12px;color:#475569}
 </style>
 </head>
 <body>
@@ -31,8 +36,20 @@
   <div class="wrap">
     <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
 
-    <!-- نموذج الإضافة/التعديل -->
+    <!-- شريط المالك -->
     <div class="card">
+      <div class="owner-bar">
+        <span>🔒 وضع المالك:</span>
+        <input id="pin" type="password" placeholder="أدخل رمز المالك (PIN)" />
+        <button class="btn btn-blue" id="unlockBtn">فتح</button>
+        <button class="btn btn-gray" id="lockBtn">قفل</button>
+        <span id="ownerState" class="owner-hint">الحالة: قراءة فقط</span>
+      </div>
+      <div class="owner-hint">ملاحظة: بدون فتح وضع المالك لا يمكن الإضافة/التعديل/الحذف أو الاستيراد/التصدير.</div>
+    </div>
+
+    <!-- نموذج الإضافة/التعديل (يظهر للمالك فقط) -->
+    <div class="card" id="adminForm" style="display:none">
       <h3 style="margin:4px 0 10px">إضافة / تعديل سعر سلعة</h3>
       <div class="row">
         <div>
@@ -51,6 +68,7 @@
             <option value="dz">للدُزْن</option>
             <option value="pcs">للحبة</option>
             <option value="ltr">للتر</option>
+            <option value="Ah">Ah (لكل أمبير/ساعة)</option>
           </select>
         </div>
       </div>
@@ -69,8 +87,8 @@
     <div class="card">
       <div class="actions">
         <input id="q" placeholder="ابحث بالاسم… مثال: شبك، بطاطس، بطاريات" />
-        <button class="btn btn-blue" id="exportBtn">تصدير JSON</button>
-        <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
+        <button class="btn btn-blue" id="exportBtn" disabled>تصدير JSON</button>
+        <button class="btn btn-gray" id="importBtn" disabled>استيراد JSON</button>
         <input type="file" id="importFile" accept="application/json" style="display:none" />
       </div>
       <div class="list" id="list" style="margin-top:8px"></div>
@@ -78,9 +96,31 @@
   </div>
 
 <script>
-  // —— البيانات في LocalStorage ——
-  const KEY = 'pricesCatalogV1';
+  // —— إعداد رمز المالك (PIN) ——
+  const ADMIN_PIN = "bassam1234"; // <-- غيّره برمزك الخاص
 
+  // —— التحكّم في وضع المالك ——
+  let isOwner = false;
+  const pinEl = document.getElementById('pin');
+  const unlockBtn = document.getElementById('unlockBtn');
+  const lockBtn = document.getElementById('lockBtn');
+  const ownerState = document.getElementById('ownerState');
+  const adminForm = document.getElementById('adminForm');
+
+  function updateOwnerUI(){
+    ownerState.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+    adminForm.style.display = isOwner ? '' : 'none';
+    document.getElementById('exportBtn').disabled = !isOwner;
+    document.getElementById('importBtn').disabled = !isOwner;
+  }
+  unlockBtn.addEventListener('click', ()=>{
+    if(pinEl.value === ADMIN_PIN){ isOwner = true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
+    else { alert('❌ رمز غير صحيح'); }
+  });
+  lockBtn.addEventListener('click', ()=>{ isOwner = false; updateOwnerUI(); });
+
+  // —— قاعدة البيانات ——
+  const KEY = 'pricesCatalogV1';
   const nameEl = document.getElementById('name');
   const priceEl = document.getElementById('price');
   const unitEl = document.getElementById('unit');
@@ -94,19 +134,30 @@
   const importBtn = document.getElementById('importBtn');
   const importFile = document.getElementById('importFile');
 
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch{ return []; } }
-  function save(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+  // تحميل JSON الأساسي من assets ثم دمجه مع LocalStorage (للعرض)
+  let baseData = [];
+  async function loadBase(){
+    try{
+      const r = await fetch('./assets/prices_catalog.json');
+      baseData = await r.json();
+    }catch(e){ baseData = []; }
+  }
+
+  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch{ return []; } }
+  function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
 
   function upsert(rec){
-    const arr = load();
+    if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
+    const arr = loadLocal();
     const idx = arr.findIndex(x => (x.name||'').trim() === (rec.name||'').trim());
     if(idx >= 0) arr[idx] = rec; else arr.push(rec);
-    save(arr);
+    saveLocal(arr);
   }
 
   function del(name){
-    const arr = load().filter(x => (x.name||'') !== name);
-    save(arr);
+    if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
+    const arr = loadLocal().filter(x => (x.name||'') !== name);
+    saveLocal(arr);
     render();
   }
 
@@ -118,14 +169,25 @@
   }
 
   function unitLabel(u){
-    return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='ltr'?'للتر':'';
+    return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='ltr'?'للتر':u==='Ah'?'Ah/أمبير':'';
+  }
+
+  function mergedData(){
+    // الدمج: الأساس من الملف + تعديلاتك المحلية (الأولوية للمحلي على الاسم نفسه)
+    const local = loadLocal();
+    const map = new Map();
+    baseData.forEach(x => map.set((x.name||'').trim(), x));
+    local.forEach(x => map.set((x.name||'').trim(), x));
+    return Array.from(map.values());
   }
 
   function render(){
-    const arr = load();
+    const arr = mergedData();
     const s = (q.value||'').trim();
     const filtered = s ? arr.filter(x => (x.name||'').includes(s)) : arr;
-    if(!filtered.length){ list.innerHTML = '<div class="muted" style="padding:10px">لا توجد بيانات بعد…</div>'; return; }
+
+    if(!filtered.length){ list.innerHTML = '<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
+
     list.innerHTML = filtered.map(x => `
       <div class="item">
         <div>
@@ -134,14 +196,17 @@
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-green" onclick="location.href='./index.html?value=${encodeURIComponent(x.price)}'">استخدام السعر</button>
-          <button class="btn" style="background:#f97316;color:#fff" onclick='(function(n){const arr = JSON.parse(localStorage.getItem("${KEY}")||"[]"); const rec = arr.find(r=>r.name===n); if(rec) { window.applyToForm(rec);} })(${JSON.stringify(x.name)})'>تعديل</button>
-          <button class="btn" style="background:#ef4444;color:#fff" onclick="del(${JSON.stringify(x.name)})">حذف</button>
+          ${isOwner ? `
+            <button class="btn btn-orange" onclick='(function(n){const rec = mergedData().find(r=>r.name===n); if(rec){ window.applyToForm(rec);} })(${JSON.stringify(x.name)})'>تعديل</button>
+            <button class="btn btn-red" onclick="del(${JSON.stringify(x.name)})">حذف</button>
+          ` : ``}
         </div>
       </div>
     `).join('');
   }
 
-  saveBtn.addEventListener('click', ()=>{
+  document.getElementById('saveBtn')?.addEventListener('click', ()=>{
+    if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
     const rec = {
       name: (nameEl.value||'').trim(),
       price: parseFloat(priceEl.value||'0'),
@@ -155,22 +220,28 @@
     render();
   });
 
-  clearBtn.addEventListener('click', ()=>{
+  document.getElementById('clearBtn')?.addEventListener('click', ()=>{
     nameEl.value=''; priceEl.value=''; unitEl.value='ton'; notesEl.value='';
   });
 
   q.addEventListener('input', render);
 
   exportBtn.addEventListener('click', ()=>{
-    const data = JSON.stringify(load(), null, 2);
+    if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
+    const data = JSON.stringify(mergedData(), null, 2);
     const blob = new Blob([data], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'prices_catalog.json';
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 500);
   });
 
-  importBtn.addEventListener('click', ()=> importFile.click());
+  importBtn.addEventListener('click', ()=> {
+    if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
+    importFile.click();
+  });
+
   importFile.addEventListener('change', async ()=>{
+    if(!isOwner){ return; }
     const f = importFile.files[0]; if(!f) return;
     try{
       const text = await f.text();
@@ -185,25 +256,23 @@
           notes: String(x.notes||'').trim()
         }))
         .filter(x=>x.name && x.price>0);
-      save(cleaned); render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
+      // نخزنها محليًا كنسخة المالك (لن تُرفع تلقائيًا)
+      saveLocal(cleaned);
+      render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
     }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
     finally{ importFile.value=''; }
   });
 
-  // أمثلة مبدئية (تظهر مرة واحدة فقط للمخزن الفارغ)
-  (function seed(){
-    const arr = load();
-    if(arr.length) return;
-    save([
-      {name:'شبك حديد (للطن)', price:1600, unit:'ton', notes:'متوسط السوق'},
-      {name:'بطاطس مجمدة (للطن)', price:2000, unit:'ton', notes:'مثال'},
-      {name:'بطاريات ليثيوم 100Ah (للحبة)', price:180, unit:'pcs', notes:'مثال'}
-    ]);
+  // بدء: تحميل الملف الأساسي ثم العرض
+  (async function(){
+    await loadBase();
+    updateOwnerUI();
+    render();
   })();
 
-  render();
+  // تعريض الدوال للاستخدام داخل onclick
   window.applyToForm = applyToForm;
-  window.del = del;
+  window.mergedData = mergedData;
 </script>
 </body>
 </html>
