@@ -1,166 +1,101 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>البنود الجمركية – بحث عربي</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>البنود الجمركية</title>
 <style>
   body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .top{background:#16a34a;color:#062; padding:14px 16px; font-weight:800; font-size:18px}
+  .top{background:#16a34a;color:#fff;padding:14px 16px;font-size:18px;font-weight:700;text-align:center}
   .wrap{max-width:880px;margin:16px auto;padding:0 12px}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
-  .muted{color:#64748b;font-size:12px}
   input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:#fff}
-  .item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px dashed #e2e8f0}
-  .code{font-weight:800;color:#065f46}
-  .name{font-weight:700}
-  .desc{color:#475569;font-size:13px;margin-top:2px}
-  .tag{display:inline-block;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;border-radius:999px;padding:2px 8px;font-size:12px;margin-inline-start:8px}
-  .btn{border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-  .btn-copy{background:#e2e8f0}
-  .btn-go{background:#16a34a;color:#fff}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .item{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+  .info{flex:1}
+  .name{font-weight:700;color:#0f172a}
+  .code{font-size:13px;color:#475569;margin-top:2px}
+  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn-green{background:#16a34a;color:#fff}
+  .muted{color:#64748b;font-size:13px}
   .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
-  mark{background:#fef08a}
 </style>
 </head>
 <body>
-  <div class="top">🔎 البحث في البنود الجمركية (يدعم العربية)</div>
+  <div class="top">📋 البنود الجمركية</div>
   <div class="wrap">
     <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
 
     <div class="card">
-      <input id="q" placeholder="اكتب اسم الصنف بالعربي… مثال: بطاريات، ملابس، رولات تغليف، قطع غيار" autofocus />
-      <div class="muted" style="margin-top:6px">البحث يدعم العربية وإزالة التشكيل وتوحيد الأرقام (٠١٢٣… ↔ 0123)</div>
+      <input id="q" placeholder="اكتب اسم الصنف بالعربية... مثال: بطاريات، ملابس، رولات تغليف، شبك حديد" autofocus />
+      <div class="muted" style="margin-top:6px">يمكنك البحث باسم الصنف بالعربية أو برقم البند الجمركي</div>
     </div>
 
     <div class="card" id="results">
-      <div class="muted">ابدأ بالكتابة لعرض النتائج…</div>
+      <div class="muted">ابدأ بالكتابة لعرض البنود...</div>
     </div>
   </div>
 
 <script>
-  // ————— أدوات تطبيع العربية (إزالة التشكيل وتوحيد الأرقام) —————
-  const rim = /[\u064B-\u065F\u0670\u06D6-\u06ED]/g; // التشكيل والمدود
-  const arNums = "٠١٢٣٤٥٦٧٨٩";
-  const enNums = "0123456789";
-  const mapDigits = {};
-  for(let i=0;i<10;i++){ mapDigits[arNums[i]] = enNums[i]; }
-
-  function normalizeArabic(s){
-    if(!s) return "";
-    // تحويل الأرقام العربية/الهندية إلى إنجليزية
-    s = s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d => mapDigits[d] ?? d);
-    // توحيد الألف والهمزات والياء/الألف المقصورة
-    s = s.replace(rim,'')
-         .replace(/[أإآا]/g,'ا')
-         .replace(/ى/g,'ي')
-         .replace(/ؤ/g,'و')
-         .replace(/ئ/g,'ي')
-         .replace(/ة/g,'ه')
-         .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ') // إزالة رموز مزعجة
-         .replace(/\s+/g,' ')
-         .trim();
-    return s;
-  }
-
-  // إبراز المطابقة
-  function highlight(text, query){
-    if(!query) return text;
-    const qn = normalizeArabic(query);
-    const tn = normalizeArabic(text);
-    // نحاول إيجاد موضع التطابق على النسخ المطبّعة، ثم نُبرز على النص الأصلي
-    const idx = tn.indexOf(qn);
-    if(idx < 0) return text;
-    // تحويل الفهارس عبر سير بسيط
-    let i=0, j=0, start=-1, end=-1;
-    while(i < text.length && j < tn.length){
-      const ch = text[i];
-      const nn = normalizeArabic(ch);
-      if(j === idx) start = i;
-      if(nn) j += nn.length;
-      i++;
-      if(j === idx + qn.length){ end = i; break; }
-    }
-    if(start>=0 && end>=0){
-      return text.slice(0,start) + '<mark>' + text.slice(start,end) + '</mark>' + text.slice(end);
-    }
-    return text;
-  }
-
-  // ————— تحميل بيانات البنود —————
-  const HS_URL = './assets/hs_catalog.json'; // [{code, name, rate?, description?}]
+  const HS_URL = './assets/hs_catalog.json';
   let HS = [];
 
+  // — تحميل البيانات —
   async function loadHS(){
     try{
-      HS = await fetch(HS_URL).then(r=>r.json());
-    }catch(e){
-      HS = [];
-    }
+      const res = await fetch(HS_URL);
+      HS = await res.json();
+    }catch{ HS = []; }
+  }
+
+  // — تطبيع الأحرف العربية —
+  function normalizeArabic(s){
+    if(!s) return "";
+    return s.replace(/[أإآا]/g,'ا')
+            .replace(/ى/g,'ي')
+            .replace(/ة/g,'ه')
+            .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]+/g,' ')
+            .trim();
   }
 
   function matches(item, query){
-    if(!query) return false;
     const q = normalizeArabic(query);
-    const n = normalizeArabic(item.name||'');
-    const d = normalizeArabic(item.description||'');
-    const c = String(item.code||'');
-    // المطابقة: يحتوي الاسم أو الوصف على الاستعلام، أو الكود يبدأ بالاستعلام إن كان أرقامًا
-    return n.includes(q) || d.includes(q) || c.startsWith(q);
+    const name = normalizeArabic(item.name || '');
+    const code = String(item.code || '');
+    return name.includes(q) || code.startsWith(q);
   }
 
   function render(list, query){
     const box = document.getElementById('results');
     if(!list.length){
-      box.innerHTML = '<div class="muted">لا نتائج. جرّب كلمة أخرى مثل: "ملابس" أو "بطاريات".</div>';
+      box.innerHTML = '<div class="muted">لم يتم العثور على بنود مطابقة...</div>';
       return;
     }
-    box.innerHTML = list.slice(0,200).map(x=>{
-      const nameHTML = highlight(x.name||'', query);
-      const descHTML = x.description ? ('<div class="desc">'+highlight(x.description, query)+'</div>') : '';
-      const rateTag = x.rate ? `<span class="tag">فئة ${x.rate}</span>` : '';
-      return `
-        <div class="item">
-          <div>
-            <div class="name">${nameHTML} ${rateTag}</div>
-            <div class="code">البند: ${x.code}</div>
-            ${descHTML}
-          </div>
-          <div class="row">
-            <button class="btn btn-copy" onclick="copyCode('${x.code}')">نسخ الكود</button>
-            <button class="btn btn-go" onclick="goCalc('${encodeURIComponent(x.code)}')">استخدام في الحاسبة</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
 
-  function copyCode(code){
-    navigator.clipboard?.writeText(code).then(()=>alert('✔ تم نسخ الكود: '+code));
+    box.innerHTML = list.slice(0,200).map(x => `
+      <div class="item">
+        <div class="info">
+          <div class="name">${x.name}</div>
+          <div class="code">البند الجمركي: ${x.code}</div>
+        </div>
+        <button class="btn btn-green" onclick="goCalc('${x.code}')">استخدام</button>
+      </div>
+    `).join('');
   }
 
   function goCalc(code){
-    // نرسل الكود للصفحة الرئيسية (يُعرض في الملاحظات أو حيثما تضعه هناك)
-    location.href = './index.html?hs='+code;
+    location.href = './index.html?hs=' + code;
   }
 
-  // ————— تفعيل البحث بالعربي —————
   const q = document.getElementById('q');
   q.addEventListener('input', ()=>{
-    const query = q.value;
-    const list = HS.filter(x=>matches(x, query));
-    render(list, query);
+    const query = q.value.trim();
+    const filtered = HS.filter(x => matches(x, query));
+    render(filtered, query);
   });
 
-  (async function init(){
+  (async ()=>{
     await loadHS();
-    // إن كان في الرابط ?q=... نملأ مباشرة
-    const sp = new URLSearchParams(location.search);
-    if(sp.get('q')){ q.value = sp.get('q'); }
-    const list = HS.filter(x=>matches(x, q.value||''));
-    render(list, q.value||'');
-    q.focus();
+    render([], '');
   })();
 </script>
 </body>
