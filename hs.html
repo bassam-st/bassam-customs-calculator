@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>البنود الجمركية</title>
+<style>
+  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
+  .top{background:#0d9488;color:#fff;padding:14px 16px}
+  .wrap{max-width:720px;margin:16px auto;padding:0 12px}
+  input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff}
+  .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1}
+  .muted{color:#64748b;font-size:13px}
+  .btn{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .nav{margin:10px 0}
+  .nav a{display:inline-block;margin-left:8px;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
+</style>
+</head>
+<body>
+  <div class="top"><b>🔎 البحث عن البنود الجمركية (HS)</b></div>
+  <div class="wrap">
+    <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
+    <input id="q" placeholder="اكتب اسم الصنف... مثال: قطع غيار سيارات، بطاطس مجمدة" />
+    <div id="list" style="margin-top:10px;background:#fff;border:1px solid #e5e7eb;border-radius:10px"></div>
+  </div>
+
+<script>
+  let DB=[];
+  async function load(){
+    try{
+      const r = await fetch('./assets/hs_catalog.json');
+      DB = await r.json();
+    }catch(e){ DB=[]; }
+  }
+  function render(items){
+    const box = document.getElementById('list');
+    if(!items.length){ box.innerHTML = '<div class="muted" style="padding:10px">لا توجد نتائج مطابقة…</div>'; return; }
+    box.innerHTML = items.slice(0,50).map(x=>`
+      <div class="item">
+        <div>
+          <div><b>${x.name}</b></div>
+          <div class="muted">HS: ${x.hs_code}</div>
+        </div>
+        <button class="btn" onclick="navigator.clipboard.writeText('${x.hs_code}')">نسخ HS</button>
+      </div>
+    `).join('');
+  }
+  function norm(s){return (s||'').toString().trim();}
+  document.getElementById('q').addEventListener('input',e=>{
+    const v = norm(e.target.value);
+    if(!v){ render([]); return; }
+    const res = DB.filter(x=> norm(x.name).includes(v));
+    render(res);
+  });
+  load();
+</script>
+</body>
+</html>
