@@ -20,13 +20,16 @@
   .btn-gray{background:#e2e8f0;color:#0f172a}
   .btn-orange{background:#f97316;color:#fff}
   .btn-red{background:#ef4444;color:#fff}
-  .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1}
-  .muted{color:#64748b;font-size:12px}
+  .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1;align-items:center}
+  .list .left{min-width:0;cursor:pointer}
+  .list .name{font-weight:700}
+  .list .muted{color:#64748b;font-size:12px}
+  .price-chip{display:inline-block;border:1px solid #cbd5e1;border-radius:999px;padding:2px 8px;font-size:12px;margin-inline-start:8px;background:#f8fafc}
   .tag{display:inline-block;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;padding:2px 8px;border-radius:999px;font-size:12px;margin-inline-start:6px}
   .nav{margin:10px 0}
   .nav a{display:inline-block;margin-left:8px;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
   @media(max-width:640px){.row{grid-template-columns:1fr}}
-  .owner-bar{display:flex;gap:8px;align-items:center}
+  .owner-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .owner-bar input{max-width:200px}
   .owner-hint{font-size:12px;color:#475569}
 </style>
@@ -68,8 +71,9 @@
             <option value="dz">للدُزْن</option>
             <option value="pcs">للحبة</option>
             <option value="ltr">للتر</option>
-            <option value="ltr">للكيفي</option>
             <option value="Ah">Ah (لكل أمبير/ساعة)</option>
+            <option value="yd">yd (لليارده)</option>
+            <option value="W">W (لكل واط)</option>
           </select>
         </div>
       </div>
@@ -97,10 +101,10 @@
   </div>
 
 <script>
-  // —— إعداد رمز المالك (PIN) ——
-  const ADMIN_PIN = "bassam1234"; // <-- غيّره برمزك الخاص
+  // —— PIN المالك ——
+  const ADMIN_PIN = "bassam1234"; // يمكنك تغييره
 
-  // —— التحكّم في وضع المالك ——
+  // —— حالة المالك ——
   let isOwner = false;
   const pinEl = document.getElementById('pin');
   const unlockBtn = document.getElementById('unlockBtn');
@@ -126,14 +130,14 @@
   const priceEl = document.getElementById('price');
   const unitEl = document.getElementById('unit');
   const notesEl = document.getElementById('notes');
-  const saveBtn = document.getElementById('saveBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const msg = document.getElementById('msg');
   const q = document.getElementById('q');
   const list = document.getElementById('list');
   const exportBtn = document.getElementById('exportBtn');
   const importBtn = document.getElementById('importBtn');
   const importFile = document.getElementById('importFile');
+
+  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch{ return []; } }
+  function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
 
   // تحميل JSON الأساسي من assets ثم دمجه مع LocalStorage (للعرض)
   let baseData = [];
@@ -143,9 +147,6 @@
       baseData = await r.json();
     }catch(e){ baseData = []; }
   }
-
-  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch{ return []; } }
-  function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
 
   function upsert(rec){
     if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
@@ -164,22 +165,35 @@
 
   function applyToForm(rec){
     nameEl.value = rec.name || '';
-    priceEl.value = rec.price || '';
+    priceEl.value = rec.price ?? '';
     unitEl.value = rec.unit || 'ton';
     notesEl.value = rec.notes || '';
   }
 
   function unitLabel(u){
-    return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='ltr'?'للتر':u==='Ah'?'Ah/أمبير':'';
+    return u==='ton'?'للطن'
+        : u==='kg' ? 'للكيلو'
+        : u==='dz' ? 'للدُزْن'
+        : u==='pcs'? 'للحبة'
+        : u==='ltr'? 'للتر'
+        : u==='Ah' ? 'Ah/أمبير'
+        : u==='yd' ? 'لليارده'
+        : u==='W'  ? 'لكل واط'
+        : '';
   }
 
   function mergedData(){
-    // الدمج: الأساس من الملف + تعديلاتك المحلية (الأولوية للمحلي على الاسم نفسه)
+    // الأساس من الملف + تعديلاتك المحلية (الأولوية للمحلي على الاسم نفسه)
     const local = loadLocal();
     const map = new Map();
-    baseData.forEach(x => map.set((x.name||'').trim(), x));
-    local.forEach(x => map.set((x.name||'').trim(), x));
+    (baseData||[]).forEach(x => map.set((x.name||'').trim(), x));
+    (local||[]).forEach(x => map.set((x.name||'').trim(), x));
     return Array.from(map.values());
+  }
+
+  // — الانتقال للحاسبة —
+  function goCalc(price){
+    location.href = './index.html?value=' + encodeURIComponent(price);
   }
 
   function render(){
@@ -189,35 +203,40 @@
 
     if(!filtered.length){ list.innerHTML = '<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
 
-    list.innerHTML = filtered.map(x => `
-      <div class="item">
-        <div>
-          <div><b>${x.name}</b> <span class="tag">${unitLabel(x.unit)}</span></div>
-          <div class="muted">${x.price} USD ${x.notes?(' • '+x.notes):''}</div>
+    list.innerHTML = filtered.map(x => {
+      const unitTxt = unitLabel(x.unit);
+      const priceTxt = (x.price!=null ? x.price : '') + ' USD';
+      return `
+        <div class="item">
+          <div class="left" onclick="goCalc(${JSON.stringify(x.price)})" title="انقر للانتقال إلى الحاسبة">
+            <div class="name">${x.name} <span class="price-chip">${priceTxt}</span></div>
+            <div class="muted">${unitTxt}${x.notes?(' • '+x.notes):''}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-green" onclick="goCalc(${JSON.stringify(x.price)})">استخدام السعر</button>
+            ${isOwner ? `
+              <button class="btn btn-orange" onclick='(function(n){const rec = mergedData().find(r=>r.name===n); if(rec){ window.applyToForm(rec);} })(${JSON.stringify(x.name)})'>تعديل</button>
+              <button class="btn btn-red" onclick="del(${JSON.stringify(x.name)})">حذف</button>
+            ` : ``}
+          </div>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-green" onclick="location.href='./index.html?value=${encodeURIComponent(x.price)}'">استخدام السعر</button>
-          ${isOwner ? `
-            <button class="btn btn-orange" onclick='(function(n){const rec = mergedData().find(r=>r.name===n); if(rec){ window.applyToForm(rec);} })(${JSON.stringify(x.name)})'>تعديل</button>
-            <button class="btn btn-red" onclick="del(${JSON.stringify(x.name)})">حذف</button>
-          ` : ``}
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   document.getElementById('saveBtn')?.addEventListener('click', ()=>{
     if(!isOwner){ return alert('هذا الإجراء للمالك فقط'); }
     const rec = {
       name: (nameEl.value||'').trim(),
-      price: parseFloat(priceEl.value||'0'),
+      price: Number(priceEl.value),
       unit: (unitEl.value||'ton'),
       notes: (notesEl.value||'').trim()
     };
     if(!rec.name){ alert('اكتب اسم السلعة'); return; }
-    if(!rec.price){ alert('اكتب السعر بالدولار'); return; }
+    if(Number.isNaN(rec.price)){ alert('اكتب السعر بالدولار'); return; }
     upsert(rec);
-    msg.style.display='inline'; setTimeout(()=>msg.style.display='none',1200);
+    document.getElementById('msg').style.display='inline';
+    setTimeout(()=>{ document.getElementById('msg').style.display='none'; },1200);
     render();
   });
 
@@ -252,16 +271,21 @@
         .filter(x=>x && typeof x==='object')
         .map(x=>({
           name: String(x.name||'').trim(),
-          price: Number(x.price||0),
+          price: Number(x.price),
           unit: (x.unit||'ton'),
           notes: String(x.notes||'').trim()
         }))
-        .filter(x=>x.name && x.price>0);
+        .filter(x=>x.name && !Number.isNaN(x.price));
       // نخزنها محليًا كنسخة المالك (لن تُرفع تلقائيًا)
       saveLocal(cleaned);
       render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
     }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
     finally{ importFile.value=''; }
+  });
+
+  // تحسين عرض القائمة فوق كيبورد الموبايل
+  q.addEventListener('focus', ()=>{
+    setTimeout(()=>{ q.scrollIntoView({behavior:'smooth',block:'center'}); }, 250);
   });
 
   // بدء: تحميل الملف الأساسي ثم العرض
@@ -271,9 +295,10 @@
     render();
   })();
 
-  // تعريض الدوال للاستخدام داخل onclick
+  // دوال عامة
   window.applyToForm = applyToForm;
   window.mergedData = mergedData;
+  window.goCalc = goCalc;
 </script>
 </body>
 </html>
