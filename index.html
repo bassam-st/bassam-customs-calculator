@@ -1,116 +1,96 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بسام الشتيمي للتخليص الجمركي</title>
-<style>
-  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .header{background:linear-gradient(90deg,#16a34a,#0d9488);color:#fff;text-align:center;padding:18px;border-radius:0 0 18px 18px}
-  .header h1{margin:6px 0;font-size:22px}
-  .header .phone{font-size:14px}
-  .container{max-width:520px;background:#fff;margin:20px auto;padding:20px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
-  label{font-size:14px;color:#334155;display:block;margin-bottom:6px}
-  input{width:100%;padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:16px;color:#0f172a;background:#f8fafc}
-  .radio-group{display:flex;gap:10px;margin:10px 0}
-  .radio{flex:1;padding:10px;border-radius:10px;text-align:center;font-weight:600;cursor:pointer;border:2px solid #94a3b8;color:#0f172a;background:#f1f5f9;transition:.2s}
-  .radio.active{background:#0d9488;color:#fff;border-color:#0d9488}
-  .result-box{background:#ecfdf5;border:1px solid #10b981;color:#065f46;font-weight:bold;font-size:32px;text-align:center;padding:18px;border-radius:12px;margin-top:10px;direction:ltr;unicode-bidi:plaintext}
-  .formula{text-align:center;color:#475569;font-size:13px;margin-top:6px}
-  .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-  .btn{flex:1;padding:12px;font-weight:bold;border:none;border-radius:10px;cursor:pointer;font-size:15px;transition:.2s}
-  .btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
-  .btn-blue{background:#2563eb;color:#fff}.btn-blue:hover{background:#1d4ed8}
-  .btn-gray{background:#e2e8f0;color:#0f172a}
-  .nav{display:flex;gap:10px;margin:16px 0}
-  .nav a{flex:1;text-decoration:none;text-align:center;padding:10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;font-weight:700}
-  .note{text-align:center;font-size:13px;color:#475569;margin-top:15px;line-height:1.6}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بسام الشتيمي للتخليص الجمركي</title>
+  <style>
+    body{font-family:'Noto Kufi Arabic',sans-serif;background:#f1f5f9;margin:0;padding:0}
+    .header{background:linear-gradient(90deg,#16a34a,#22c55e);color:#fff;text-align:center;padding:20px;border-bottom:4px solid #0f5132}
+    .header h1{margin:0;font-size:20px}
+    .header p{margin:4px 0 0}
+    .container{max-width:600px;margin:20px auto;background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,0.08);padding:20px}
+    label{display:block;margin-top:10px;font-weight:600;color:#0f172a}
+    input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;margin-top:4px}
+    .btn{border:none;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font-size:14px}
+    .btn-green{background:#16a34a;color:#fff}
+    .btn-blue{background:#2563eb;color:#fff}
+    .btn-gray{background:#e2e8f0;color:#0f172a}
+    .actions{display:flex;gap:8px;justify-content:center;margin-bottom:15px;flex-wrap:wrap}
+    .result{font-size:28px;color:#065f46;text-align:center;margin-top:15px;font-weight:800}
+    .footer{margin-top:20px;font-size:12px;color:#475569;text-align:center}
+    .rate-box{display:flex;gap:10px;margin-top:10px;justify-content:center;flex-wrap:wrap}
+    .rate-btn{padding:10px 16px;border-radius:10px;border:2px solid #94a3b8;cursor:pointer;font-weight:700}
+    .rate-btn.active{background:#065f46;color:#fff;border-color:#065f46}
+  </style>
 </head>
 <body>
-
-<div class="header">
-  <h1>بسام الشتيمي للتخليص الجمركي</h1>
-  <div class="phone">للاستفسار وخدمات التخليص: 00967771997809</div>
-</div>
-
-<div class="container">
-
-  <!-- أزرار التنقل الجديدة -->
-  <div class="nav">
-    <a href="./hs.html">🔎 البنود الجمركية</a>
-    <a href="./prices.html">💲 الأسعار</a>
+  <div class="header">
+    <h1>بسام الشتيمي للتخليص الجمركي</h1>
+    <p>للاستفسار وخدمات التخليص: 00967771997809</p>
   </div>
 
-  <label>قيمة السلعة (بالدولار USD)</label>
-  <input id="itemValue" type="number" placeholder="أدخل القيمة مثال: 2000" />
+  <div class="container">
+    <div class="actions">
+      <button class="btn btn-green" onclick="location.href='./prices.html'">💲 الأسعار</button>
+      <button class="btn btn-blue" onclick="location.href='./hs.html'">🔍 البنود الجمركية</button>
+    </div>
 
-  <label style="margin-top:10px;">اختر الفئة الجمركية</label>
-  <div class="radio-group">
-    <div class="radio active" data-factor="0.2075">5% (فئة خمسة بالمئة)</div>
-    <div class="radio" data-factor="0.265">10% (فئة عشرة بالمئة)</div>
+    <label>قيمة السلعة (بالدولار USD)</label>
+    <input id="usd" type="number" placeholder="ادخل القيمة مثال: 2000" />
+
+    <label style="margin-top:15px;">اختر الفئة الجمركية</label>
+    <div class="rate-box">
+      <div class="rate-btn active" data-rate="0.2075">5% (فئة خمسة بالمئة)</div>
+      <div class="rate-btn" data-rate="0.265">10% (فئة عشرة بالمئة)</div>
+    </div>
+
+    <div class="result" id="result">0.00</div>
+
+    <div class="actions">
+      <button class="btn btn-gray" onclick="copyResult()">نسخ النتيجة</button>
+      <button class="btn btn-green" onclick="shareWhatsApp()">مشاركة واتساب</button>
+      <button class="btn btn-blue" onclick="window.print()">طباعة / حفظ PDF</button>
+    </div>
+
+    <div class="footer">
+      المعادلة: الرسوم = قيمة السلعة × 750 × معامل الفئة <br>
+      مثال: 2000 × 750 × 0.2075 = 311,250 ريال
+    </div>
   </div>
 
-  <label style="margin-top:10px;">الرسوم الجمركية (ريال يمني)</label>
-  <div class="result-box" id="result">0</div>
-  <div class="formula" id="formula">—</div>
+  <script>
+    const usd = document.getElementById('usd');
+    const result = document.getElementById('result');
+    const rateBtns = document.querySelectorAll('.rate-btn');
+    let rate = 0.2075;
 
-  <div class="buttons">
-    <button class="btn btn-blue" id="pdfBtn">طباعة / حفظ PDF</button>
-    <button class="btn btn-green" id="copyBtn">نسخ النتيجة</button>
-    <button class="btn btn-green" id="whatsappBtn">مشاركة واتساب</button>
-  </div>
-
-  <div class="note">
-    المعادلة: <b>الرسوم = قيمة السلعة × 750 × معامل الفئة</b><br>
-    مثال: 2000 × 750 × 0.2075 = 311,250 ريال
-  </div>
-</div>
-
-<script>
-  const itemValue = document.getElementById('itemValue');
-  const radios = document.querySelectorAll('.radio');
-  const result = document.getElementById('result');
-  const formula = document.getElementById('formula');
-
-  const FIXED_RATE = 750;
-  let factor = 0.2075;
-
-  // قراءة قيمة قادمة من صفحة الأسعار (query param: value)
-  const params = new URLSearchParams(location.search);
-  const qVal = params.get('value');
-  if(qVal){ itemValue.value = qVal; }
-
-  function formatNumber(n){
-    return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
-  }
-  function calc(){
-    const val = parseFloat(itemValue.value||'0');
-    const duty = val * FIXED_RATE * factor;
-    result.textContent = formatNumber(duty);
-    const pct = (factor===0.2075)?'5%':'10%';
-    formula.textContent = `${pct} فئة × ${FIXED_RATE} × ${val}`;
-  }
-  itemValue.addEventListener('input', calc);
-  radios.forEach(r=>{
-    r.addEventListener('click',()=>{
-      radios.forEach(x=>x.classList.remove('active'));
-      r.classList.add('active');
-      factor = parseFloat(r.dataset.factor);
-      calc();
+    rateBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        rateBtns.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        rate = parseFloat(btn.dataset.rate);
+        calculate();
+      });
     });
-  });
-  document.getElementById('copyBtn').addEventListener('click',()=>{
-    const text = `الرسوم الجمركية: ${result.textContent} ريال يمني`;
-    navigator.clipboard.writeText(text); alert('✅ تم نسخ النتيجة بنجاح');
-  });
-  document.getElementById('whatsappBtn').addEventListener('click',()=>{
-    const msg = `💰 نتيجة الحاسبة الجمركية:\nقيمة السلعة: ${itemValue.value} USD\nالفئة: ${(factor===0.2075)?'5%':'10%'}\nالرسوم: ${result.textContent} ريال يمني.`;
-    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`; window.open(url,'_blank');
-  });
-  document.getElementById('pdfBtn').addEventListener('click',()=>window.print());
-  calc();
-</script>
 
+    usd.addEventListener('input', calculate);
+
+    function calculate(){
+      const value = parseFloat(usd.value||0);
+      const resultValue = value * 750 * rate;
+      result.textContent = resultValue.toLocaleString('en-US',{minimumFractionDigits:2});
+    }
+
+    function copyResult(){
+      navigator.clipboard.writeText(result.textContent);
+      alert('✔ تم نسخ النتيجة');
+    }
+
+    function shareWhatsApp(){
+      const msg = `الرسوم الجمركية المقدّرة: ${result.textContent} ريال يمني`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    }
+  </script>
 </body>
 </html>
