@@ -30,126 +30,97 @@
     <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
 
     <div class="card">
-      <input id="q" placeholder="اكتب اسم الصنف بالعربي… مثال: بطاريات، ملابس، رولات تغليف، قطع غيار" autofocus />
-      <div class="muted" style="margin-top:6px">البحث يدعم العربية وإزالة التشكيل وتوحيد الأرقام (٠١٢٣… ↔ 0123)</div>
+      <input id="q" placeholder="اكتب أول حرف… مثال: ب (بطاريات/بلاستيك)، م (ملابس/مسامير)…" autofocus />
+      <div class="muted" style="margin-top:6px">يبدأ العرض من أول حرف – البحث يدعم إزالة التشكيل وتوحيد الأرقام.</div>
     </div>
 
     <div class="card" id="results">
-      <div class="muted">ابدأ بالكتابة لعرض النتائج…</div>
+      <div class="muted">جاري تحميل البيانات…</div>
     </div>
   </div>
 
 <script>
-  // أدوات لتوحيد الكتابة العربية
-  const rim = /[\u064B-\u065F\u0670\u06D6-\u06ED]/g;
-  const arNums = "٠١٢٣٤٥٦٧٨٩";
-  const enNums = "0123456789";
-  const mapDigits = {};
-  for(let i=0;i<10;i++){ mapDigits[arNums[i]] = enNums[i]; }
-
+  // — أدوات التطبيع —
+  const rim=/[\u064B-\u065F\u0670\u06D6-\u06ED]/g;
   function normalizeArabic(s){
     if(!s) return "";
-    s = s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d => mapDigits[d] ?? d);
-    s = s.replace(rim,'')
-         .replace(/[أإآا]/g,'ا')
-         .replace(/ى/g,'ي')
-         .replace(/ؤ/g,'و')
-         .replace(/ئ/g,'ي')
-         .replace(/ة/g,'ه')
-         .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ')
-         .replace(/\s+/g,' ')
-         .trim();
-    return s;
+    return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d=> String("0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]||d))
+            .replace(rim,'')
+            .replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
+            .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ').replace(/\s+/g,' ').trim();
   }
 
-  function highlight(text, query){
-    if(!query) return text;
-    const qn = normalizeArabic(query);
-    const tn = normalizeArabic(text);
-    const idx = tn.indexOf(qn);
-    if(idx < 0) return text;
-    let i=0, j=0, start=-1, end=-1;
-    while(i < text.length && j < tn.length){
-      const ch = text[i];
-      const nn = normalizeArabic(ch);
-      if(j === idx) start = i;
-      if(nn) j += nn.length;
-      i++;
-      if(j === idx + qn.length){ end = i; break; }
+  function highlight(text, q){
+    if(!q) return text;
+    const tn=normalizeArabic(text), qn=normalizeArabic(q);
+    const i=tn.indexOf(qn); if(i<0) return text;
+    // تقريب موضع الإبراز على النص الأصلي
+    let oi=0, ni=0, start=-1, end=-1;
+    while(oi<text.length && ni<=i){
+      const seg=normalizeArabic(text[oi])||text[oi]; ni+=seg.length; oi++;
+      if(ni>=i && start<0) start=oi-1;
     }
-    if(start>=0 && end>=0){
-      return text.slice(0,start) + '<mark>' + text.slice(start,end) + '</mark>' + text.slice(end);
+    while(oi<text.length && ni<i+qn.length){
+      const seg=normalizeArabic(text[oi])||text[oi]; ni+=seg.length; oi++;
+      if(ni>=i+qn.length){ end=oi; break; }
     }
+    if(start>=0 && end>=0) return text.slice(0,start)+'<mark>'+text.slice(start,end)+'</mark>'+text.slice(end);
     return text;
   }
 
-  // تحميل بيانات البنود
-  const HS_URL = './assets/hs_catalog.json';
-  let HS = [];
+  const HS_URL='./assets/hs_catalog.json';
+  let HS=[], HSn=[];
 
   async function loadHS(){
-    try{ HS = await fetch(HS_URL).then(r=>r.json()); }
-    catch(e){ HS = []; }
+    try{
+      HS = await fetch(HS_URL).then(r=>r.json());
+      // فهرس مطبّع للاسم لتسريع البحث
+      HSn = HS.map(x=>({ ...x, n: normalizeArabic(x.name||''), c: String(x.code||'') }));
+      // عرض أولي لأعلى 200 بند (مرتبة أبجدياً)
+      render(HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200), '');
+    }catch(e){
+      document.getElementById('results').innerHTML = '<div class="muted">تعذّر تحميل البيانات. تأكد من وجود الملف assets/hs_catalog.json</div>';
+    }
   }
 
-  function matches(item, query){
-    if(!query) return false;
+  function search(query){
     const q = normalizeArabic(query);
-    const n = normalizeArabic(item.name||'');
-    const d = normalizeArabic(item.description||'');
-    const c = String(item.code||'');
-    return n.includes(q) || d.includes(q) || c.startsWith(q);
+    if(!q) return HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200);
+    const starts = [], contains = [];
+    for(const x of HSn){
+      if(x.n.startsWith(q) || x.c.startsWith(q)) starts.push(x);
+      else if(x.n.includes(q)) contains.push(x);
+    }
+    // نُقدّم النتائج التي تبدأ بالاستعلام ثم الباقي — مع ترتيب أبجدي
+    starts.sort((a,b)=>a.n.localeCompare(b.n));
+    contains.sort((a,b)=>a.n.localeCompare(b.n));
+    return starts.concat(contains);
   }
 
   function render(list, query){
     const box = document.getElementById('results');
-    if(!list.length){
-      box.innerHTML = '<div class="muted">لا نتائج. جرّب كلمة أخرى مثل: "ملابس" أو "بطاريات".</div>';
-      return;
-    }
+    if(!list.length){ box.innerHTML='<div class="muted">لا نتائج… جرّب حرفًا آخر.</div>'; return; }
     box.innerHTML = list.slice(0,200).map(x=>{
       const nameHTML = highlight(x.name||'', query);
-      const descHTML = x.description ? ('<div class="desc">'+highlight(x.description, query)+'</div>') : '';
       const rateTag = x.rate ? `<span class="tag">فئة ${x.rate}</span>` : '';
       return `
         <div class="item">
           <div>
             <div class="name">${nameHTML} ${rateTag}</div>
             <div class="code">البند: ${x.code}</div>
-            ${descHTML}
           </div>
           <div class="row">
-            <button class="btn btn-copy" onclick="copyCode('${x.code}')">نسخ الكود</button>
-            <button class="btn btn-go" onclick="goCalc('${encodeURIComponent(x.code)}')">استخدام في الحاسبة</button>
+            <button class="btn btn-copy" onclick="navigator.clipboard.writeText('${x.code}').then(()=>alert('✔ نُسخ: ${x.code}'))">نسخ الكود</button>
+            <button class="btn btn-go" onclick="location.href='./index.html?hs=${encodeURIComponent(x.code)}'">استخدام في الحاسبة</button>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
-  function copyCode(code){
-    navigator.clipboard?.writeText(code).then(()=>alert('✔ تم نسخ الكود: '+code));
-  }
-
-  function goCalc(code){
-    location.href = './index.html?hs='+code;
-  }
-
   const q = document.getElementById('q');
-  q.addEventListener('input', ()=>{
-    const query = q.value;
-    const list = HS.filter(x=>matches(x, query));
-    render(list, query);
-  });
+  q.addEventListener('input', ()=>{ render(search(q.value), q.value); });
 
-  (async function init(){
-    await loadHS();
-    const sp = new URLSearchParams(location.search);
-    if(sp.get('q')){ q.value = sp.get('q'); }
-    const list = HS.filter(x=>matches(x, q.value||''));
-    render(list, q.value||'');
-    q.focus();
-  })();
+  loadHS();
 </script>
 </body>
 </html>
