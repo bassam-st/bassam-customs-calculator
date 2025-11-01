@@ -3,10 +3,8 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// يخدم الملفات من الجذر
 app.use(express.static(path.join(__dirname)));
 
-// أي مسار يرجع index.html
 app.get("*", (_, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
