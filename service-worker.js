@@ -1,11 +1,10 @@
-const CACHE = "customs-calculator-v1";
+const CACHE = "bassam-customs-v1";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/icon-192.png",
-  "./assets/icon-512.png",
-  "./assets/logo.svg"
+  "./assets/icon-512.png"
 ];
 
 self.addEventListener("install", e => {
@@ -21,12 +20,7 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  const req = e.request;
   e.respondWith(
-    caches.match(req).then(cached => cached || fetch(req).then(res => {
-      const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(req, copy));
-      return res;
-    }).catch(() => caches.match("./index.html")))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
