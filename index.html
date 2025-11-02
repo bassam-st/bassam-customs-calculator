@@ -3,56 +3,102 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>بسام الشتيمي للتخليص الجمركي</title>
+<title>بسام مساعدك الجمركي</title>
 
-<!-- PWA -->
+<!-- PWA إعدادات -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#16a34a">
-<link rel="icon" href="/icons/icon-192.png">
+<link rel="icon" href="/أيقونات/icon-192.png">
 
 <style>
-  :root{--green:#16a34a;--green2:#22c55e;--ink:#0f172a;--muted:#64748b;--bg:#f1f5f9;--card:#fff;--blue:#2563eb}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
+  :root{
+    --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
+    --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
   .wrap{max-width:720px;margin:16px auto;padding:12px}
-  .hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:24px;padding:22px 18px;box-shadow:0 10px 30px rgba(22,163,74,.18)}
-  .brand{display:flex;align-items:center;justify-content:space-between}
-  .brand h1{margin:0;font-size:22px;line-height:1.4}
-  .badge{background:#fff;color:#064e3b;border:2px solid #fff;width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-weight:900}
+
+  /* العنوان */
+  .hero{
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    color:#fff;border-radius:24px;padding:22px 18px;position:relative;
+    box-shadow:0 10px 30px rgba(22,163,74,.18);
+  }
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand h1{margin:0;font-size:22px;line-height:1.35}
+  .badge{
+    background:#fff;border:2px solid #fff;color:#064e3b;
+    width:64px;height:64px;display:grid;place-items:center;border-radius:18px;
+    font-weight:800;
+  }
   .phone{margin-top:6px;opacity:.95;font-size:14px}
-  .nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
   .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
-  .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;border:1px solid #e5e7eb;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+
+  /* كارت التحكم */
+  .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
+        box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
   .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .owner input[type=password]{padding:10px;border:1px solid #cbd5e1;border-radius:10px}
+  .owner small{color:var(--muted)}
+  .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
   .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-  .btn-blue{background:var(--blue);color:#fff} .btn-gray{background:#e2e8f0}
+  .btn-blue{background:var(--accent);color:#fff}
+  .btn-gray{background:#e2e8f0;color:#0f172a}
+  .owner-on{color:#065f46;font-weight:800}
+
+  /* الاختصارات */
   .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
-  .chip .x{margin-inline-start:8px;color:#b91c1c;display:none} .chip.admin .x{display:inline}
+  .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
+  .chip.admin .x{display:inline}
+
+  /* الآلة الحاسبة */
   label{display:block;font-weight:700;margin-bottom:6px}
-  input[type=number]{width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;font-size:18px;background:#fff}
-  .rates{display:flex;flex-direction:column;gap:12px;margin-top:8px}
-  .pill{display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:999px;border:2px solid #cbead9;background:#f0fdf4;cursor:pointer}
+  input[type="number"]{
+    width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
+    font-size:18px;background:#fff;outline:none
+  }
+  .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
+  .rates{display:flex;flex-direction:column;gap:12px}
+  .pill{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px;border-radius:999px;border:2px solid #cbead9;
+    background:#f0fdf4;cursor:pointer
+  }
   .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
   .pill.active{background:#14532d;color:#fff;border-color:#14532d}
   .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
-  .hint{font-size:13px;opacity:.95}
-  .result{border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;text-align:center;margin-top:12px}
-  .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
-  .mini{margin-top:8px;color:#64748b}
+  .hint{font-size:13px;color:#0f5132;opacity:.9}
+  .result{
+    border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;
+    text-align:center
+  }
+  .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
+  .result .mini{margin-top:8px;color:var(--muted)}
   .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-  .btn.copy{background:#22c55e;color:#fff} .btn.pdf{background:var(--blue);color:#fff} .btn.wa{background:#16a34a;color:#fff}
-  #installBtn{position:fixed;bottom:16px;inset-inline:16px;display:none;background:#16a34a;color:#fff;border:none;border-radius:14px;padding:12px 16px;font-weight:900;box-shadow:0 8px 20px rgba(22,163,74,.25)}
+  .btn.copy{background:#22c55e;color:#fff}
+  .btn.pdf{background:var(--accent);color:#fff}
+  .btn.wa{background:#16a34a;color:#fff}
+  @media (max-width:420px){ .result .big{font-size:36px} }
+
+  /* زر تثبيت التطبيق */
+  #installBtn{
+    position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
+    background:#16a34a; color:#fff; border:none; border-radius:14px;
+    padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- العنوان -->
     <section class="hero">
       <div class="brand">
-        <h1>بسام الشتيمي للتخليص الجمركي</h1>
-        <div class="badge">بش</div>
+        <h1>بسام مساعدك الجمركي</h1>
+        <div class="badge">💼</div>
       </div>
-      <div class="phone">للاستفسار: <b>00967771997809</b></div>
+      <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
       <div class="nav">
         <a href="./prices.html">💲 قائمة الأسعار</a>
         <a href="./hs.html">🔍 البنود الجمركية</a>
@@ -60,6 +106,7 @@
       <div class="presets" id="presets"></div>
     </section>
 
+    <!-- وضع المالك -->
     <section class="card">
       <div class="owner">
         <span>🔒 وضع المالك:</span>
@@ -68,76 +115,176 @@
         <button class="btn btn-gray" id="lock">قفل</button>
         <small id="state">الحالة: قراءة فقط</small>
       </div>
+
+      <!-- إدارة الأسعار -->
       <div id="adminForm" style="display:none;margin-top:10px">
         <div class="owner" style="gap:10px">
-          <input id="pName" placeholder="اسم اختصار… مثال: رسوم فلاتر" />
-          <input id="pVal" type="number" inputmode="decimal" placeholder="قيمة بالدولار… 2000" />
+          <input id="pName" placeholder="اسم السلعة…" />
+          <input id="pVal" type="number" inputmode="decimal" placeholder="القيمة بالدولار…" />
+          <select id="pUnit">
+            <option value="pcs">حبة</option>
+            <option value="ton">طن</option>
+            <option value="dz">درزن</option>
+            <option value="kw">كيلووات</option>
+            <option value="ah">أمبير/ساعة</option>
+          </select>
           <button class="btn btn-blue" id="addPreset">إضافة</button>
           <button class="btn btn-gray" id="clearPresets">تفريغ الكل</button>
         </div>
+        <small class="owner-on">البيانات تحفظ محلياً في المتصفح ويمكن تعديلها لاحقاً.</small>
       </div>
     </section>
 
+    <!-- الآلة الحاسبة -->
     <section class="card">
       <label for="usd">قيمة السلعة (بالدولار USD)</label>
       <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
+
+      <div class="group-title">اختر الفئة الجمركية</div>
       <div class="rates">
-        <label class="pill" id="pill5"><div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div><input type="radio" name="rate" value="0.2075"></label>
-        <label class="pill active" id="pill10"><div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div><input type="radio" name="rate" value="0.265" checked></label>
+        <label class="pill" id="pill5">
+          <div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div>
+          <input type="radio" name="rate" value="0.2075" />
+        </label>
+        <label class="pill active" id="pill10">
+          <div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div>
+          <input type="radio" name="rate" value="0.265" checked />
+        </label>
       </div>
+
+      <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
       <div class="result">
         <div class="big" id="out">0</div>
         <div class="mini" id="formula">0 × 750 × 0 = 0</div>
       </div>
+
       <div class="actions">
-        <button class="btn pdf" onclick="window.print()">طباعة / حفظ PDF</button>
-        <button class="btn copy" onclick="copyResult()">نسخ النتيجة</button>
-        <button class="btn wa" onclick="shareWhatsApp()">مشاركة واتساب</button>
+        <button class="btn pdf"  onclick="window.print()">🖨️ طباعة / PDF</button>
+        <button class="btn copy" onclick="copyResult()">📋 نسخ النتيجة</button>
+        <button class="btn wa"   onclick="shareWhatsApp()">📲 واتساب</button>
       </div>
     </section>
   </div>
 
+  <!-- زر التثبيت -->
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
 <script>
-  // PWA
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js'); }
-  let deferredPrompt; const installBtn=document.getElementById('installBtn');
-  window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display='block'; });
-  installBtn.addEventListener('click',async()=>{ if(!deferredPrompt) return; installBtn.style.display='none'; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; });
+  // ✅ تسجيل Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
 
-  // Admin presets
-  const ADMIN_PIN="bassam1234"; let isOwner=false;
-  const pin=document.getElementById('pin'),unlock=document.getElementById('unlock'),lock=document.getElementById('lock'),state=document.getElementById('state'),adminForm=document.getElementById('adminForm');
-  const PRESETS_KEY='customQuickPresetsV1'; const pName=document.getElementById('pName'); const pVal=document.getElementById('pVal');
-  const addPresetBtn=document.getElementById('addPreset'); const clearPresetsBtn=document.getElementById('clearPresets'); const presetsEl=document.getElementById('presets');
-  function loadPresets(){ try{return JSON.parse(localStorage.getItem(PRESETS_KEY))||[]}catch{return[]} }
-  function savePresets(x){ localStorage.setItem(PRESETS_KEY,JSON.stringify(x)); }
-  function renderPresets(){ const arr=loadPresets(); if(!arr.length){presetsEl.innerHTML=''; return;}
-    presetsEl.innerHTML=arr.map(x=>`<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">${x.name}: ${x.value}${isOwner?`<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>`:''}</span>`).join(''); }
-  function updateOwnerUI(){ state.textContent='الحالة: '+(isOwner?'مالك (تحرير مفعّل)':'قراءة فقط'); adminForm.style.display=isOwner?'':'none'; renderPresets(); }
-  unlock.onclick=()=>{ if(pin.value===ADMIN_PIN){isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك');} else alert('❌ رمز غير صحيح'); };
-  lock.onclick=()=>{ isOwner=false; updateOwnerUI(); };
-  addPresetBtn?.addEventListener('click',()=>{ if(!isOwner) return alert('هذا الإجراء للمالك فقط'); const name=(pName.value||'').trim(); const val=parseFloat(pVal.value||0); if(!name) return alert('اكتب اسم'); if(!val) return alert('قيمة غير صحيحة');
-    const arr=loadPresets(); const i=arr.findIndex(a=>a.name===name); if(i>=0) arr[i].value=val; else arr.push({name,value:val}); savePresets(arr); pName.value=''; pVal.value=''; renderPresets(); });
-  clearPresetsBtn?.addEventListener('click',()=>{ if(!isOwner) return alert('هذا الإجراء للمالك فقط'); if(confirm('حذف جميع الاختصارات؟')){ savePresets([]); renderPresets(); }});
-  window.fillValue=v=>{ usd.value=String(v); calc(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }
-  window.delPreset=name=>{ if(!isOwner) return; savePresets(loadPresets().filter(x=>x.name!==name)); renderPresets(); }
+  // 🔽 زر التثبيت
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+  installBtn.addEventListener('click', async () => {
+    installBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
 
-  // Calculator
-  const usd=document.getElementById('usd'), out=document.getElementById('out'), formula=document.getElementById('formula');
-  const rateRadios=[...document.querySelectorAll('input[name="rate"]')]; const pills=[document.getElementById('pill5'),document.getElementById('pill10')];
-  const enFmt=new Intl.NumberFormat('en-US');
-  rateRadios.forEach((r,i)=>r.addEventListener('change',()=>{pills.forEach(p=>p.classList.remove('active')); pills[i].classList.add('active'); calc();}));
-  const params=new URLSearchParams(location.search); if(params.has('value')) usd.value=params.get('value');
-  usd.addEventListener('input',calc);
+  // 🔒 وضع المالك
+  const ADMIN_PIN = "bassam1234";
+  let isOwner = false;
+  const pin = document.getElementById('pin');
+  const unlock = document.getElementById('unlock');
+  const lock = document.getElementById('lock');
+  const state = document.getElementById('state');
+  const adminForm = document.getElementById('adminForm');
+
+  function updateOwnerUI(){
+    state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+    adminForm.style.display = isOwner ? '' : 'none';
+    renderPresets();
+  }
+
+  unlock.addEventListener('click', ()=>{
+    if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
+    else alert('❌ رمز غير صحيح');
+  });
+  lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
+
+  // 💾 الاختصارات
+  const PRESETS_KEY = 'customQuickPresetsV2';
+  const pName = document.getElementById('pName');
+  const pVal  = document.getElementById('pVal');
+  const pUnit = document.getElementById('pUnit');
+  const addPresetBtn = document.getElementById('addPreset');
+  const clearPresetsBtn = document.getElementById('clearPresets');
+  const presetsEl = document.getElementById('presets');
+
+  function loadPresets(){ try{ return JSON.parse(localStorage.getItem(PRESETS_KEY))||[] }catch{ return [] } }
+  function savePresets(arr){ localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)) }
+
+  addPresetBtn.addEventListener('click', ()=>{
+    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+    const name = (pName.value||'').trim();
+    const val  = parseFloat(pVal.value||0);
+    const unit = pUnit.value;
+    if(!name || !val) return alert('أكمل البيانات أولاً');
+    const arr = loadPresets();
+    const i = arr.findIndex(x=>x.name===name);
+    if(i>=0){ arr[i].value=val; arr[i].unit=unit; }
+    else { arr.push({name, value: val, unit}); }
+    savePresets(arr);
+    pName.value=''; pVal.value='';
+    renderPresets();
+  });
+
+  clearPresetsBtn.addEventListener('click', ()=>{
+    if(!isOwner) return alert('للمالك فقط');
+    if(confirm('هل تريد حذف جميع الأسعار؟')){ savePresets([]); renderPresets(); }
+  });
+
+  function renderPresets(){
+    const arr = loadPresets();
+    if(!arr.length){ presetsEl.innerHTML=''; return; }
+    presetsEl.innerHTML = arr.map(x=>(
+      `<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">
+         ${x.name} (${x.unit}) – ${x.value}$
+         ${isOwner?`<span class='x' onclick="event.stopPropagation(); delPreset('${x.name}')">×</span>`:''}
+       </span>`
+    )).join('');
+  }
+
+  window.fillValue = v => { usd.value=v; calc(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }
+  window.delPreset = name => { if(isOwner){ savePresets(loadPresets().filter(x=>x.name!==name)); renderPresets(); } }
+
+  // 💰 الحاسبة
+  const usd = document.getElementById('usd');
+  const out = document.getElementById('out');
+  const formula = document.getElementById('formula');
+  const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
+  const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
+  const enFmt = new Intl.NumberFormat('en-US');
+
+  rateRadios.forEach((r,i)=>{
+    r.addEventListener('change',()=>{
+      pills.forEach(p=>p.classList.remove('active'));
+      pills[i].classList.add('active');
+      calc();
+    });
+  });
+
+  usd.addEventListener('input', calc);
   function getRate(){ const r=rateRadios.find(x=>x.checked); return r?parseFloat(r.value):0.2075; }
-  function calc(){ const v=parseFloat(usd.value||0); const rate=getRate(); const result=v*750*rate; out.textContent=enFmt.format(Math.round(result)); formula.textContent=`${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`; }
-  function copyResult(){ navigator.clipboard.writeText(`Estimated customs duty: ${out.textContent} Yemeni Rial`).then(()=>alert('✔ Copied')); }
-  function shareWhatsApp(){ open(`https://wa.me/?text=${encodeURIComponent('Estimated customs duty: '+out.textContent+' Yemeni Rial')}`,'_blank'); }
-  window.copyResult=copyResult; window.shareWhatsApp=shareWhatsApp;
+  function calc(){
+    const v=parseFloat(usd.value||0), rate=getRate();
+    const result=v*750*rate;
+    out.textContent=enFmt.format(Math.round(result));
+    formula.textContent=`${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
+  }
 
-  // init
+  function copyResult(){ navigator.clipboard.writeText(`الرسوم الجمركية: ${out.textContent} ريال يمني`).then(()=>alert('✔ تم النسخ')); }
+  function shareWhatsApp(){ open(`https://wa.me/?text=${encodeURIComponent('الرسوم الجمركية: '+out.textContent+' ريال يمني')}`,'_blank'); }
+
   renderPresets(); updateOwnerUI(); calc();
 </script>
 </body>
