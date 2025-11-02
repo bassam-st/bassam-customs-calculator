@@ -1,94 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>بسام الشتيمي للتخليص الجمركي</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بسام الشتيمي للتخليص الجمركي</title>
 
-<!-- PWA: Manifest + Theme + Icon -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#16a34a">
-<link rel="icon" href="/icons/icon-192.png">
+  <!-- PWA (اختياري لكن يُفضَّل) -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+  <link rel="icon" href="./icons/icon-512.png" sizes="512x512">
 
-<style>
-  :root{
-    --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
-    --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
-  .wrap{max-width:720px;margin:16px auto;padding:12px}
+  <style>
+    :root{
+      --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
+      --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
+    .wrap{max-width:720px;margin:16px auto;padding:12px}
 
-  /* Hero */
-  .hero{
-    background:linear-gradient(135deg,var(--green),var(--green2));
-    color:#fff;border-radius:24px;padding:22px 18px;position:relative;
-    box-shadow:0 10px 30px rgba(22,163,74,.18);
-  }
-  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .brand h1{margin:0;font-size:22px;line-height:1.35}
-  .badge{
-    background:#fff;border:2px solid #fff;color:#064e3b;
-    width:64px;height:64px;display:grid;place-items:center;border-radius:18px;
-    font-weight:800;
-  }
-  .phone{margin-top:6px;opacity:.95;font-size:14px}
-  .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-  .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
+    /* Hero */
+    .hero{
+      background:linear-gradient(135deg,var(--green),var(--green2));
+      color:#fff;border-radius:18px;padding:18px;position:relative;
+      box-shadow:0 10px 30px rgba(22,163,74,.18);
+    }
+    .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand h1{margin:0;font-size:20px;line-height:1.35}
+    .badge{
+      background:#fff;border:2px solid #fff;color:#064e3b;
+      width:56px;height:56px;display:grid;place-items:center;border-radius:14px;
+      font-weight:800;
+    }
+    .phone{margin-top:4px;opacity:.95;font-size:13px}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+    .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
+    .pwa-bar{margin-top:10px}
+    .btn{border:none;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .btn-blue{background:var(--accent);color:#fff}
+    .btn-gray{background:#e2e8f0;color:#0f172a}
 
-  /* Owner bar */
-  .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
-        box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
-  .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .owner small{color:var(--muted)}
-  .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
-  .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-  .btn-blue{background:var(--accent);color:#fff}
-  .btn-gray{background:#e2e8f0;color:#0f172a}
-  .owner-on{color:#065f46;font-weight:800}
+    /* Cards */
+    .card{background:var(--card);border-radius:14px;padding:16px;margin-top:12px;
+          box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
 
-  /* Quick presets */
-  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
-  .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
-  .chip.admin .x{display:inline}
+    /* Calculator */
+    label{display:block;font-weight:700;margin-bottom:6px}
+    input[type="number"]{
+      width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:12px;
+      font-size:18px;background:#fff;outline:none
+    }
+    .hint{font-size:12px;color:#0f5132;opacity:.9;margin-top:6px}
+    .rates{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .pill{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 14px;border-radius:999px;border:2px solid #cbead9;background:#f0fdf4;
+      cursor:pointer;font-weight:800;color:#14532d
+    }
+    .pill input{appearance:none;width:20px;height:20px;border:2px solid #84d1b0;border-radius:50%}
+    .pill.active{background:#14532d;color:#fff;border-color:#14532d}
+    .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
 
-  /* Calculator */
-  label{display:block;font-weight:700;margin-bottom:6px}
-  input[type="number"]{
-    width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
-    font-size:18px;background:#fff;outline:none
-  }
-  .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
-  .rates{display:flex;flex-direction:column;gap:12px}
-  .pill{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:14px;border-radius:999px;border:2px solid #cbead9;
-    background:#f0fdf4;cursor:pointer
-  }
-  .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
-  .pill.active{background:#14532d;color:#fff;border-color:#14532d}
-  .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
-  .hint{font-size:13px;color:#0f5132;opacity:.9}
-  .result{
-    border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;
-    text-align:center
-  }
-  .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
-  .result .mini{margin-top:8px;color:var(--muted)}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-  .btn.copy{background:#22c55e;color:#fff}
-  .btn.pdf{background:var(--accent);color:#fff}
-  .btn.wa{background:#16a34a;color:#fff}
-  @media (max-width:420px){ .result .big{font-size:36px} }
+    .hs-badge{display:inline-block;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;
+              border-radius:999px;padding:4px 10px;font-size:12px;margin-top:8px}
 
-  /* PWA install button */
-  #installBtn{
-    position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
-    background:#16a34a; color:#fff; border:none; border-radius:14px;
-    padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
-  }
-</style>
+    .result{
+      border:2px dashed #cbd5e1;border-radius:14px;padding:16px;background:#f8fafc;margin-top:12px;
+      text-align:center
+    }
+    .result .big{font-size:38px;font-weight:900;color:#065f46;letter-spacing:.5px}
+    .result .mini{margin-top:8px;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .btn.copy{background:#22c55e;color:#fff}
+    .btn.pdf{background:var(--accent);color:#fff}
+    .btn.wa{background:#16a34a;color:#fff}
+
+    @media (max-width:420px){ .result .big{font-size:32px} }
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -103,29 +92,11 @@
         <a href="./prices.html">💲 قائمة الأسعار</a>
         <a href="./hs.html">🔍 البنود الجمركية</a>
       </div>
-      <!-- اختصارات سريعة (تظهر للجميع؛ الحذف للمالك فقط) -->
-      <div class="presets" id="presets"></div>
-    </section>
 
-    <!-- شريط الإدارة -->
-    <section class="card">
-      <div class="owner">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="PIN" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <small id="state">الحالة: قراءة فقط</small>
-      </div>
-
-      <!-- نموذج إضافة اختصار يدوي (يظهر بعد الفتح) -->
-      <div id="adminForm" style="display:none;margin-top:10px">
-        <div class="owner" style="gap:10px">
-          <input id="pName" placeholder="اسم اختصار… مثال: رسوم فلاتر" />
-          <input id="pVal" type="number" inputmode="decimal" placeholder="قيمة بالدولار… 2000" />
-          <button class="btn btn-blue" id="addPreset">إضافة</button>
-          <button class="btn btn-gray" id="clearPresets">تفريغ الكل</button>
-        </div>
-        <small class="owner-on">الاختصارات تُحفظ محليًا في المتصفح ويمكنك تعديلها أو حذفها لاحقًا.</small>
+      <!-- زر التثبيت (PWA) -->
+      <div class="pwa-bar">
+        <button id="installBtn" class="btn btn-blue" style="display:none">⬇️ تثبيت التطبيق</button>
+        <button id="openAppBtn" class="btn btn-gray" style="display:none">فتح التطبيق</button>
       </div>
     </section>
 
@@ -134,19 +105,19 @@
       <label for="usd">قيمة السلعة (بالدولار USD)</label>
       <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
 
-      <div class="group-title">اختر الفئة الجمركية</div>
-      <div class="rates">
-        <label class="pill" id="pill5">
-          <div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div>
-          <input type="radio" name="rate" value="0.2075" />
+      <div class="rates" style="margin-top:8px">
+        <label class="pill active" id="pill5">
+          <input type="radio" name="rate" value="0.2075" checked />
+          <span>5% (عامل 0.2075)</span>
         </label>
-        <label class="pill active" id="pill10">
-          <div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div>
-          <input type="radio" name="rate" value="0.265" checked />
+        <label class="pill" id="pill10">
+          <input type="radio" name="rate" value="0.265" />
+          <span>10% (عامل 0.265)</span>
         </label>
       </div>
 
-      <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
+      <div id="hsBadge" class="hs-badge" style="display:none"></div>
+
       <div class="result">
         <div class="big" id="out">0</div>
         <div class="mini" id="formula">0 × 750 × 0 = 0</div>
@@ -157,120 +128,18 @@
         <button class="btn copy" onclick="copyResult()">نسخ النتيجة</button>
         <button class="btn wa"   onclick="shareWhatsApp()">مشاركة واتساب</button>
       </div>
+
+      <div class="hint">المعادلة: الرسوم = قيمة السلعة × 750 × معامل الفئة</div>
     </section>
   </div>
 
-  <!-- زر تثبيت التطبيق (يظهر تلقائياً عند توفر حدث التثبيت) -->
-  <button id="installBtn">⤵️ تثبيت التطبيق</button>
-
 <script>
-  // ===== PWA: Service Worker تسجيل =====
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-
-  // ===== PWA: زر التثبيت =====
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();              // منع البانر الافتراضي
-    deferredPrompt = e;              // خزّنه لوقت ضغط الزر
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    installBtn.style.display = 'none';
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice; // { outcome: 'accepted' | 'dismissed' }
-    deferredPrompt = null;
-  });
-
-  // ===== إعدادات الإدارة =====
-  const ADMIN_PIN = "bassam1234";
-  let isOwner = false;
-
-  const pin   = document.getElementById('pin');
-  const unlock= document.getElementById('unlock');
-  const lock  = document.getElementById('lock');
-  const state = document.getElementById('state');
-  const adminForm = document.getElementById('adminForm');
-
-  function updateOwnerUI(){
-    state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-    adminForm.style.display = isOwner ? '' : 'none';
-    renderPresets();
-  }
-
-  unlock.addEventListener('click', ()=>{
-    if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
-    else alert('❌ رمز غير صحيح');
-  });
-  lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
-
-  // ===== اختصارات سريعة (محلية) =====
-  const PRESETS_KEY = 'customQuickPresetsV1';
-  const pName = document.getElementById('pName');
-  const pVal  = document.getElementById('pVal');
-  const addPresetBtn = document.getElementById('addPreset');
-  const clearPresetsBtn = document.getElementById('clearPresets');
-  const presetsEl = document.getElementById('presets');
-
-  function loadPresets(){ try{ return JSON.parse(localStorage.getItem(PRESETS_KEY))||[] }catch{ return [] } }
-  function savePresets(arr){ localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)) }
-
-  addPresetBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    const name = (pName.value||'').trim();
-    const val  = parseFloat(pVal.value||0);
-    if(!name) return alert('اكتب اسم الاختصار');
-    if(!val)  return alert('اكتب قيمة صحيحة بالدولار');
-    const arr = loadPresets();
-    const i = arr.findIndex(x=>x.name===name);
-    if(i>=0){ arr[i].value = val; } else { arr.push({name, value: val}); }
-    savePresets(arr);
-    pName.value=''; pVal.value='';
-    renderPresets();
-  });
-
-  clearPresetsBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    if(confirm('سيتم حذف جميع الاختصارات المحلية. متابعة؟')){
-      savePresets([]); renderPresets();
-    }
-  });
-
-  function renderPresets(){
-    const arr = loadPresets();
-    if(!arr.length){ presetsEl.innerHTML=''; return; }
-    presetsEl.innerHTML = arr.map(x=>(
-      `<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">
-         ${x.name}: ${x.value}
-         ${isOwner?`<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>`:''}
-       </span>`
-    )).join('');
-  }
-
-  window.fillValue = function(v){
-    usd.value = String(v);
-    calc();
-    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
-  }
-  window.delPreset = function(name){
-    if(!isOwner) return;
-    const arr = loadPresets().filter(x=>x.name!==name);
-    savePresets(arr); renderPresets();
-  }
-
   // ===== الحاسبة =====
   const usd   = document.getElementById('usd');
   const out   = document.getElementById('out');
   const formula = document.getElementById('formula');
   const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
   const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
-
-  // English numbers
   const enFmt = new Intl.NumberFormat('en-US');
 
   rateRadios.forEach((r,i)=>{
@@ -280,18 +149,12 @@
       calc();
     });
   });
-
-  // دعم تمرير قيمة من الأسعار ?value=...
-  const params = new URLSearchParams(location.search);
-  if (params.has('value')) usd.value = params.get('value');
-
   usd.addEventListener('input', calc);
 
   function getRate(){
     const r = rateRadios.find(x=>x.checked);
     return r ? parseFloat(r.value) : 0.2075;
   }
-
   function calc(){
     const v = parseFloat(usd.value || 0);
     const rate = getRate();
@@ -300,7 +163,6 @@
     const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
     formula.textContent = f;
   }
-
   function copyResult(){
     const text = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
     navigator.clipboard.writeText(text).then(()=>alert('✔ Copied'));
@@ -309,13 +171,63 @@
     const msg = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
     open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
   }
-  window.copyResult = copyResult;
-  window.shareWhatsApp = shareWhatsApp;
 
-  // تشغيل أولي
-  renderPresets();
-  updateOwnerUI();
+  // ===== دعم الروابط القادمة من الصفحات الأخرى =====
+  const params = new URLSearchParams(location.search);
+  // قيمة من الأسعار ?value=...
+  if (params.has('value')) usd.value = params.get('value');
+  // فئة من الأسعار ?rate=5 أو 10
+  if (params.has('rate')) {
+    const r = params.get('rate'); // "5" أو "10"
+    const targetVal = (r === "10") ? "0.265" : "0.2075";
+    const radio = document.querySelector(`input[name="rate"][value="${targetVal}"]`);
+    if (radio) {
+      radio.checked = true;
+      pills.forEach(p=>p.classList.remove('active'));
+      (r==="10" ? pills[1] : pills[0]).classList.add('active');
+    }
+  }
+  // كود بند HS من صفحة البنود ?hs=
+  const hsBadge = document.getElementById('hsBadge');
+  if (params.has('hs')) {
+    const hs = decodeURIComponent(params.get('hs'));
+    hsBadge.textContent = `البند: ${hs}`;
+    hsBadge.style.display = '';
+  }
+
   calc();
+
+  // ===== زر تثبيت التطبيق (PWA) =====
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+  const openAppBtn = document.getElementById('openAppBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'inline-block';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installBtn.style.display = 'none';
+      openAppBtn.style.display = 'inline-block';
+    }
+    deferredPrompt = null;
+  });
+
+  openAppBtn.addEventListener('click', ()=>{
+    // مجرد محاولة فتح التثبيت/التطبيق المثبت
+    alert('إذا كان التطبيق مُثبّتًا سيظهر من الشاشة الرئيسية.');
+  });
+
+  // تسجيل Service Worker إن وُجد الملف
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
 </script>
 </body>
 </html>
