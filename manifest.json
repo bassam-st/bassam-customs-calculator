@@ -1,15 +1,16 @@
 {
-  "id": "/",
+  "id": "/bassam-customs-calculator/",
   "name": "بسام مساعدك الجمركي",
   "short_name": "مساعدك الجمركي",
   "description": "حاسبة الرسوم الجمركية + البحث في البنود وقائمة الأسعار",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/bassam-customs-calculator/",
+  "scope": "/bassam-customs-calculator/",
   "display": "standalone",
+  "display_override": ["standalone"],
   "theme_color": "#16a34a",
   "background_color": "#ffffff",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
