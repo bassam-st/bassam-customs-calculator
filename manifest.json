@@ -1,17 +1,24 @@
 {
-  "name": "بسام الشتيمي للتخليص الجمركي",
-  "short_name": "بسام الجمركي",
-  "description": "حاسبة رسوم جمركية + بنود HS + إدارة أسعار بالدولار",
+  "name": "بسام مساعدك الجمركي",
+  "short_name": "مساعد الجمركي",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "/index.html",
-  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#16a34a",
   "background_color": "#f1f5f9",
+  "theme_color": "#16a34a",
+  "description": "تطبيق لحساب الرسوم الجمركية وإدارة الأسعار بسهولة وسرعة من بسام الشتيمي.",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
