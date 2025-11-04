@@ -1,171 +1,99 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>بسام مساعدك الجمركي</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>بسام مساعدك الجمركي</title>
 
-<!-- PWA -->
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#16a34a">
-<link rel="icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+  <meta name="theme-color" content="#16a34a" />
 
-<style>
-  :root{
-    --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
-    --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
-  .wrap{max-width:720px;margin:16px auto;padding:12px}
-  .hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:24px;padding:22px 18px;box-shadow:0 10px 30px rgba(22,163,74,.18)}
-  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .brand h1{margin:0;font-size:22px;line-height:1.35}
-  .badge{background:#fff;border:2px solid #fff;color:#064e3b;width:64px;height:64px;display:grid;place-items:center;border-radius:18px;font-weight:800}
-  .phone{margin-top:6px;opacity:.95;font-size:14px}
-  .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-  .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
-  .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
-  .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .owner small{color:var(--muted)}
-  .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
-  .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-  .btn-blue{background:var(--accent);color:#fff}
-  .btn-gray{background:#e2e8f0;color:#0f172a}
-  .owner-on{color:#065f46;font-weight:800}
-  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
-  .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
-  .chip.admin .x{display:inline}
-  label{display:block;font-weight:700;margin-bottom:6px}
-  input[type="number"], input[type="text"]{
-    width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
-    font-size:18px;background:#fff;outline:none
-  }
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
-  .rates{display:flex;flex-direction:column;gap:12px}
-  .pill{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:999px;border:2px solid #cbead9;background:#f0fdf4;cursor:pointer}
-  .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
-  .pill.active{background:#14532d;color:#fff;border-color:#14532d}
-  .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
-  .hint{font-size:13px;color:#0f5132;opacity:.9}
-  .result{border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;text-align:center}
-  .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
-  .result .mini{margin-top:8px;color:var(--muted)}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-  .btn.copy{background:#22c55e;color:#fff}
-  .btn.pdf{background:var(--accent);color:#fff}
-  .btn.wa{background:#16a34a;color:#fff}
-  @media (max-width:520px){ .row{grid-template-columns:1fr} .result .big{font-size:36px} }
-  #installBtn{position:fixed;bottom:16px;inset-inline:16px;z-index:9999;background:#16a34a;color:#fff;border:none;border-radius:14px;padding:12px 16px;font-weight:900;display:none;box-shadow:0 8px 20px rgba(22,163,74,.25)}
-  .muted{color:#64748b;font-size:12px}
-</style>
+  <style>
+    body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
+    .top{background:#16a34a;color:#fff;padding:18px 16px;border-bottom:1px solid #0e7a33}
+    .wrap{max-width:880px;margin:16px auto;padding:0 12px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:16px}
+    label{display:block;margin-top:10px;margin-bottom:6px;color:#0f172a;font-size:14px}
+    input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:15px;background:#fff}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn-blue{background:#2563eb;color:#fff}
+    .btn-green{background:#16a34a;color:#fff}
+    .btn-gray{background:#e2e8f0;color:#0f172a}
+    .btn-orange{background:#f97316;color:#fff}
+    .muted{color:#64748b;font-size:12px}
+    .pill{display:block}
+    @media print {.top,.btn{display:none}}
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Hero -->
-    <section class="hero">
-      <div class="brand">
-        <h1>بسام مساعدك الجمركي</h1>
-        <div class="badge">ب</div>
+  <div class="top">
+    <div class="wrap" style="color:#fff">
+      <h2 style="margin:0">بسام مساعدك الجمركي</h2>
+      <div class="muted" style="color:#eaf7ee">للاستفسار وخدمات التخليص: 00967771997809</div>
+      <div style="margin-top:10px">
+        <a class="btn btn-green" href="./prices.html" style="text-decoration:none">قائمة الأسعار 💲</a>
+        <a class="btn btn-gray"  href="./hs.html" style="text-decoration:none">البنود الجمركية 🔎</a>
       </div>
-      <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
-      <div class="nav">
-        <a href="./prices.html">💲 قائمة الأسعار</a>
-        <a href="./hs.html">🔍 البنود الجمركية</a>
-      </div>
-      <div class="presets" id="presets"></div>
-    </section>
-
-    <!-- شريط المالك -->
-    <section class="card">
-      <div class="owner">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="PIN" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <small id="state">الحالة: قراءة فقط</small>
-      </div>
-      <!-- إضافة اختصار سريع (اسم + قيمة) -->
-      <div id="adminForm" style="display:none;margin-top:10px">
-        <div class="owner" style="gap:10px;flex-wrap:wrap">
-          <input id="pName" placeholder="اسم اختصار… مثال: ملابس 1800$" />
-          <input id="pVal" type="number" inputmode="decimal" placeholder="قيمة بالدولار… 1800" />
-          <select id="pUnit" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px">
-            <option value="pcs">للحبة</option>
-            <option value="dz">للدرزن</option>
-            <option value="kg">للكيلو</option>
-            <option value="ton">للطن</option>
-            <option value="Ah">Ah (أمبير/ساعة)</option>
-            <option value="W">W (وات)</option>
-            <option value="ltr">للتر</option>
-          </select>
-          <button class="btn btn-blue" id="addPreset">إضافة</button>
-          <button class="btn btn-gray" id="clearPresets">تفريغ الكل</button>
-        </div>
-        <small class="owner-on">تُحفظ محليًا على جهازك.</small>
-      </div>
-    </section>
-
-    <!-- الحاسبة (مع الكمية والتعبئة التلقائية من الأسعار) -->
-    <section class="card">
-      <div class="row">
-        <div>
-          <label>اسم السلعة</label>
-          <input id="itemName" type="text" placeholder="اختياري – يُملأ تلقائيًا عند القدوم من قائمة الأسعار" />
-        </div>
-        <div>
-          <label>الوحدة</label>
-          <input id="unit" type="text" placeholder="مثال: للحبة / للطن" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div>
-          <label>السعر للوحدة (USD)</label>
-          <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15" />
-        </div>
-        <div>
-          <label>العدد الكلي</label>
-          <input id="qty" type="number" inputmode="numeric" placeholder="مثال: 100" value="1" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div>
-          <label>قيمة السلعة الإجمالية (USD)</label>
-          <input id="usd" type="number" inputmode="decimal" placeholder="يُحسب تلقائيًا = سعر × عدد" />
-          <div class="muted">يمكنك الكتابة يدويًا لو أردت.</div>
-        </div>
-        <div>
-          <label>سعر الصرف (ريال/دولار)</label>
-          <input id="fx" type="number" inputmode="decimal" placeholder="مثال: 750" value="750" />
-        </div>
-      </div>
-
-      <div class="group-title">الفئة الجمركية</div>
-      <div class="rates">
-        <label class="pill" id="pill5"><div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div><input type="radio" name="rate" value="0.2075" /></label>
-        <label class="pill" id="pill10"><div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div><input type="radio" name="rate" value="0.265" /></label>
-      </div>
-
-      <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
-      <div class="result">
-        <div class="big" id="out">0</div>
-        <div class="mini" id="formula">0 × 750 × 0 = 0</div>
-      </div>
-
-      <div class="actions">
-        <button class="btn pdf"  onclick="window.print()">طباعة / حفظ PDF</button>
-        <button class="btn copy" onclick="copyResult()">نسخ النتيجة</button>
-        <button class="btn wa"   onclick="shareWhatsApp()">مشاركة واتساب</button>
-      </div>
-    </section>
+    </div>
   </div>
 
-  <button id="installBtn">⤵️ تثبيت التطبيق</button>
+  <div class="wrap">
+    <!-- المقتطف من الخيار 1 (نفسه) -->
+    <!-- يمكنك تركه كما هو تماماً -->
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <input id="pin" type="password" placeholder="PIN" style="flex:1" />
+        <button id="unlock" class="btn btn-blue">فتح</button>
+        <button id="lock" class="btn btn-gray">قفل</button>
+        <span id="state" class="muted">الحالة: قراءة فقط</span>
+      </div>
 
-<script src="./main.js"></script>
+      <label>اسم السلعة</label>
+      <input id="itemName" placeholder="اختياري — يُملأ تلقائيًا عند القدوم من قائمة الأسعار">
+
+      <label style="margin-top:10px">الوحدة</label>
+      <input id="unitTxt" placeholder="مثال: للحبة / للطن">
+
+      <label style="margin-top:10px">السعر للوحدة (USD)</label>
+      <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15" />
+
+      <label style="margin-top:10px">العدد الكلي</label>
+      <input id="qty" type="number" inputmode="numeric" value="1" />
+
+      <label style="margin-top:10px">قيمة السلعة الإجمالية (USD)</label>
+      <input id="usd" placeholder="يُحسب تلقائيًا = سعر × عدد — ويمكنك الكتابة يدويًا لو أردت.">
+
+      <label style="margin-top:10px">سعر الصرف (ريال/دولار)</label>
+      <input id="fx" type="number" inputmode="decimal" value="750" />
+
+      <div style="margin:14px 0 6px">الفئة الجمركية</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label class="pill" style="display:block;padding:12px;border-radius:12px;background:#0f5132;color:#fff">
+          <input type="radio" name="rate" value="0.2075" data-percent="5" checked style="margin-inline-end:8px" />
+          5% (فئة خمسة بالمئة)
+        </label>
+        <label class="pill" style="display:block;padding:12px;border-radius:12px;background:#eaf7ee">
+          <input type="radio" name="rate" value="0.2506" data-percent="10" style="margin-inline-end:8px" />
+          10% (فئة عشرة بالمئة)
+        </label>
+      </div>
+
+      <h3 style="margin:16px 0 8px">الرسوم الجمركية (ريال يمني)</h3>
+      <div style="border:1px dashed #cbd5e1;border-radius:12px;padding:16px;text-align:center">
+        <div id="out" style="font-size:46px;font-weight:800;line-height:1">0</div>
+        <div id="formula" class="muted" style="margin-top:8px">0 = 0.2075 × 750 × 0</div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn btn-gray" onclick="navigator.clipboard.writeText('الرسوم الجمركية: '+document.getElementById('out').textContent+' ريال يمني')">نسخ النتيجة</button>
+        <button class="btn btn-blue" id="printBtn" onclick="window.print()">طباعة / حفظ PDF</button>
+        <button class="btn btn-green" onclick="open('https://wa.me/?text='+encodeURIComponent('الرسوم الجمركية: '+document.getElementById('out').textContent+' ريال يمني'),'_blank')">مشاركة واتساب</button>
+        <button id="installBtn" class="btn btn-orange" style="display:none">تثبيت التطبيق</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
 </body>
 </html>
