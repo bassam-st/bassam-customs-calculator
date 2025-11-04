@@ -27,6 +27,11 @@
   @media(max-width:640px){.row{grid-template-columns:1fr}}
   .owner-bar{display:flex;gap:8px;align-items:center}
   .owner-hint{font-size:12px;color:#475569}
+
+  /* حوار الكمية */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:9999}
+  .modal .sheet{background:#fff;border-radius:14px;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:16px;max-width:360px;width:92%}
+  .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style>
 </head>
 <body>
@@ -103,6 +108,20 @@
     </div>
   </div>
 
+  <!-- نافذة إدخال الكمية قبل التحويل للحاسبة -->
+  <div class="modal" id="qtyModal">
+    <div class="sheet">
+      <h3 style="margin-top:0">تحديد الكمية</h3>
+      <div class="muted" id="mItem" style="margin:6px 0 10px"></div>
+      <label>الكمية</label>
+      <input id="qtyInput" type="number" inputmode="decimal" placeholder="مثال: 12" value="1" />
+      <div class="row2" style="margin-top:12px">
+        <button class="btn btn-gray" id="mCancel">إلغاء</button>
+        <button class="btn btn-green" id="mOk">متابعة</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   const ADMIN_PIN = "bassam1234";
   let isOwner = false;
@@ -153,12 +172,50 @@
     return Array.from(m.values());
   }
 
-  function unitLabel(u){ return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='Ah'?'Ah':'W'===u?'W':u==='ltr'?'للتر':u; }
+  function unitLabel(u){
+    return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='Ah'?'Ah/أمبير':u==='W'?'W/وات':u==='ltr'?'للتر':u;
+  }
+
+  // ——— نافذة الكمية ———
+  const modal = document.getElementById('qtyModal');
+  const mItem = document.getElementById('mItem');
+  const qtyInput = document.getElementById('qtyInput');
+  const mCancel = document.getElementById('mCancel');
+  const mOk = document.getElementById('mOk');
+
+  let pendingItem = null; // {name, price, unit, ratePercent}
+
+  function openQtyModal(item){
+    pendingItem = item;
+    mItem.textContent = `${item.name} • ${item.price}$ • ${unitLabel(item.unit)} • فئة ${item.ratePercent}%`;
+    qtyInput.value = '1';
+    modal.style.display = 'flex';
+    qtyInput.focus();
+  }
+  function closeQtyModal(){
+    modal.style.display = 'none';
+    pendingItem = null;
+  }
+  mCancel.addEventListener('click', closeQtyModal);
+  mOk.addEventListener('click', ()=>{
+    if(!pendingItem) return closeQtyModal();
+    const qty = Math.max(1, parseFloat(qtyInput.value||1));
+    const total = pendingItem.price * qty;
+    const params = new URLSearchParams({
+      name: pendingItem.name,
+      price: total,            // المبلغ الإجمالي (السعر × الكمية)
+      unit: pendingItem.unit,
+      qty: String(qty),
+      rate: String(pendingItem.ratePercent) // 5 أو 10
+    });
+    location.href = './index.html?' + params.toString();
+  });
 
   function render(){
     const arr=merged();
     const s=(q.value||'').trim();
-    const filtered = s ? arr.filter(x=> (x.name||'').includes(s)) : arr;
+    const needle = s.toLowerCase();
+    const filtered = needle ? arr.filter(x=> (x.name||'').toLowerCase().includes(needle)) : arr;
     if(!filtered.length){ list.innerHTML='<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
     list.innerHTML = filtered.map(x=>`
       <div class="item">
@@ -167,7 +224,7 @@
           <div class="muted">${x.price} USD ${x.notes?(' • '+x.notes):''}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-green" onclick="useInCalc(${JSON.stringify(x.name)}, ${x.price}, '${x.unit||''}', '${(x.rate||'').replace('%','')}')">استخدام السعر</button>
+          <button class="btn btn-green" onclick='useInCalc(${JSON.stringify(x.name)}, ${x.price}, ${JSON.stringify(x.unit||"")}, ${JSON.stringify((x.rate||"").replace("%",""))})'>استخدام السعر</button>
           ${isOwner?`<button class="btn btn-orange" onclick='editItem(${JSON.stringify(x)})'>تعديل</button>
                      <button class="btn btn-red" onclick='delItem(${JSON.stringify(x.name)})'>حذف</button>`:''}
         </div>
@@ -175,13 +232,9 @@
     `).join('');
   }
 
+  // كان سابقًا يذهب مباشرة — الآن يفتح نافذة الكمية
   window.useInCalc = function(name, price, unit, ratePercent){
-    const params = new URLSearchParams({
-      name, price, unit,
-      qty: '1',
-      rate: String(ratePercent) // 5 أو 10
-    });
-    location.href = './index.html?' + params.toString();
+    openQtyModal({name, price, unit, ratePercent});
   }
 
   window.editItem = function(rec){
@@ -207,7 +260,7 @@
     saveLocal(arr);
   }
 
-  saveBtn.addEventListener('click', ()=>{
+  document.getElementById('saveBtn').addEventListener('click', ()=>{
     if(!isOwner) return alert('للمالك فقط');
     const rec = {
       name:(nameEl.value||'').trim(),
@@ -217,14 +270,17 @@
       notes: (notesEl.value||'').trim()
     };
     if(!rec.name || !rec.price){ alert('أكمل الاسم والسعر'); return; }
-    upsert(rec); msg.style.display='inline'; setTimeout(()=>msg.style.display='none',1200); render();
+    upsert(rec); document.getElementById('msg').style.display='inline';
+    setTimeout(()=>document.getElementById('msg').style.display='none',1200); render();
   });
 
-  clearBtn.addEventListener('click', ()=>{ nameEl.value=''; priceEl.value=''; unitEl.value='pcs'; rateSel.value='5%'; notesEl.value=''; });
+  document.getElementById('clearBtn').addEventListener('click', ()=>{
+    nameEl.value=''; priceEl.value=''; unitEl.value='pcs'; rateSel.value='5%'; notesEl.value='';
+  });
 
   q.addEventListener('input', render);
 
-  exportBtn.addEventListener('click', ()=>{
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
     if(!isOwner) return alert('للمالك فقط');
     const data = JSON.stringify(merged(), null, 2);
     const blob = new Blob([data], {type:'application/json'});
@@ -233,10 +289,10 @@
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),500);
   });
 
-  importBtn.addEventListener('click', ()=>{ if(!isOwner) return alert('للمالك فقط'); importFile.click(); });
-  importFile.addEventListener('change', async ()=>{
+  document.getElementById('importBtn').addEventListener('click', ()=>{ if(!isOwner) return alert('للمالك فقط'); document.getElementById('importFile').click(); });
+  document.getElementById('importFile').addEventListener('change', async ()=>{
     if(!isOwner) return;
-    const f=importFile.files[0]; if(!f) return;
+    const f=document.getElementById('importFile').files[0]; if(!f) return;
     try{
       const text=await f.text(); const arr=JSON.parse(text);
       const cleaned=arr.filter(x=>x&&typeof x==='object').map(x=>({
@@ -248,7 +304,7 @@
       })).filter(x=>x.name && x.price>0);
       saveLocal(cleaned); render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
     }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
-    finally{ importFile.value=''; }
+    finally{ document.getElementById('importFile').value=''; }
   });
 
   (async function init(){
