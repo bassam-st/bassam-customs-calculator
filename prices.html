@@ -59,8 +59,8 @@
 
     <!-- نموذج إضافة/تعديل -->
     <div class="owner" style="gap:8px;margin-top:10px;display:none" id="formRow">
-      <input id="fName" placeholder="اسم السلعة">
-      <input id="fPrice" type="number" inputmode="decimal" placeholder="السعر بالدولار">
+      <input id="fName" placeholder="اسم السلعة" />
+      <input id="fPrice" type="number" inputmode="decimal" placeholder="السعر بالدولار" />
       <select id="fUnit">
         <option value="ton">الطن</option>
         <option value="kg">الكيلو</option>
@@ -69,8 +69,17 @@
         <option value="ltr">اللتر</option>
         <option value="Ah">Ah/أمبير</option>
         <option value="W">W/واط</option>
+        <!-- وحدات إضافية مطلوبة -->
+        <option value="yd">الياردة</option>
+        <option value="pair">الزوج</option>
+        <option value="bbl">البرميل</option>
+        <option value="m2">المتر المربع</option>
+        <option value="m3">المتر المكعب</option>
+        <option value="mg">مليجرام</option>
+        <option value="g">جرام</option>
+        <option value="roll">اللفة</option>
       </select>
-      <input id="fNotes" style="min-width:180px" placeholder="ملاحظات (مثال: الفئة5%)">
+      <input id="fNotes" style="min-width:180px" placeholder="ملاحظات (مثال: الفئة5%)" />
       <button class="btn btn-blue" id="saveBtn">حفظ/تحديث</button>
       <button class="btn btn-gray" id="clearBtn">تفريغ النموذج</button>
     </div>
@@ -96,30 +105,22 @@
 <script>
 /* ===== إعدادات عامة ===== */
 const ADMIN_PIN = "bassam1234";
-const STORAGE_KEY = 'prices_catalog_v3';   // التخزين المحلي
+const STORAGE_KEY = 'prices_catalog_v3';
 const REMOTE_JSON = '/assets/prices_catalog.json';
 
 let isOwner = false;
-let items = [];       // المصدر المعروض
-let editIndex = -1;   // مؤشر العنصر أثناء التعديل
+let items = [];
+let editIndex = -1;
 
-/* ===== أدوات DOM ===== */
+/* ===== DOM ===== */
 const $ = id => document.getElementById(id);
-const pin = $('pin'), unlock=$('unlock'), lock=$('lock'), state=$('state');
+const pin = $('pin'), unlock=$('unlock'), lockBtn=$('lock'), state=$('state');
 const formRow = $('formRow'), fName=$('fName'), fPrice=$('fPrice'), fUnit=$('fUnit'), fNotes=$('fNotes');
 const saveBtn=$('saveBtn'), clearBtn=$('clearBtn');
 const list=$('list'), q=$('q');
 const exportBtn=$('exportBtn'), importBtn=$('importBtn'), importFile=$('importFile');
 
-/* ===== وظائف مساعدة ===== */
-function normalize(rec){
-  // قبول مفاتيح عربية/إنجليزية
-  const name  = rec.name || rec['الاسم'] || rec['اسم'] || rec['item'] || '';
-  const price = rec.price ?? rec['السعر'] ?? rec['price_usd'] ?? rec['usd'] ?? rec['قيمة'] ?? null;
-  const unit  = rec.unit  || rec['الوحدة'] || rec['وحدة'] || rec['الوحده'] || 'pcs';
-  const notes = rec.notes || rec['ملحوظات'] || rec['ملاحظات'] || '';
-  return { name: String(name).trim(), price: Number(price), unit: unitMap(unit), notes: String(notes).trim() };
-}
+/* ===== وحدات ===== */
 function unitMap(u){
   const s = String(u||'').toLowerCase();
   if (s.includes('طن') || s === 'ton') return 'ton';
@@ -127,7 +128,15 @@ function unitMap(u){
   if (s.includes('dz') || s.includes('درزن')) return 'dz';
   if (s.includes('لتر') || s === 'ltr') return 'ltr';
   if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
-  if (s.includes('w') || s.includes('واط')) return 'W';
+  if (s.startsWith('w') || s.includes('واط')) return 'W';
+  if (s === 'yd' || s.includes('يارد') || s.includes('ياردة')) return 'yd';
+  if (s === 'pair' || s.includes('زوج')) return 'pair';
+  if (s === 'bbl' || s.includes('برميل')) return 'bbl';
+  if (s === 'm2' || s.includes('متر مربع')) return 'm2';
+  if (s === 'm3' || s.includes('متر مكعب')) return 'm3';
+  if (s === 'mg' || s.includes('مليجرام')) return 'mg';
+  if (s === 'g'  || s.includes('جرام')) return 'g';
+  if (s === 'roll' || s.includes('لفة') || s.includes('لفه')) return 'roll';
   return 'pcs';
 }
 function unitLabel(u){
@@ -139,21 +148,37 @@ function unitLabel(u){
     case 'ltr': return 'اللتر';
     case 'Ah' : return 'Ah/أمبير';
     case 'W'  : return 'W/واط';
+    case 'yd' : return 'الياردة';
+    case 'pair': return 'الزوج';
+    case 'bbl': return 'البرميل';
+    case 'm2' : return 'المتر المربع';
+    case 'm3' : return 'المتر المكعب';
+    case 'mg' : return 'مليجرام';
+    case 'g'  : return 'جرام';
+    case 'roll': return 'اللفة';
     default   : return u;
   }
 }
+
+/* ===== معدل الفئة من الملاحظات ===== */
 function parseRateFromNotes(notes){
   const s = String(notes||'').replace(/\s+/g,'');
-  // نبحث عن 5% أو 10% بأي ترتيب
-  if (/%?10/.test(s) || /10%/.test(s) || /الفئة10%/.test(s)) return {pct:10, value:0.265, cls:'rate10'};
-  if (/%?5/.test(s) || /5%/.test(s) || /الفئة5%/.test(s))   return {pct:5,  value:0.2075, cls:'rate5'};
-  // افتراضي 10%
+  if (/الفئة?10%|10%/.test(s)) return {pct:10, value:0.265, cls:'rate10'};
+  if (/الفئة?5%|5%/.test(s))  return {pct:5,  value:0.2075, cls:'rate5'};
   return {pct:10, value:0.265, cls:'rate10'};
+}
+
+/* ===== IO محلي/ريموت ===== */
+function normalize(rec){
+  const name  = rec.name || rec['الاسم'] || rec['اسم'] || '';
+  const price = rec.price ?? rec['السعر'] ?? null;
+  const unit  = rec.unit  || rec['الوحدة'] || rec['وحدة'] || 'pcs';
+  const notes = rec.notes || rec['ملحوظات'] || rec['ملاحظات'] || '';
+  return { name: String(name).trim(), price: Number(price), unit: unitMap(unit), notes: String(notes).trim() };
 }
 function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
 function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[] }catch{ return [] } }
 
-/* ===== تحميل البيانات (دمج الريموت + المحلي) ===== */
 async function boot(){
   let remote = [];
   try{
@@ -162,62 +187,57 @@ async function boot(){
       const raw = await r.json();
       remote = Array.isArray(raw) ? raw.map(normalize) : [];
     }
-  }catch(e){ /* يتوفر المحلي على الأقل */ }
-
+  }catch(e){}
   const local = loadLocal().map(normalize);
-  // ندمج بالاسم (المحلّي يغلب)
   const map = new Map();
-  remote.forEach(x=>{ if(x.name) map.set(x.name, x); });
-  local.forEach(x=>{ if(x.name) map.set(x.name, x); });
+  remote.forEach(x=>{ if(x.name) map.set(x.name,x); });
+  local.forEach(x=>{ if(x.name) map.set(x.name,x); });
   items = Array.from(map.values());
   render();
 }
 
-/* ===== عرض القائمة ===== */
+/* ===== عرض ===== */
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
 function render(){
   const term = (q.value||'').trim();
   const re = term ? new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i') : null;
 
-  const rows = items
-    .map((it,i)=>{
-      if (re && !re.test(it.name)) return null;
-      const rate = parseRateFromNotes(it.notes);
-      return `
-        <div class="item">
-          <div class="head">
-            <div class="name">${escapeHtml(it.name)}</div>
-            <div class="badges">
-              <span class="badge unit">${unitLabel(it.unit)}</span>
-              <span class="badge ${rate.cls}">%${rate.pct} الفئة</span>
-            </div>
+  const rows = items.map((it,i)=>{
+    if (re && !re.test(it.name)) return null;
+    const rate = parseRateFromNotes(it.notes);
+    return `
+      <div class="item">
+        <div class="head">
+          <div class="name">${escapeHtml(it.name)}</div>
+          <div class="badges">
+            <span class="badge unit">${unitLabel(it.unit)}</span>
+            <span class="badge ${rate.cls}">%${rate.pct} الفئة</span>
           </div>
-          <div class="price">USD ${it.price ?? ''}</div>
-          ${it.notes ? `<div class="muted">${escapeHtml(it.notes)}</div>`:''}
-          <div class="actions">
-            <button class="btn btn-green" onclick="usePrice(${i})">استخدام السعر</button>
-            <button class="btn btn-orange" onclick="editItem(${i})">تعديل</button>
-            <button class="btn btn-red" onclick="deleteItem(${i})">حذف</button>
-          </div>
-        </div>`;
-    })
-    .filter(Boolean)
-    .join('');
+        </div>
+        <div class="price">USD ${it.price ?? ''}</div>
+        ${it.notes ? `<div class="muted">${escapeHtml(it.notes)}</div>`:''}
+        <div class="actions">
+          <button class="btn btn-green" onclick="usePrice(${i})">استخدام السعر</button>
+          <button class="btn btn-orange" onclick="editItem(${i})">تعديل</button>
+          <button class="btn btn-red" onclick="deleteItem(${i})">حذف</button>
+        </div>
+      </div>`;
+  }).filter(Boolean).join('');
 
   list.innerHTML = rows || '<div class="muted">لا توجد عناصر مطابقة.</div>';
 }
 
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-/* ===== استخدام السعر (الانتقال للحاسبة وتمرير الفئة) ===== */
+/* ===== استخدام السعر → الحاسبة ===== */
 window.usePrice = function(idx){
-  const it = items[idx];
-  if (!it) return;
-  const rate = parseRateFromNotes(it.notes).value; // 0.2075 أو 0.265
-  // ممررًا للصفحة الرئيسية — index.html يدعم ?price و ?rate
-  location.href = `./index.html?price=${encodeURIComponent(it.price)}&rate=${encodeURIComponent(rate)}`;
+  const it = items[idx]; if(!it) return;
+  const rate = parseRateFromNotes(it.notes);         // {pct, value}
+  const qty = 1;                                     // يمكن تعديلها لاحقًا لإرسال كمية
+  const url = `./index.html?price=${encodeURIComponent(it.price)}&qty=${qty}&ratePct=${rate.pct}`;
+  location.href = url;
 };
 
-/* ===== تعديل / حذف ===== */
+/* ===== تعديل/حذف ===== */
 window.editItem = function(idx){
   if(!isOwner) return alert('هذا الإجراء للمالك فقط');
   const it = items[idx]; if(!it) return;
@@ -228,7 +248,6 @@ window.editItem = function(idx){
   fNotes.value = it.notes || '';
   formRow.scrollIntoView({behavior:'smooth', block:'center'});
 };
-
 window.deleteItem = function(idx){
   if(!isOwner) return alert('هذا الإجراء للمالك فقط');
   const it = items[idx]; if(!it) return;
@@ -238,34 +257,25 @@ window.deleteItem = function(idx){
   }
 };
 
-/* ===== حفظ / تفريغ ===== */
+/* ===== حفظ/تفريغ ===== */
 saveBtn.addEventListener('click', ()=>{
   if(!isOwner) return alert('هذا الإجراء للمالك فقط');
   const rec = normalize({name:fName.value, price:fPrice.value, unit:fUnit.value, notes:fNotes.value});
   if(!rec.name) return alert('اكتب اسم السلعة');
   if(!(rec.price>0)) return alert('اكتب سعرًا صحيحًا بالدولار');
 
-  if(editIndex>=0){
-    items[editIndex] = rec;
-    editIndex = -1;
-  }else{
-    // إن كان موجود بالاسم نستبدله
+  if(editIndex>=0){ items[editIndex] = rec; editIndex=-1; }
+  else{
     const i = items.findIndex(x=>x.name===rec.name);
-    if(i>=0) items[i] = rec;
-    else items.push(rec);
+    if(i>=0) items[i] = rec; else items.push(rec);
   }
   saveLocal(); render();
   fName.value=''; fPrice.value=''; fNotes.value='';
 });
+clearBtn.addEventListener('click', ()=>{ editIndex=-1; fName.value=''; fPrice.value=''; fNotes.value=''; });
 
-clearBtn.addEventListener('click', ()=>{
-  editIndex=-1; fName.value=''; fPrice.value=''; fNotes.value='';
-});
-
-/* ===== بحث حي ===== */
+/* ===== بحث/استيراد/تصدير ===== */
 q.addEventListener('input', render);
-
-/* ===== استيراد/تصدير ===== */
 exportBtn.addEventListener('click', ()=>{
   const blob = new Blob([JSON.stringify(items, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -285,7 +295,7 @@ importFile.addEventListener('change', async (e)=>{
   importFile.value = '';
 });
 
-/* ===== فتح/قفل وضع المالك ===== */
+/* ===== فتح/قفل ===== */
 function updateOwnerUI(){
   state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
   formRow.style.display = isOwner ? '' : 'none';
@@ -294,7 +304,7 @@ unlock.addEventListener('click', ()=>{
   if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
   else alert('❌ رمز غير صحيح');
 });
-lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
+lockBtn.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
 
 /* ===== بدء التشغيل ===== */
 updateOwnerUI();
