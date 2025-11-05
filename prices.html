@@ -3,321 +3,302 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>بسام مساعدك الجمركي</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
+  <title>قائمة الأسعار — بسام مساعدك الجمركي</title>
   <meta name="theme-color" content="#16a34a">
   <link rel="icon" href="/icons/icon-192.png">
-
   <style>
-    :root{
-      --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
-      --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
-    .wrap{max-width:720px;margin:16px auto;padding:12px}
-
-    /* Hero */
-    .hero{
-      background:linear-gradient(135deg,var(--green),var(--green2));
-      color:#fff;border-radius:24px;padding:22px 18px;position:relative;
-      box-shadow:0 10px 30px rgba(22,163,74,.18);
-    }
-    .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand h1{margin:0;font-size:22px;line-height:1.35}
-    .badge{
-      background:#fff;border:2px solid #fff;color:#064e3b;
-      width:64px;height:64px;display:grid;place-items:center;border-radius:18px;
-      font-weight:800;font-size:22px
-    }
-    .phone{margin-top:6px;opacity:.95;font-size:14px}
-    .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+    :root{--green:#16a34a;--green2:#22c55e;--ink:#0f172a;--muted:#64748b;--card:#fff;--bg:#f1f5f9;--accent:#2563eb;--danger:#ef4444;--orange:#f97316}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
+    .wrap{max-width:760px;margin:16px auto;padding:12px}
+    .hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:24px;padding:18px;box-shadow:0 10px 30px rgba(22,163,74,.18)}
+    .hero h1{margin:0 0 6px 0;font-size:22px}
+    .nav{display:flex;gap:8px;flex-wrap:wrap}
     .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
-
-    /* Owner bar */
-    .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
-          box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
+    .card{background:var(--card);border-radius:18px;padding:14px;margin-top:14px;border:1px solid #e5e7eb;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .owner small{color:var(--muted)}
-    .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
     .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-    .btn-blue{background:var(--accent);color:#fff}
-    .btn-gray{background:#e2e8f0;color:#0f172a}
-    .owner-on{color:#065f46;font-weight:800}
-
-    /* Quick presets */
-    .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
-    .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
-    .chip.admin .x{display:inline}
-
-    /* Calculator */
-    label{display:block;font-weight:700;margin-bottom:6px}
-    input[type="number"]{
-      width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
-      font-size:18px;background:#fff;outline:none
-    }
-    .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
-    .rates{display:flex;flex-direction:column;gap:12px}
-    .pill{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:14px;border-radius:999px;border:2px solid #cbead9;
-      background:#f0fdf4;cursor:pointer
-    }
-    .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
-    .pill.active{background:#14532d;color:#fff;border-color:#14532d}
-    .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
-    .hint{font-size:13px;color:#0f5132;opacity:.9}
-    .result{
-      border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;
-      text-align:center
-    }
-    .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
-    .result .mini{margin-top:8px;color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-    .btn.copy{background:#22c55e;color:#fff}
-    .btn.pdf{background:var(--accent);color:#fff}
-    .btn.wa{background:#16a34a;color:#fff}
-    @media (max-width:420px){ .result .big{font-size:36px} }
-
-    /* PWA install button */
-    #installBtn{
-      position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
-      background:#16a34a; color:#fff; border:none; border-radius:14px;
-      padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
-    }
+    .btn-blue{background:var(--accent);color:#fff} .btn-gray{background:#e2e8f0;color:#0f172a}
+    .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:var(--orange);color:#fff}
+    .owner input, .owner select{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+    .state{color:#065f46;font-weight:800}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .search{width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px}
+    .item{border-top:1px dashed #e5e7eb;padding:12px 0}
+    .head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+    .name{font-weight:900}
+    .badges{display:flex;gap:6px;flex-wrap:wrap}
+    .badge{background:#eef2ff;color:#334155;border:1px solid #c7d2fe;padding:4px 8px;border-radius:999px;font-size:12px}
+    .badge.unit{background:#e2e8f0;border-color:#cbd5e1}
+    .badge.rate5{background:#dcfce7;border-color:#bbf7d0;color:#166534}
+    .badge.rate10{background:#fee2e2;border-color:#fecaca;color:#7f1d1d}
+    .price{color:#0f172a;opacity:.9;font-size:13px;margin-top:4px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .muted{color:#64748b;font-size:12px;margin-top:4px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- رأس الصفحة -->
-    <section class="hero">
-      <div class="brand">
-        <h1>بسام مساعدك الجمركي</h1>
-        <div class="badge">💼</div>
-      </div>
-      <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
-      <div class="nav">
-        <a href="./prices.html">💲 قائمة الأسعار</a>
-        <a href="./hs.html">🔍 البنود الجمركية</a>
-      </div>
-      <!-- اختصارات سريعة (تظهر للجميع؛ الحذف للمالك فقط) -->
-      <div class="presets" id="presets"></div>
-    </section>
+<div class="wrap">
 
-    <!-- شريط الإدارة -->
-    <section class="card">
-      <div class="owner">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="PIN" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <small id="state">الحالة: قراءة فقط</small>
-      </div>
+  <section class="hero">
+    <h1>💲 قائمة الأسعار</h1>
+    <div class="nav">
+      <a href="./index.html">🏠 الحاسبة</a>
+      <a href="./hs.html">🔍 البنود الجمركية</a>
+    </div>
+  </section>
 
-      <!-- نموذج إضافة اختصار يدوي (يظهر بعد الفتح) -->
-      <div id="adminForm" style="display:none;margin-top:10px">
-        <div class="owner" style="gap:10px">
-          <input id="pName" placeholder="اسم اختصار… مثال: رسوم فلاتر" />
-          <input id="pVal" type="number" inputmode="decimal" placeholder="قيمة بالدولار… 2000" />
-          <button class="btn btn-blue" id="addPreset">إضافة</button>
-          <button class="btn btn-gray" id="clearPresets">تفريغ الكل</button>
-        </div>
-        <small class="owner-on">الاختصارات تُحفظ محليًا في المتصفح ويمكنك تعديلها أو حذفها لاحقًا.</small>
-      </div>
-    </section>
+  <!-- شريط المالك -->
+  <section class="card">
+    <div class="owner">
+      <span>🔒 وضع المالك:</span>
+      <input id="pin" type="password" placeholder="PIN">
+      <button class="btn btn-blue" id="unlock">فتح</button>
+      <button class="btn btn-gray" id="lock">قفل</button>
+      <span class="state" id="state">الحالة: قراءة فقط</span>
+    </div>
 
-    <!-- الحاسبة -->
-    <section class="card">
-      <label for="usd">قيمة السلعة (بالدولار USD)</label>
-      <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
+    <!-- نموذج إضافة/تعديل -->
+    <div class="owner" style="gap:8px;margin-top:10px;display:none" id="formRow">
+      <input id="fName" placeholder="اسم السلعة">
+      <input id="fPrice" type="number" inputmode="decimal" placeholder="السعر بالدولار">
+      <select id="fUnit">
+        <option value="ton">الطن</option>
+        <option value="kg">الكيلو</option>
+        <option value="dz">الدُزْن</option>
+        <option value="pcs">الحبة</option>
+        <option value="ltr">اللتر</option>
+        <option value="Ah">Ah/أمبير</option>
+        <option value="W">W/واط</option>
+      </select>
+      <input id="fNotes" style="min-width:180px" placeholder="ملاحظات (مثال: الفئة5%)">
+      <button class="btn btn-blue" id="saveBtn">حفظ/تحديث</button>
+      <button class="btn btn-gray" id="clearBtn">تفريغ النموذج</button>
+    </div>
+    <div class="muted">💡 لالتقاط الفئة تلقائيًا اكتب في الملاحظات: <b>الفئة5%</b> أو <b>الفئة10%</b>.</div>
+  </section>
 
-      <div class="group-title">اختر الفئة الجمركية</div>
-      <div class="rates">
-        <label class="pill" id="pill5">
-          <div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div>
-          <input type="radio" name="rate" value="0.2075" />
-        </label>
-        <label class="pill active" id="pill10">
-          <div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div>
-          <input type="radio" name="rate" value="0.265" checked />
-        </label>
-      </div>
+  <!-- أدوات -->
+  <section class="card">
+    <input id="q" class="search" placeholder="ابحث بالاسم… مثال: بطاريات، شبك، ملابس">
+    <div class="toolbar">
+      <button class="btn btn-gray" id="exportBtn">تصدير JSON</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
+      <small class="muted">المصدر الأساسي: <code>assets/prices_catalog.json</code> (مع دمج المحلي).</small>
+    </div>
+  </section>
 
-      <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
-      <div class="result">
-        <div class="big" id="out">0</div>
-        <div class="mini" id="formula">0 × 750 × 0 = 0</div>
-      </div>
+  <!-- القائمة -->
+  <section class="card" id="list"></section>
 
-      <div class="actions">
-        <button class="btn pdf"  onclick="window.print()">طباعة / حفظ PDF</button>
-        <button class="btn copy" onclick="copyResult()">نسخ النتيجة</button>
-        <button class="btn wa"   onclick="shareWhatsApp()">مشاركة واتساب</button>
-      </div>
-    </section>
-  </div>
-
-  <!-- زر تثبيت التطبيق (يظهر تلقائياً عند توافر حدث التثبيت) -->
-  <button id="installBtn">⤵️ تثبيت التطبيق</button>
+</div>
 
 <script>
-  /* ===== PWA: Service Worker ===== */
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(console.error);
+/* ===== إعدادات عامة ===== */
+const ADMIN_PIN = "bassam1234";
+const STORAGE_KEY = 'prices_catalog_v3';   // التخزين المحلي
+const REMOTE_JSON = '/assets/prices_catalog.json';
+
+let isOwner = false;
+let items = [];       // المصدر المعروض
+let editIndex = -1;   // مؤشر العنصر أثناء التعديل
+
+/* ===== أدوات DOM ===== */
+const $ = id => document.getElementById(id);
+const pin = $('pin'), unlock=$('unlock'), lock=$('lock'), state=$('state');
+const formRow = $('formRow'), fName=$('fName'), fPrice=$('fPrice'), fUnit=$('fUnit'), fNotes=$('fNotes');
+const saveBtn=$('saveBtn'), clearBtn=$('clearBtn');
+const list=$('list'), q=$('q');
+const exportBtn=$('exportBtn'), importBtn=$('importBtn'), importFile=$('importFile');
+
+/* ===== وظائف مساعدة ===== */
+function normalize(rec){
+  // قبول مفاتيح عربية/إنجليزية
+  const name  = rec.name || rec['الاسم'] || rec['اسم'] || rec['item'] || '';
+  const price = rec.price ?? rec['السعر'] ?? rec['price_usd'] ?? rec['usd'] ?? rec['قيمة'] ?? null;
+  const unit  = rec.unit  || rec['الوحدة'] || rec['وحدة'] || rec['الوحده'] || 'pcs';
+  const notes = rec.notes || rec['ملحوظات'] || rec['ملاحظات'] || '';
+  return { name: String(name).trim(), price: Number(price), unit: unitMap(unit), notes: String(notes).trim() };
+}
+function unitMap(u){
+  const s = String(u||'').toLowerCase();
+  if (s.includes('طن') || s === 'ton') return 'ton';
+  if (s.includes('كجم') || s.includes('كيلو') || s === 'kg') return 'kg';
+  if (s.includes('dz') || s.includes('درزن')) return 'dz';
+  if (s.includes('لتر') || s === 'ltr') return 'ltr';
+  if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
+  if (s.includes('w') || s.includes('واط')) return 'W';
+  return 'pcs';
+}
+function unitLabel(u){
+  switch(u){
+    case 'ton': return 'الطن';
+    case 'kg' : return 'الكيلو';
+    case 'dz' : return 'الدُزْن';
+    case 'pcs': return 'الحبة';
+    case 'ltr': return 'اللتر';
+    case 'Ah' : return 'Ah/أمبير';
+    case 'W'  : return 'W/واط';
+    default   : return u;
   }
+}
+function parseRateFromNotes(notes){
+  const s = String(notes||'').replace(/\s+/g,'');
+  // نبحث عن 5% أو 10% بأي ترتيب
+  if (/%?10/.test(s) || /10%/.test(s) || /الفئة10%/.test(s)) return {pct:10, value:0.265, cls:'rate10'};
+  if (/%?5/.test(s) || /5%/.test(s) || /الفئة5%/.test(s))   return {pct:5,  value:0.2075, cls:'rate5'};
+  // افتراضي 10%
+  return {pct:10, value:0.265, cls:'rate10'};
+}
+function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||[] }catch{ return [] } }
 
-  /* ===== PWA: زر التثبيت ===== */
-  let deferredPrompt = null;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    installBtn.style.display = 'none';
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  });
-
-  /* ===== إعدادات الإدارة / الاختصارات ===== */
-  const ADMIN_PIN = "bassam1234";
-  let isOwner = false;
-
-  const pin   = document.getElementById('pin');
-  const unlock= document.getElementById('unlock');
-  const lock  = document.getElementById('lock');
-  const state = document.getElementById('state');
-  const adminForm = document.getElementById('adminForm');
-
-  function updateOwnerUI(){
-    state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-    adminForm.style.display = isOwner ? '' : 'none';
-    renderPresets();
-  }
-  unlock.addEventListener('click', ()=>{
-    if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
-    else alert('❌ رمز غير صحيح');
-  });
-  lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
-
-  const PRESETS_KEY = 'customQuickPresetsV1';
-  const pName = document.getElementById('pName');
-  const pVal  = document.getElementById('pVal');
-  const addPresetBtn = document.getElementById('addPreset');
-  const clearPresetsBtn = document.getElementById('clearPresets');
-  const presetsEl = document.getElementById('presets');
-
-  function loadPresets(){ try{ return JSON.parse(localStorage.getItem(PRESETS_KEY))||[] }catch{ return [] } }
-  function savePresets(arr){ localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)) }
-
-  addPresetBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    const name = (pName.value||'').trim();
-    const val  = parseFloat(pVal.value||0);
-    if(!name) return alert('اكتب اسم الاختصار');
-    if(!val)  return alert('اكتب قيمة صحيحة بالدولار');
-    const arr = loadPresets();
-    const i = arr.findIndex(x=>x.name===name);
-    if(i>=0){ arr[i].value = val; } else { arr.push({name, value: val}); }
-    savePresets(arr);
-    pName.value=''; pVal.value='';
-    renderPresets();
-  });
-
-  clearPresetsBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    if(confirm('سيتم حذف جميع الاختصارات المحلية. متابعة؟')){
-      savePresets([]); renderPresets();
+/* ===== تحميل البيانات (دمج الريموت + المحلي) ===== */
+async function boot(){
+  let remote = [];
+  try{
+    const r = await fetch(REMOTE_JSON, {cache:'no-store'});
+    if (r.ok){
+      const raw = await r.json();
+      remote = Array.isArray(raw) ? raw.map(normalize) : [];
     }
-  });
+  }catch(e){ /* يتوفر المحلي على الأقل */ }
 
-  function renderPresets(){
-    const arr = loadPresets();
-    if(!arr.length){ presetsEl.innerHTML=''; return; }
-    presetsEl.innerHTML = arr.map(x=>(
-      `<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">
-         ${x.name}: ${x.value}
-         ${isOwner?`<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>`:''}
-       </span>`
-    )).join('');
+  const local = loadLocal().map(normalize);
+  // ندمج بالاسم (المحلّي يغلب)
+  const map = new Map();
+  remote.forEach(x=>{ if(x.name) map.set(x.name, x); });
+  local.forEach(x=>{ if(x.name) map.set(x.name, x); });
+  items = Array.from(map.values());
+  render();
+}
+
+/* ===== عرض القائمة ===== */
+function render(){
+  const term = (q.value||'').trim();
+  const re = term ? new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i') : null;
+
+  const rows = items
+    .map((it,i)=>{
+      if (re && !re.test(it.name)) return null;
+      const rate = parseRateFromNotes(it.notes);
+      return `
+        <div class="item">
+          <div class="head">
+            <div class="name">${escapeHtml(it.name)}</div>
+            <div class="badges">
+              <span class="badge unit">${unitLabel(it.unit)}</span>
+              <span class="badge ${rate.cls}">%${rate.pct} الفئة</span>
+            </div>
+          </div>
+          <div class="price">USD ${it.price ?? ''}</div>
+          ${it.notes ? `<div class="muted">${escapeHtml(it.notes)}</div>`:''}
+          <div class="actions">
+            <button class="btn btn-green" onclick="usePrice(${i})">استخدام السعر</button>
+            <button class="btn btn-orange" onclick="editItem(${i})">تعديل</button>
+            <button class="btn btn-red" onclick="deleteItem(${i})">حذف</button>
+          </div>
+        </div>`;
+    })
+    .filter(Boolean)
+    .join('');
+
+  list.innerHTML = rows || '<div class="muted">لا توجد عناصر مطابقة.</div>';
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* ===== استخدام السعر (الانتقال للحاسبة وتمرير الفئة) ===== */
+window.usePrice = function(idx){
+  const it = items[idx];
+  if (!it) return;
+  const rate = parseRateFromNotes(it.notes).value; // 0.2075 أو 0.265
+  // ممررًا للصفحة الرئيسية — index.html يدعم ?price و ?rate
+  location.href = `./index.html?price=${encodeURIComponent(it.price)}&rate=${encodeURIComponent(rate)}`;
+};
+
+/* ===== تعديل / حذف ===== */
+window.editItem = function(idx){
+  if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const it = items[idx]; if(!it) return;
+  editIndex = idx;
+  fName.value  = it.name;
+  fPrice.value = it.price;
+  fUnit.value  = it.unit;
+  fNotes.value = it.notes || '';
+  formRow.scrollIntoView({behavior:'smooth', block:'center'});
+};
+
+window.deleteItem = function(idx){
+  if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const it = items[idx]; if(!it) return;
+  if(confirm(`سيتم حذف "${it.name}". متابعة؟`)){
+    items.splice(idx,1);
+    saveLocal(); render();
   }
+};
 
-  window.fillValue = function(v){
-    usd.value = String(v);
-    calc();
-    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+/* ===== حفظ / تفريغ ===== */
+saveBtn.addEventListener('click', ()=>{
+  if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const rec = normalize({name:fName.value, price:fPrice.value, unit:fUnit.value, notes:fNotes.value});
+  if(!rec.name) return alert('اكتب اسم السلعة');
+  if(!(rec.price>0)) return alert('اكتب سعرًا صحيحًا بالدولار');
+
+  if(editIndex>=0){
+    items[editIndex] = rec;
+    editIndex = -1;
+  }else{
+    // إن كان موجود بالاسم نستبدله
+    const i = items.findIndex(x=>x.name===rec.name);
+    if(i>=0) items[i] = rec;
+    else items.push(rec);
   }
-  window.delPreset = function(name){
-    if(!isOwner) return;
-    const arr = loadPresets().filter(x=>x.name!==name);
-    savePresets(arr); renderPresets();
-  }
+  saveLocal(); render();
+  fName.value=''; fPrice.value=''; fNotes.value='';
+});
 
-  /* ===== الحاسبة ===== */
-  const usd   = document.getElementById('usd');
-  const out   = document.getElementById('out');
-  const formula = document.getElementById('formula');
-  const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
-  const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
+clearBtn.addEventListener('click', ()=>{
+  editIndex=-1; fName.value=''; fPrice.value=''; fNotes.value='';
+});
 
-  const enFmt = new Intl.NumberFormat('en-US');
+/* ===== بحث حي ===== */
+q.addEventListener('input', render);
 
-  rateRadios.forEach((r,i)=>{
-    r.addEventListener('change',()=>{
-      pills.forEach(p=>p.classList.remove('active'));
-      pills[i].classList.add('active');
-      calc();
-    });
-  });
+/* ===== استيراد/تصدير ===== */
+exportBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(items, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), {href:url, download:'prices_export.json'});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+importBtn.addEventListener('click', ()=>importFile.click());
+importFile.addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0]; if(!file) return;
+  try{
+    const txt = await file.text();
+    const arr = JSON.parse(txt);
+    if(!Array.isArray(arr)) throw new Error('صيغة غير صحيحة');
+    items = arr.map(normalize);
+    saveLocal(); render(); alert('✅ تم الاستيراد بنجاح');
+  }catch(err){ alert('❌ تعذر قراءة الملف: ' + err.message); }
+  importFile.value = '';
+});
 
-  function getRate(){
-    const r = rateRadios.find(x=>x.checked);
-    return r ? parseFloat(r.value) : 0.2075;
-  }
+/* ===== فتح/قفل وضع المالك ===== */
+function updateOwnerUI(){
+  state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+  formRow.style.display = isOwner ? '' : 'none';
+}
+unlock.addEventListener('click', ()=>{
+  if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
+  else alert('❌ رمز غير صحيح');
+});
+lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
 
-  function calc(){
-    const v = parseFloat(usd.value || 0);
-    const rate = getRate();
-    const result = v * 750 * rate;
-    out.textContent = enFmt.format(Math.round(result));
-    const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
-    formula.textContent = f;
-  }
-
-  function copyResult(){
-    const text = `الرسوم الجمركية: ${out.textContent} ريال يمني\n${formula.textContent}`;
-    navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
-  }
-  function shareWhatsApp(){
-    const msg = `الرسوم الجمركية: ${out.textContent} ريال يمني\n${formula.textContent}`;
-    open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
-  }
-  window.copyResult = copyResult;
-  window.shareWhatsApp = shareWhatsApp;
-
-  /* ===== (المهم) قراءة price و rate من رابط قائمة الأسعار ===== */
-  const params = new URLSearchParams(location.search);
-  if (params.has('value')) usd.value = params.get('value');   // دعم قديم
-  if (params.has('price')) usd.value = params.get('price');   // الجديد من prices.html
-  if (params.has('rate')) {
-    const passed = parseFloat(params.get('rate'));
-    const r = rateRadios.find(x => parseFloat(x.value) === passed);
-    if (r) { r.checked = true; pills.forEach(p=>p.classList.remove('active'));
-             (passed===0.2075? pills[0]:pills[1]).classList.add('active'); }
-  }
-
-  // تشغيل أولي
-  renderPresets();
-  updateOwnerUI();
-  calc();
+/* ===== بدء التشغيل ===== */
+updateOwnerUI();
+boot();
 </script>
 </body>
 </html>
