@@ -1,163 +1,286 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>إدارة أسعار السلع (USD)</title>
-<style>
-  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .top{background:#2563eb;color:#fff;padding:14px 16px;font-weight:800;text-align:center}
-  .wrap{max-width:880px;margin:16px auto;padding:0 12px}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
-  label{display:block;font-size:13px;color:#475569;margin-bottom:4px}
-  input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px}
-  textarea{min-height:70px}
-  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn-blue{background:#2563eb;color:#fff}
-  .btn-green{background:#16a34a;color:#fff}
-  .btn-gray{background:#e2e8f0;color:#0f172a}
-  .btn-orange{background:#f97316;color:#fff}
-  .btn-red{background:#ef4444;color:#fff}
-  .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1;flex-wrap:wrap}
-  .muted{color:#64748b;font-size:12px}
-  .tag{display:inline-block;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;padding:2px 8px;border-radius:999px;font-size:12px;margin-inline-start:6px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>قائمة الأسعار</title>
+  <meta name="theme-color" content="#16a34a">
+  <style>
+    :root{--green:#16a34a; --ink:#0f172a; --muted:#64748b; --card:#fff; --bg:#f1f5f9;}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
+    .wrap{max-width:720px;margin:16px auto;padding:12px}
+    .hero{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border-radius:18px;padding:16px}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
+    .card{background:var(--card);border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #e5e7eb}
+    .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .btn-blue{background:#2563eb;color:#fff} .btn-gray{background:#e2e8f0}
+    .btn-green{background:#16a34a;color:#fff} .btn-orange{background:#f97316;color:#fff} .btn-red{background:#ef4444;color:#fff}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px}
+    .row{display:grid;grid-template-columns:1fr 120px 120px;gap:8px}
+    .search{display:flex;gap:8px}
+    .badge{display:inline-block;background:#eef2ff;color:#1e293b;border:1px solid #c7d2fe;padding:4px 8px;border-radius:999px;font-size:12px}
+    .item{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:12px;border:1px solid #e5e7eb;border-radius:14px;margin-top:10px}
+    .left h3{margin:0 0 6px 0;font-size:18px}
+    .hint{color:var(--muted);font-size:12px;margin-top:4px}
+    .btns{display:flex;gap:8px;flex-wrap:wrap}
+  </style>
 </head>
 <body>
-  <div class="top">💲 إدارة أسعار السلع (USD)</div>
-  <div class="wrap">
-
-    <!-- لوحة المالك -->
-    <div class="card">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="أدخل رمز المالك (PIN)" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <span id="ownerState" class="muted">الحالة: قراءة فقط</span>
-      </div>
-      <div class="muted" style="margin-top:6px">
-        ملاحظة: بدون فتح وضع المالك لا يمكن الإضافة أو التعديل أو الحذف أو الاستيراد أو التصدير.
-      </div>
+<div class="wrap">
+  <section class="hero">
+    <h2 style="margin:0">💲 قائمة الأسعار</h2>
+    <div class="nav">
+      <a href="./">🏠 الحاسبة</a>
+      <a href="./hs.html">🔍 البنود الجمركية</a>
     </div>
+  </section>
 
-    <!-- نموذج إضافة / تعديل -->
-    <div class="card" id="adminForm" style="display:none">
-      <h3>➕ إضافة / تعديل سعر سلعة</h3>
-      <div style="display:grid;grid-template-columns:1fr 150px 130px;gap:10px;max-width:880px">
-        <div>
-          <label>اسم السلعة</label>
-          <input id="name" placeholder="مثال: بطاريات ليثيوم (Ah)" />
-        </div>
-        <div>
-          <label>السعر بالدولار</label>
-          <input id="price" type="number" inputmode="decimal" placeholder="مثال: 3000" />
-        </div>
-        <div>
-          <label>الوحدة</label>
-          <select id="unit">
-            <option value="ton">للطن</option>
-            <option value="kg">للكيلو</option>
-            <option value="dz">للدُزْن</option>
-            <option value="pcs">للحبة</option>
-            <option value="ltr">للتر</option>
-            <option value="Ah">Ah (لكل أمبير/ساعة)</option>
-            <option value="kW">كيلووات</option>
-            <option value="W">وات</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <label>ملاحظات (اختياري)</label>
-        <textarea id="notes" placeholder="مثال: مصدر السعر، تاريخ التحديث..."></textarea>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <button class="btn btn-green" id="saveBtn">احفظ/حدّث</button>
-        <button class="btn btn-gray" id="clearBtn">تفريغ النموذج</button>
-        <span class="muted" id="msg" style="display:none">✔ تم الحفظ</span>
-      </div>
+  <!-- شريط المالك -->
+  <section class="card">
+    <div class="owner">
+      <span>🔒 وضع المالك:</span>
+      <input id="pin" type="password" placeholder="PIN" style="max-width:180px" />
+      <button class="btn btn-blue" id="unlock">فتح</button>
+      <button class="btn btn-gray" id="lock">قفل</button>
+      <small id="state">الحالة: قراءة فقط</small>
     </div>
+  </section>
 
-    <!-- أدوات واستعراض -->
-    <div class="card">
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <input id="q" placeholder="ابحث بالاسم... مثال: بطاريات، شبك، ملابس" />
-        <button class="btn btn-blue" id="exportBtn" disabled>تصدير JSON</button>
-        <button class="btn btn-gray" id="importBtn" disabled>استيراد JSON</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none" />
-      </div>
-      <div id="list" style="margin-top:10px"></div>
+  <!-- نموذج الإضافة/التعديل -->
+  <section class="card" id="formCard" style="display:none">
+    <h3 style="margin-top:0">إضافة / تعديل سعر سلعة</h3>
+    <div class="row" style="margin-bottom:8px">
+      <input id="fName" placeholder="اسم السلعة… مثال: ملابس" />
+      <input id="fPrice" type="number" inputmode="decimal" placeholder="بالدولار" />
+      <select id="fUnit">
+        <option value="ton">الطن</option>
+        <option value="kg">الكيلو</option>
+        <option value="dz">الدُزْن</option>
+        <option value="pcs">الحبة</option>
+        <option value="ltr">اللتر</option>
+        <option value="Ah">Ah/أمبير</option>
+        <option value="W">W/واط</option>
+        <option value="yd">ياردة</option>
+      </select>
     </div>
-  </div>
+    <textarea id="fNotes" rows="3" placeholder="ملاحظات (مثال: الفئة5%، مصدر السعر، تاريخ التحديث)…"></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn-blue" id="saveBtn">حفظ/تحديث</button>
+      <button class="btn btn-gray" id="clearBtn">تفريغ النموذج</button>
+    </div>
+  </section>
+
+  <!-- بحث وتصدير/استيراد -->
+  <section class="card">
+    <div class="search">
+      <input id="q" placeholder="ابحث بالاسم… مثال: بطاريات، شبك، ملابس" />
+      <button class="btn btn-blue" id="exportBtn">تصدير JSON</button>
+      <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none" />
+    </div>
+  </section>
+
+  <!-- القائمة -->
+  <section class="card" id="listCard">
+    <div id="list"></div>
+  </section>
+</div>
 
 <script>
-  const ADMIN_PIN = "bassam1234";
-  let isOwner = false;
-  const pin=document.getElementById('pin'),unlock=document.getElementById('unlock'),
-        lock=document.getElementById('lock'),ownerState=document.getElementById('ownerState'),
-        adminForm=document.getElementById('adminForm');
-  function updateOwnerUI(){
-    ownerState.textContent='الحالة: '+(isOwner?'مالك (تحرير مفعّل)':'قراءة فقط');
-    adminForm.style.display=isOwner?'':'none';
-    document.getElementById('exportBtn').disabled=!isOwner;
-    document.getElementById('importBtn').disabled=!isOwner;
+/* ===== إعدادات عامة ===== */
+const ADMIN_PIN = "bassam1234";
+const LS_KEY = 'pricesCatalogV3';          // تخزين محلي للتعديل/الحذف
+const REMOTE_JSON = '/json/prices_catalog.json'; // ملفك العام (لجميع المستخدمين)
+
+const state = document.getElementById('state');
+const pin   = document.getElementById('pin');
+const unlock= document.getElementById('unlock');
+const lock  = document.getElementById('lock');
+const formCard = document.getElementById('formCard');
+
+const fName  = document.getElementById('fName');
+const fPrice = document.getElementById('fPrice');
+const fUnit  = document.getElementById('fUnit');
+const fNotes = document.getElementById('fNotes');
+const saveBtn= document.getElementById('saveBtn');
+const clearBtn= document.getElementById('clearBtn');
+
+const q = document.getElementById('q');
+const list = document.getElementById('list');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile= document.getElementById('importFile');
+
+let isOwner = false;
+let catalog = [];     // المصدر المعروض
+let editIndex = -1;   // -1 = إضافة جديدة
+
+/* ===== أدوات مساعدة ===== */
+const unitLabel = (u)=>({
+  ton:'الطن', kg:'الكيلو', dz:'الدُزْن', pcs:'الحبة', ltr:'اللتر', Ah:'Ah/أمبير', W:'W/واط', yd:'ياردة'
+}[u] || u || '');
+
+function enfmt(n){ return new Intl.NumberFormat('en-US').format(n); }
+
+/* استخراج الفئة من الملاحظات: يرجع 0.2075 (فئة 5%) أو 0.265 (فئة 10%) أو null */
+function parseRateFromNotes(notes=''){
+  const t = (notes||'').toString().replace(/\s+/g,'').toLowerCase();
+  // ابحث عن 5% أو ١٠٪ باختلاف الصيغ
+  if (/(الفئه|الفئة)?10%|١٠%|%10|10٪/.test(t)) return 0.265;
+  if (/(الفئه|الفئة)?5%|٥%|%5|5٪/.test(t))   return 0.2075;
+  return null;
+}
+
+/* ===== وضع المالك ===== */
+function updateOwnerUI(){
+  state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+  formCard.style.display = isOwner ? '' : 'none';
+  render();
+}
+unlock.addEventListener('click', ()=>{
+  if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
+  else alert('❌ رمز غير صحيح');
+});
+lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
+
+/* ===== تحميل البيانات ===== */
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||null }catch{ return null } }
+function saveLocal(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+
+async function loadCatalog(){
+  // 1) جرّب القراءة من التخزين المحلي لو موجود (يحفظ تعديلاتك)
+  const local = loadLocal();
+  if (local && Array.isArray(local)) { catalog = local; render(); return; }
+  // 2) خلاف ذلك، اجلب الملف العام ثم خزّنه محلياً للقراءة السريعة
+  try{
+    const res = await fetch(REMOTE_JSON, {cache:'no-store'});
+    const data = await res.json();
+    if (Array.isArray(data)) { catalog = data; saveLocal(data); render(); }
+    else { catalog = []; render(); }
+  }catch{
+    catalog = []; render();
+  }
+}
+
+/* ===== عرض القائمة ===== */
+function render(){
+  const term = (q.value||'').trim();
+  const items = term ? catalog.filter(x => (x.name||'').includes(term)) : catalog;
+
+  list.innerHTML = items.map((x, idx)=>{
+    const i = catalog.indexOf(x); // index الحقيقي في الكاتالوج
+    const notes = x.notes || x.ملحوظات || '';
+    return `
+      <div class="item">
+        <div class="left" style="flex:1">
+          <h3>${x.name||''} ${x.unit?`<span class="badge">${unitLabel(x.unit)}</span>`:''}</h3>
+          <div>${x.price!=null?`USD ${x.price}`:''}</div>
+          ${notes?`<div class="hint">${notes}</div>`:''}
+        </div>
+        <div class="btns">
+          <button class="btn btn-green" onclick="usePrice(${i})">استخدام السعر</button>
+          <button class="btn btn-orange" onclick="editItem(${i})">تعديل</button>
+          <button class="btn btn-red" onclick="deleteItem(${i})">حذف</button>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="hint">لا توجد عناصر.</div>';
+}
+
+/* ===== استخدام السعر => يفتح الحاسبة بالقيمة والفئة من الملاحظات ===== */
+window.usePrice = function(idx){
+  const it = catalog[idx]; if (!it) return;
+  const rate = parseRateFromNotes(it.notes || it.ملحوظات);
+  const url = new URL(location.origin + '/');
+  url.searchParams.set('price', String(it.price||0));
+  if (rate) url.searchParams.set('rate', String(rate));
+  // يمكنك تمرير الوحدة أيضاً إن أردت لاحقاً:
+  // url.searchParams.set('unit', it.unit||'');
+  location.href = url.toString();
+};
+
+/* ===== تعديل ===== */
+window.editItem = function(idx){
+  if (!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const it = catalog[idx]; if(!it) return;
+  editIndex = idx;
+  fName.value  = it.name || '';
+  fPrice.value = it.price != null ? it.price : '';
+  fUnit.value  = it.unit || 'pcs';
+  fNotes.value = it.notes || it.ملحوظات || '';
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+
+saveBtn.addEventListener('click', ()=>{
+  if (!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const name  = (fName.value||'').trim();
+  const price = parseFloat(fPrice.value||'');
+  const unit  = fUnit.value || 'pcs';
+  const notes = fNotes.value || '';
+
+  if (!name)  return alert('اكتب اسم السلعة');
+  if (!isFinite(price)) return alert('اكتب السعر بالدولار');
+
+  const obj = { name, price, unit, notes };
+  if (editIndex >= 0) catalog[editIndex] = obj; // تحديث
+  else catalog.unshift(obj);                     // إضافة في الأعلى
+
+  saveLocal(catalog);
+  clearForm();
+  render();
+});
+
+function clearForm(){
+  editIndex = -1;
+  fName.value=''; fPrice.value=''; fUnit.value='ton'; fNotes.value='';
+}
+clearBtn.addEventListener('click', clearForm);
+
+/* ===== حذف ===== */
+window.deleteItem = function(idx){
+  if (!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const it = catalog[idx]; if(!it) return;
+  if (!confirm(`حذف "${it.name}" ؟`)) return;
+  catalog.splice(idx,1);
+  saveLocal(catalog);
+  render();
+};
+
+/* ===== تصدير/استيراد ===== */
+exportBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(catalog,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'prices_catalog.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+importBtn.addEventListener('click', ()=> importFile.click());
+importFile.addEventListener('change', async (e)=>{
+  if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+  const file = e.target.files[0]; if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data)) throw new Error('Invalid JSON');
+    catalog = data;
+    saveLocal(catalog);
     render();
+  }catch(err){
+    alert('ملف غير صالح');
+  }finally{
+    e.target.value = '';
   }
-  unlock.onclick=()=>{if(pin.value===ADMIN_PIN){isOwner=true;updateOwnerUI();alert('✅ تم فتح وضع المالك');}else alert('❌ رمز غير صحيح');};
-  lock.onclick=()=>{isOwner=false;updateOwnerUI();};
+});
 
-  const KEY='pricesCatalogV1';
-  const nameEl=document.getElementById('name'),priceEl=document.getElementById('price'),
-        unitEl=document.getElementById('unit'),notesEl=document.getElementById('notes'),
-        saveBtn=document.getElementById('saveBtn'),clearBtn=document.getElementById('clearBtn'),
-        msg=document.getElementById('msg'),q=document.getElementById('q'),list=document.getElementById('list'),
-        exportBtn=document.getElementById('exportBtn'),importBtn=document.getElementById('importBtn'),
-        importFile=document.getElementById('importFile');
+/* ===== أحداث ===== */
+q.addEventListener('input', render);
 
-  let baseData=[];
-  async function loadBase(){
-    try{const r=await fetch('./assets/prices_catalog.json');baseData=await r.json();}catch{baseData=[];}
-  }
-  function loadLocal(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch{return[]}}
-  function saveLocal(arr){localStorage.setItem(KEY,JSON.stringify(arr));}
-  function mergedData(){
-    const local=loadLocal(),map=new Map();
-    baseData.forEach(x=>map.set((x.name||'').trim(),x));
-    local.forEach(x=>map.set((x.name||'').trim(),x));
-    return Array.from(map.values());
-  }
-  function unitLabel(u){return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='ltr'?'للتر':u==='Ah'?'Ah/أمبير':u==='kW'?'كيلووات':u==='W'?'وات':'';}
-  function upsert(rec){if(!isOwner)return alert('للمالك فقط');const arr=loadLocal();const i=arr.findIndex(x=>(x.name||'')===rec.name);if(i>=0)arr[i]=rec;else arr.push(rec);saveLocal(arr);}
-  function delItem(name){if(!isOwner)return alert('للمالك فقط');const arr=loadLocal().filter(x=>(x.name||'')!==name);saveLocal(arr);render();}
-  function applyToForm(rec){nameEl.value=rec.name||'';priceEl.value=rec.price||'';unitEl.value=rec.unit||'ton';notesEl.value=rec.notes||'';window.scrollTo({top:adminForm.offsetTop-12,behavior:'smooth'});}
-  window.applyToForm=applyToForm;window.delItem=delItem;
-  function render(){
-    const arr=mergedData();const s=(q.value||'').trim();const f=s?arr.filter(x=>(x.name||'').includes(s)):arr;
-    if(!f.length){list.innerHTML='<div class="muted" style="padding:10px">لا توجد بيانات…</div>';return;}
-    list.innerHTML=f.map(x=>`
-    <div class="item">
-      <div>
-        <div><b>${x.name}</b> <span class="tag">${unitLabel(x.unit)}</span></div>
-        <div class="muted">${x.price} USD ${x.notes?('• '+x.notes):''}</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-green" onclick="location.href='./index.html?value=${encodeURIComponent(x.price)}'">استخدام السعر</button>
-        ${isOwner?`
-        <button class="btn btn-orange" onclick="window.applyToForm(${JSON.stringify(x)})">تعديل</button>
-        <button class="btn btn-red" onclick="delItem(${JSON.stringify(x.name)})">حذف</button>`:''}
-      </div>
-    </div>`).join('');
-  }
-
-  saveBtn.onclick=()=>{if(!isOwner)return alert('للمالك فقط');const rec={name:(nameEl.value||'').trim(),price:+priceEl.value,unit:unitEl.value,notes:(notesEl.value||'').trim()};if(!rec.name)return alert('أدخل اسم السلعة');if(!rec.price)return alert('أدخل السعر');upsert(rec);msg.style.display='inline';setTimeout(()=>msg.style.display='none',1200);render();};
-  clearBtn.onclick=()=>{nameEl.value='';priceEl.value='';unitEl.value='ton';notesEl.value='';};
-  q.oninput=render;
-
-  exportBtn.onclick=()=>{if(!isOwner)return alert('للمالك فقط');const data=JSON.stringify(mergedData(),null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='prices_catalog.json';a.click();};
-  importBtn.onclick=()=>{if(!isOwner)return alert('للمالك فقط');importFile.click();};
-  importFile.onchange=async()=>{if(!isOwner)return;const f=importFile.files[0];if(!f)return;try{const t=await f.text();const a=JSON.parse(t);if(!Array.isArray(a))throw new Error('صيغة غير صحيحة');saveLocal(a);render();alert('تم الاستيراد بنجاح')}catch(e){alert('خطأ:'+e.message)}importFile.value='';};
-
-  (async()=>{await loadBase();render();updateOwnerUI();})();
+/* ===== بدء التشغيل ===== */
+updateOwnerUI();
+loadCatalog();
 </script>
 </body>
 </html>
