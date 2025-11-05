@@ -17,7 +17,7 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
-    .wrap{max-width:780px;margin:16px auto;padding:12px}
+    .wrap{max-width:720px;margin:16px auto;padding:12px}
 
     /* Hero */
     .hero{
@@ -36,54 +36,51 @@
     .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
     .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
 
-    /* Cards / buttons */
+    /* Owner bar */
     .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
           box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .owner small{color:var(--muted)}
-    .owner input{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+    .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
     .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn-blue{background:var(--accent);color:#fff}
     .btn-gray{background:#e2e8f0;color:#0f172a}
-    .btn-green{background:#16a34a;color:#fff}
-    .btn-red{background:#ef4444;color:#fff}
     .owner-on{color:#065f46;font-weight:800}
+
+    /* Quick presets */
+    .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
+    .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
+    .chip.admin .x{display:inline}
 
     /* Calculator */
     label{display:block;font-weight:700;margin-bottom:6px}
-    input[type="number"], input[type="text"], textarea, select{
-      width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;
-      font-size:16px;background:#fff;outline:none
+    input[type="number"]{
+      width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
+      font-size:18px;background:#fff;outline:none
     }
-    textarea{min-height:90px;resize:vertical}
     .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
     .rates{display:flex;flex-direction:column;gap:12px}
     .pill{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:12px;border-radius:999px;border:2px solid #cbead9;
+      padding:14px;border-radius:999px;border:2px solid #cbead9;
       background:#f0fdf4;cursor:pointer
     }
-    .pill input{appearance:none;width:20px;height:20px;border:2px solid #84d1b0;border-radius:50%;margin:0}
+    .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
     .pill.active{background:#14532d;color:#fff;border-color:#14532d}
     .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
     .hint{font-size:13px;color:#0f5132;opacity:.9}
     .result{
-      border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;text-align:center
+      border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;
+      text-align:center
     }
-    .result .big{font-size:40px;font-weight:900;color:#065f46;letter-spacing:1px}
+    .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
     .result .mini{margin-top:8px;color:var(--muted)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-
-    /* List */
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .half{flex:1 1 280px}
-    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-    .badge2{background:#eef2ff;border:1px solid #dbeafe;color:#1e3a8a;border-radius:999px;padding:4px 10px;font-size:12px}
-    .badge2.green{background:#ecfdf5;border-color:#bbf7d0;color:#14532d}
-    .price-item{border-top:1px dashed #e5e7eb;padding-top:12px;margin-top:12px}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-
-    @media (max-width:420px){ .result .big{font-size:34px} }
+    .btn.copy{background:#22c55e;color:#fff}
+    .btn.pdf{background:var(--accent);color:#fff}
+    .btn.wa{background:#16a34a;color:#fff}
+    @media (max-width:420px){ .result .big{font-size:36px} }
 
     /* PWA install button */
     #installBtn{
@@ -103,15 +100,15 @@
       </div>
       <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
       <div class="nav">
-        <a href="#prices">💲 قائمة الأسعار</a>
-        <a href="#calc">🧮 الحاسبة</a>
+        <a href="./prices.html">💲 قائمة الأسعار</a>
+        <a href="./hs.html">🔍 البنود الجمركية</a>
       </div>
       <!-- اختصارات سريعة (تظهر للجميع؛ الحذف للمالك فقط) -->
       <div class="presets" id="presets"></div>
     </section>
 
     <!-- شريط الإدارة -->
-    <section class="card" id="admin">
+    <section class="card">
       <div class="owner">
         <span>🔒 وضع المالك:</span>
         <input id="pin" type="password" placeholder="PIN" />
@@ -133,7 +130,7 @@
     </section>
 
     <!-- الحاسبة -->
-    <section class="card" id="calc">
+    <section class="card">
       <label for="usd">قيمة السلعة (بالدولار USD)</label>
       <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
 
@@ -141,7 +138,6 @@
       <div class="rates">
         <label class="pill" id="pill5">
           <div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div>
-          <!-- 0.2075 = (0.25 معامل × 750 × 5% / 750) مختصر حسب معادلتك السابقة -->
           <input type="radio" name="rate" value="0.2075" />
         </label>
         <label class="pill active" id="pill10">
@@ -157,298 +153,166 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-blue"  onclick="window.print()">طباعة / حفظ PDF</button>
-        <button class="btn btn-green" onclick="copyResult()">نسخ النتيجة</button>
-        <button class="btn btn-green" onclick="shareWhatsApp()">مشاركة واتساب</button>
+        <button class="btn pdf"  onclick="window.print()">طباعة / حفظ PDF</button>
+        <button class="btn copy" onclick="copyResult()">نسخ النتيجة</button>
+        <button class="btn wa"   onclick="shareWhatsApp()">مشاركة واتساب</button>
       </div>
-    </section>
-
-    <!-- إدارة/عرض قائمة الأسعار -->
-    <section class="card" id="prices">
-      <h3 style="margin-top:0">💲 قائمة الأسعار (إضافة / تعديل / حذف)</h3>
-
-      <div class="row">
-        <div class="half">
-          <label>اسم السلعة</label>
-          <input id="itName" placeholder="مثال: ملابس، بطاريات…" />
-        </div>
-        <div class="half">
-          <label>السعر بالدولار</label>
-          <input id="itPrice" type="number" inputmode="decimal" placeholder="مثال: 3000" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <div class="half">
-          <label>الوحدة</label>
-          <select id="itUnit">
-            <option value="ton">الطن</option>
-            <option value="kg">الكيلو</option>
-            <option value="dz">الدُزْن</option>
-            <option value="pcs">الحبة</option>
-            <option value="ltr">اللتر</option>
-            <option value="Ah">Ah</option>
-            <option value="W">W</option>
-            <option value="yd">yd</option>
-          </select>
-        </div>
-        <div class="half">
-          <label>ملاحظات (اكتب هنا الفئة مثل: الفئة5% أو الفئه 10%)</label>
-          <input id="itNotes" placeholder="مثال: الفئة5% • مصدر السعر • تاريخ التحديث…" />
-        </div>
-      </div>
-
-      <div class="controls" style="margin-top:10px">
-        <button class="btn btn-green" id="saveItem">حفظ / حدّث</button>
-        <button class="btn btn-gray"  id="resetForm">تفريغ النموذج</button>
-        <input id="q" placeholder="ابحث بالاسم… مثال: بطاريات، شبك، ملابس" style="flex:1" />
-        <button class="btn btn-blue" id="exportJson">تصدير JSON</button>
-        <button class="btn btn-blue" id="importJson">استيراد JSON</button>
-      </div>
-
-      <div id="list" style="margin-top:12px"></div>
     </section>
   </div>
 
-  <!-- زر تثبيت التطبيق -->
+  <!-- زر تثبيت التطبيق (يظهر تلقائياً عند توافر حدث التثبيت) -->
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
 <script>
-/* =================== PWA =================== */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
-}
-let deferredPrompt=null;
-const installBtn=document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block';});
-installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;installBtn.style.display='none';deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});
-
-/* =================== المالك / الاختصارات =================== */
-const ADMIN_PIN="bassam1234";
-const PRESETS_KEY='customQuickPresetsV2';
-let isOwner=false;
-
-const el=(id)=>document.getElementById(id);
-const pin=el('pin'), unlock=el('unlock'), lockBtn=el('lock'), state=el('state');
-const adminForm=el('adminForm'), pName=el('pName'), pVal=el('pVal');
-const addPresetBtn=el('addPreset'), clearPresetsBtn=el('clearPresets'), presetsEl=el('presets');
-
-function updateOwnerUI(){
-  state.textContent='الحالة: '+(isOwner?'مالك (تحرير مفعّل)':'قراءة فقط');
-  adminForm.style.display=isOwner?'':'none';
-  renderPresets();
-}
-unlock.addEventListener('click',()=>{ if(pin.value===ADMIN_PIN){isOwner=true;updateOwnerUI();alert('✅ تم فتح وضع المالك');}else alert('❌ رمز غير صحيح');});
-lockBtn.addEventListener('click',()=>{ isOwner=false;updateOwnerUI(); });
-
-function loadPresets(){ try{return JSON.parse(localStorage.getItem(PRESETS_KEY))||[]}catch{return[]} }
-function savePresets(arr){ localStorage.setItem(PRESETS_KEY,JSON.stringify(arr)); }
-function renderPresets(){
-  const arr=loadPresets();
-  presetsEl.innerHTML=arr.map(x=>(
-    `<span class="badge2 green" onclick="fillValue(${x.value})">
-      ${x.name}: ${x.value}$
-      ${isOwner?`<b style="color:#b91c1c;cursor:pointer;margin-inline-start:6px" onclick="event.stopPropagation();delPreset(${JSON.stringify(x.name)})">×</b>`:''}
-    </span>`
-  )).join('');
-}
-addPresetBtn?.addEventListener('click',()=>{
-  if(!isOwner)return alert('هذا الإجراء للمالك فقط');
-  const name=(pName.value||'').trim(); const val=parseFloat(pVal.value||0);
-  if(!name||!val) return alert('أكمل البيانات');
-  const arr=loadPresets(); const i=arr.findIndex(x=>x.name===name);
-  if(i>=0) arr[i].value=val; else arr.push({name,value:val});
-  savePresets(arr); pName.value=''; pVal.value=''; renderPresets();
-});
-clearPresetsBtn?.addEventListener('click',()=>{ if(!isOwner)return alert('للمالك فقط'); if(confirm('حذف جميع الاختصارات؟')){ savePresets([]); renderPresets(); }});
-window.fillValue=(v)=>{ el('usd').value=v; calc(); window.location.hash='#calc'; window.scrollTo({top:0,behavior:'smooth'}); };
-window.delPreset=(name)=>{ if(!isOwner)return; savePresets(loadPresets().filter(x=>x.name!==name)); renderPresets(); };
-
-/* =================== الحاسبة =================== */
-const usdInput=el('usd'), outEl=el('out'), formulaEl=el('formula');
-const rateRadios=Array.from(document.querySelectorAll('input[name="rate"]'));
-const pills=[el('pill5'),el('pill10')];
-const enFmt=new Intl.NumberFormat('en-US');
-
-rateRadios.forEach((r,i)=>r.addEventListener('change',()=>{pills.forEach(p=>p.classList.remove('active')); if(pills[i])pills[i].classList.add('active'); calc();}));
-usdInput.addEventListener('input',calc);
-
-function getRate(){ const r=rateRadios.find(x=>x.checked); return r?parseFloat(r.value):0.265; }
-function setRateByPercent(percent){ // 5 أو 10
-  if(percent===5){ rateRadios[0].checked=true; pills[0].classList.add('active'); pills[1].classList.remove('active'); }
-  else if(percent===10){ rateRadios[1].checked=true; pills[1].classList.add('active'); pills[0].classList.remove('active'); }
-  calc();
-}
-function calc(){
-  const v=parseFloat(usdInput.value||0), rate=getRate(), fx=750;
-  const result=v*fx*rate;
-  outEl.textContent=enFmt.format(Math.round(result));
-  formulaEl.textContent=`${enFmt.format(v)} × ${fx} × ${rate} = ${enFmt.format(Math.round(result))}`;
-}
-function copyResult(){ const text=`الرسوم الجمركية: ${outEl.textContent} ريال يمني\n${formulaEl.textContent}`; navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ')); }
-function shareWhatsApp(){ const msg=`الرسوم الجمركية: ${outEl.textContent} ريال يمني\n${formulaEl.textContent}`; open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }
-
-/* =================== الكتالوج (إضافة/تعديل/حذف/بحث) =================== */
-const CAT_KEY='pricesCatalogV3';
-let catalog=[];
-let editingIndex=null;
-
-const itName=el('itName'), itPrice=el('itPrice'), itUnit=el('itUnit'), itNotes=el('itNotes');
-const saveItem=el('saveItem'), resetForm=el('resetForm'), q=el('q'), list=el('list');
-const exportBtn=el('exportJson'), importBtn=el('importJson');
-
-function loadCatalog(){ try{ return JSON.parse(localStorage.getItem(CAT_KEY))||[] }catch{ return [] } }
-function saveCatalog(arr){ localStorage.setItem(CAT_KEY, JSON.stringify(arr)); }
-function arabicDigitsToEnglish(s){
-  if(!s) return '';
-  const map={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
-  return String(s).replace(/[٠-٩]/g,d=>map[d]||d);
-}
-function parseRateFromNotes(notes){
-  // يبحث عن 5% أو 10% أو كلمة "الفئة 5%"، بأرقام عربية/إنجليزية
-  const t=arabicDigitsToEnglish(notes||'').replace(/\s+/g,'');
-  if(/(الفئة|الفئه)?10%/.test(t) || /%?10/.test(t)) return 10;
-  if(/(الفئة|الفئه)?5%/.test(t)  || /%?5/.test(t))  return 5;
-  return null;
-}
-function unitLabel(u){
-  switch(u){
-    case 'ton':return 'الطن';
-    case 'kg':return 'الكيلو';
-    case 'dz':return 'الدُزْن';
-    case 'pcs':return 'الحبة';
-    case 'ltr':return 'اللتر';
-    case 'Ah':return 'Ah';
-    case 'W':return 'W';
-    case 'yd':return 'yd';
-    default:return u||'';
+  /* ===== PWA: Service Worker ===== */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
   }
-}
-function renderList(){
-  const term=(q.value||'').trim();
-  const items=catalog.filter(x=>!term || x.name.includes(term));
-  list.innerHTML = items.map((x,idx)=>{
-    const ratePct=parseRateFromNotes(x.notes);
-    const rateBadge= ratePct ? `<span class="badge2 green">%${ratePct} الفئة</span>` : '';
-    return `
-      <div class="price-item">
-        <div style="font-weight:800">${x.name}</div>
-        <div class="badges">
-          <span class="badge2">${unitLabel(x.unit)}</span>
-          ${rateBadge}
-          <span class="badge2">USD ${x.price}</span>
-        </div>
-        ${x.notes?`<div style="margin-top:6px;color:#475569;font-size:13px">${x.notes}</div>`:''}
-        <div class="controls">
-          <button class="btn btn-green" onclick="usePrice(${idx})">استخدام السعر</button>
-          <button class="btn btn-blue"  onclick="editItem(${idx})">تعديل</button>
-          <button class="btn btn-red"   onclick="delItem(${idx})">حذف</button>
-        </div>
-      </div>`;
-  }).join('') || '<div style="color:#64748b">لا توجد عناصر.</div>';
-}
 
-function clearForm(){ editingIndex=null; itName.value=''; itPrice.value=''; itUnit.value='ton'; itNotes.value=''; saveItem.textContent='حفظ / حدّث'; }
+  /* ===== PWA: زر التثبيت ===== */
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
 
-function editItem(i){
-  if(!isOwner) return alert('فتح وضع المالك أولاً للتعديل');
-  const x=catalog[i]; if(!x) return;
-  editingIndex=i;
-  itName.value=x.name; itPrice.value=x.price; itUnit.value=x.unit; itNotes.value=x.notes||'';
-  saveItem.textContent='تحديث العنصر';
-  window.location.hash='#prices';
-}
-function delItem(i){
-  if(!isOwner) return alert('فتح وضع المالك أولاً للحذف');
-  if(!confirm('تأكيد حذف هذا السعر؟')) return;
-  catalog.splice(i,1); saveCatalog(catalog); renderList();
-}
-function usePrice(i){
-  const x=catalog[i]; if(!x) return;
-  usdInput.value = x.price;
-  const pct=parseRateFromNotes(x.notes);
-  if(pct===5) setRateByPercent(5);
-  else if(pct===10) setRateByPercent(10);
-  calc();
-  window.location.hash='#calc';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
 
-saveItem.addEventListener('click',()=>{
-  if(!isOwner) return alert('فتح وضع المالك أولاً للحفظ/التحديث');
-  const name=(itName.value||'').trim();
-  const price=parseFloat(itPrice.value||0);
-  const unit=itUnit.value||'pcs';
-  const notes=itNotes.value||'';
-  if(!name || !price) return alert('أكمل الاسم والسعر');
-  const obj={name, price, unit, notes};
-  if(editingIndex===null) catalog.push(obj);
-  else catalog[editingIndex]=obj;
-  saveCatalog(catalog); clearForm(); renderList();
-});
-resetForm.addEventListener('click', clearForm);
-q.addEventListener('input', renderList);
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    installBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
 
-exportBtn.addEventListener('click',()=>{
-  const blob=new Blob([JSON.stringify(catalog,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='prices_catalog.json'; a.click();
-  URL.revokeObjectURL(url);
-});
-importBtn.addEventListener('click',()=>{
-  if(!isOwner) return alert('فتح وضع المالك أولاً للاستيراد');
-  const input=document.createElement('input'); input.type='file'; input.accept='application/json';
-  input.onchange=()=>{ const f=input.files[0]; if(!f) return;
-    const fr=new FileReader(); fr.onload=()=>{ try{
-      const data=JSON.parse(fr.result);
-      if(!Array.isArray(data)) throw new Error('صيغة غير صحيحة');
-      catalog=data.map(migrateItem);
-      saveCatalog(catalog); renderList(); alert('✅ تم الاستيراد');
-    }catch{ alert('صيغة JSON غير صالحة'); } };
-    fr.readAsText(f);
-  };
-  input.click();
-});
+  /* ===== إعدادات الإدارة / الاختصارات ===== */
+  const ADMIN_PIN = "bassam1234";
+  let isOwner = false;
 
-/* ترقية/توحيد الحقول القادمة من ملفات قديمة (الوحدة/الاسم/السعر/الملاحظات) */
-function migrateItem(x){
-  const name = x.name || x['الاسم'] || x['اسم'] || '';
-  const notes= x.notes|| x['ملحوظات'] || x['ملاحظات'] || '';
-  const price= parseFloat(x.price ?? x['السعر'] ?? 0) || 0;
-  let unit = (x.unit || x['الوحدة'] || x['وحدة'] || '').trim();
-  // توحيد بعض وحدات عربية إلى مفاتيحنا
-  const map = {'طن':'ton','الكيلو':'kg','كيلو':'kg','dz':'dz','الدزن':'dz','الدُزْن':'dz',
-               'حبة':'pcs','قطعة':'pcs','اللتر':'ltr','Ah':'Ah','W':'W','yd':'yd'};
-  unit = map[unit] || unit || 'pcs';
-  return {name, price, unit, notes};
-}
+  const pin   = document.getElementById('pin');
+  const unlock= document.getElementById('unlock');
+  const lock  = document.getElementById('lock');
+  const state = document.getElementById('state');
+  const adminForm = document.getElementById('adminForm');
 
-/* تحميل بدئي من ملف عام (اختياري) ثم من المحلي */
-async function bootCatalog(){
-  catalog=loadCatalog();
-  if(!catalog.length){
-    try{
-      const res=await fetch('/json/prices_catalog.json',{cache:'no-store'});
-      if(res.ok){
-        const data=await res.json();
-        if(Array.isArray(data)){ catalog=data.map(migrateItem); saveCatalog(catalog); }
-      }
-    }catch{}
+  function updateOwnerUI(){
+    state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+    adminForm.style.display = isOwner ? '' : 'none';
+    renderPresets();
   }
-  renderList();
-}
+  unlock.addEventListener('click', ()=>{
+    if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
+    else alert('❌ رمز غير صحيح');
+  });
+  lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
 
-/* تشغيل أولي */
-(function init(){
-  // دعم تمرير ?value= من الروابط القديمة
-  const params=new URLSearchParams(location.search);
-  if(params.has('value')) usdInput.value=params.get('value');
+  const PRESETS_KEY = 'customQuickPresetsV1';
+  const pName = document.getElementById('pName');
+  const pVal  = document.getElementById('pVal');
+  const addPresetBtn = document.getElementById('addPreset');
+  const clearPresetsBtn = document.getElementById('clearPresets');
+  const presetsEl = document.getElementById('presets');
 
+  function loadPresets(){ try{ return JSON.parse(localStorage.getItem(PRESETS_KEY))||[] }catch{ return [] } }
+  function savePresets(arr){ localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)) }
+
+  addPresetBtn.addEventListener('click', ()=>{
+    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+    const name = (pName.value||'').trim();
+    const val  = parseFloat(pVal.value||0);
+    if(!name) return alert('اكتب اسم الاختصار');
+    if(!val)  return alert('اكتب قيمة صحيحة بالدولار');
+    const arr = loadPresets();
+    const i = arr.findIndex(x=>x.name===name);
+    if(i>=0){ arr[i].value = val; } else { arr.push({name, value: val}); }
+    savePresets(arr);
+    pName.value=''; pVal.value='';
+    renderPresets();
+  });
+
+  clearPresetsBtn.addEventListener('click', ()=>{
+    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+    if(confirm('سيتم حذف جميع الاختصارات المحلية. متابعة؟')){
+      savePresets([]); renderPresets();
+    }
+  });
+
+  function renderPresets(){
+    const arr = loadPresets();
+    if(!arr.length){ presetsEl.innerHTML=''; return; }
+    presetsEl.innerHTML = arr.map(x=>(
+      `<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">
+         ${x.name}: ${x.value}
+         ${isOwner?`<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>`:''}
+       </span>`
+    )).join('');
+  }
+
+  window.fillValue = function(v){
+    usd.value = String(v);
+    calc();
+    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+  }
+  window.delPreset = function(name){
+    if(!isOwner) return;
+    const arr = loadPresets().filter(x=>x.name!==name);
+    savePresets(arr); renderPresets();
+  }
+
+  /* ===== الحاسبة ===== */
+  const usd   = document.getElementById('usd');
+  const out   = document.getElementById('out');
+  const formula = document.getElementById('formula');
+  const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
+  const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
+
+  const enFmt = new Intl.NumberFormat('en-US');
+
+  rateRadios.forEach((r,i)=>{
+    r.addEventListener('change',()=>{
+      pills.forEach(p=>p.classList.remove('active'));
+      pills[i].classList.add('active');
+      calc();
+    });
+  });
+
+  // دعم تمرير قيمة من الأسعار ?value=...
+  const params = new URLSearchParams(location.search);
+  if (params.has('value')) usd.value = params.get('value');
+
+  usd.addEventListener('input', calc);
+
+  function getRate(){
+    const r = rateRadios.find(x=>x.checked);
+    return r ? parseFloat(r.value) : 0.2075;
+  }
+
+  function calc(){
+    const v = parseFloat(usd.value || 0);
+    const rate = getRate();
+    const result = v * 750 * rate;
+    out.textContent = enFmt.format(Math.round(result));
+    const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
+    formula.textContent = f;
+  }
+
+  function copyResult(){
+    const text = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
+    navigator.clipboard.writeText(text).then(()=>alert('✔ Copied'));
+  }
+  function shareWhatsApp(){
+    const msg = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
+    open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  window.copyResult = copyResult;
+  window.shareWhatsApp = shareWhatsApp;
+
+  // تشغيل أولي
   renderPresets();
   updateOwnerUI();
   calc();
-  bootCatalog();
-})();
 </script>
 </body>
 </html>
