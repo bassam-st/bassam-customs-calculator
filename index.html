@@ -19,7 +19,6 @@
     body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
     .wrap{max-width:720px;margin:16px auto;padding:12px}
 
-    /* Hero */
     .hero{
       background:linear-gradient(135deg,var(--green),var(--green2));
       color:#fff;border-radius:24px;padding:22px 18px;position:relative;
@@ -36,7 +35,6 @@
     .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
     .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
 
-    /* Owner bar */
     .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
           box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -47,13 +45,6 @@
     .btn-gray{background:#e2e8f0;color:#0f172a}
     .owner-on{color:#065f46;font-weight:800}
 
-    /* Quick presets */
-    .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .chip{background:#e6f7ef;color:#14532d;border:1px solid #bbf7d0;padding:8px 10px;border-radius:999px;cursor:pointer}
-    .chip .x{margin-inline-start:8px;cursor:pointer;color:#b91c1c;display:none}
-    .chip.admin .x{display:inline}
-
-    /* Calculator */
     label{display:block;font-weight:700;margin-bottom:6px}
     input[type="number"]{
       width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
@@ -82,7 +73,6 @@
     .btn.wa{background:#16a34a;color:#fff}
     @media (max-width:420px){ .result .big{font-size:36px} }
 
-    /* PWA install button */
     #installBtn{
       position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
       background:#16a34a; color:#fff; border:none; border-radius:14px;
@@ -92,7 +82,6 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- رأس الصفحة -->
     <section class="hero">
       <div class="brand">
         <h1>بسام مساعدك الجمركي</h1>
@@ -103,33 +92,8 @@
         <a href="./prices.html">💲 قائمة الأسعار</a>
         <a href="./hs.html">🔍 البنود الجمركية</a>
       </div>
-      <!-- اختصارات سريعة (تظهر للجميع؛ الحذف للمالك فقط) -->
-      <div class="presets" id="presets"></div>
     </section>
 
-    <!-- شريط الإدارة -->
-    <section class="card">
-      <div class="owner">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="PIN" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <small id="state">الحالة: قراءة فقط</small>
-      </div>
-
-      <!-- نموذج إضافة اختصار يدوي (يظهر بعد الفتح) -->
-      <div id="adminForm" style="display:none;margin-top:10px">
-        <div class="owner" style="gap:10px">
-          <input id="pName" placeholder="اسم اختصار… مثال: رسوم فلاتر" />
-          <input id="pVal" type="number" inputmode="decimal" placeholder="قيمة بالدولار… 2000" />
-          <button class="btn btn-blue" id="addPreset">إضافة</button>
-          <button class="btn btn-gray" id="clearPresets">تفريغ الكل</button>
-        </div>
-        <small class="owner-on">الاختصارات تُحفظ محليًا في المتصفح ويمكنك تعديلها أو حذفها لاحقًا.</small>
-      </div>
-    </section>
-
-    <!-- الحاسبة -->
     <section class="card">
       <label for="usd">قيمة السلعة (بالدولار USD)</label>
       <input id="usd" type="number" inputmode="decimal" placeholder="مثال: 2000" />
@@ -160,114 +124,23 @@
     </section>
   </div>
 
-  <!-- زر تثبيت التطبيق (يظهر تلقائياً عند توافر حدث التثبيت) -->
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
 <script>
-  /* ===== PWA: Service Worker ===== */
+  // PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(console.error);
   }
+  let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block';});
+  installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;installBtn.style.display='none';deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});
 
-  /* ===== PWA: زر التثبيت ===== */
-  let deferredPrompt = null;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    installBtn.style.display = 'none';
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  });
-
-  /* ===== إعدادات الإدارة / الاختصارات ===== */
-  const ADMIN_PIN = "bassam1234";
-  let isOwner = false;
-
-  const pin   = document.getElementById('pin');
-  const unlock= document.getElementById('unlock');
-  const lock  = document.getElementById('lock');
-  const state = document.getElementById('state');
-  const adminForm = document.getElementById('adminForm');
-
-  function updateOwnerUI(){
-    state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-    adminForm.style.display = isOwner ? '' : 'none';
-    renderPresets();
-  }
-  unlock.addEventListener('click', ()=>{
-    if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
-    else alert('❌ رمز غير صحيح');
-  });
-  lock.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
-
-  const PRESETS_KEY = 'customQuickPresetsV1';
-  const pName = document.getElementById('pName');
-  const pVal  = document.getElementById('pVal');
-  const addPresetBtn = document.getElementById('addPreset');
-  const clearPresetsBtn = document.getElementById('clearPresets');
-  const presetsEl = document.getElementById('presets');
-
-  function loadPresets(){ try{ return JSON.parse(localStorage.getItem(PRESETS_KEY))||[] }catch{ return [] } }
-  function savePresets(arr){ localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)) }
-
-  addPresetBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    const name = (pName.value||'').trim();
-    const val  = parseFloat(pVal.value||0);
-    if(!name) return alert('اكتب اسم الاختصار');
-    if(!val)  return alert('اكتب قيمة صحيحة بالدولار');
-    const arr = loadPresets();
-    const i = arr.findIndex(x=>x.name===name);
-    if(i>=0){ arr[i].value = val; } else { arr.push({name, value: val}); }
-    savePresets(arr);
-    pName.value=''; pVal.value='';
-    renderPresets();
-  });
-
-  clearPresetsBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('هذا الإجراء للمالك فقط');
-    if(confirm('سيتم حذف جميع الاختصارات المحلية. متابعة؟')){
-      savePresets([]); renderPresets();
-    }
-  });
-
-  function renderPresets(){
-    const arr = loadPresets();
-    if(!arr.length){ presetsEl.innerHTML=''; return; }
-    presetsEl.innerHTML = arr.map(x=>(
-      `<span class="chip ${isOwner?'admin':''}" onclick="fillValue(${x.value})">
-         ${x.name}: ${x.value}
-         ${isOwner?`<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>`:''}
-       </span>`
-    )).join('');
-  }
-
-  window.fillValue = function(v){
-    usd.value = String(v);
-    calc();
-    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
-  }
-  window.delPreset = function(name){
-    if(!isOwner) return;
-    const arr = loadPresets().filter(x=>x.name!==name);
-    savePresets(arr); renderPresets();
-  }
-
-  /* ===== الحاسبة ===== */
+  // الحاسبة
   const usd   = document.getElementById('usd');
   const out   = document.getElementById('out');
   const formula = document.getElementById('formula');
   const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
   const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
-
   const enFmt = new Intl.NumberFormat('en-US');
 
   rateRadios.forEach((r,i)=>{
@@ -277,11 +150,6 @@
       calc();
     });
   });
-
-  // دعم تمرير قيمة من الأسعار ?value=...
-  const params = new URLSearchParams(location.search);
-  if (params.has('value')) usd.value = params.get('value');
-
   usd.addEventListener('input', calc);
 
   function getRate(){
@@ -298,20 +166,54 @@
     formula.textContent = f;
   }
 
+  // نسخ/واتساب
   function copyResult(){
-    const text = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
-    navigator.clipboard.writeText(text).then(()=>alert('✔ Copied'));
+    const text = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
+    navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
   }
   function shareWhatsApp(){
-    const msg = `Estimated customs duty: ${out.textContent} Yemeni Rial`;
+    const msg = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
     open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
   }
   window.copyResult = copyResult;
   window.shareWhatsApp = shareWhatsApp;
 
+  // ✅ التقاط السعر والكمية والفئة تلقائيًا من قائمة الأسعار
+  (function applyFromQuery(){
+    try{
+      const q = new URLSearchParams(location.search);
+      const price = parseFloat(q.get('price') || q.get('usd') || '0'); // السعر بالدولار/حبة/طن…
+      const qty   = parseFloat(q.get('qty') || '1');                   // عدد (اختياري)
+      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || ''); // 0.2075 أو 0.265
+      const ratePct = parseFloat(q.get('ratePct') || '');                 // 5 أو 10
+
+      if (price > 0) {
+        const totalUSD = price * (isFinite(qty)&&qty>0 ? qty : 1);
+        usd.value = String(totalUSD);
+      }
+
+      // اضبط الفئة إن تم تمريرها
+      const setRadioByValue = (valStr)=>{
+        const r = rateRadios.find(x=>x.value === valStr);
+        if (r){
+          r.checked = true;
+          const idx = rateRadios.indexOf(r);
+          pills.forEach(p=>p.classList.remove('active'));
+          if (pills[idx]) pills[idx].classList.add('active');
+        }
+      };
+      if (!isNaN(rateMul) && (rateMul===0.2075 || rateMul===0.265)) {
+        setRadioByValue(String(rateMul));
+      } else if (!isNaN(ratePct)) {
+        setRadioByValue(ratePct===5 ? '0.2075' : ratePct===10 ? '0.265' : '0.265');
+      }
+
+      calc();
+      if (location.search) history.replaceState({}, '', location.pathname); // نظافة الرابط
+    }catch(e){}
+  })();
+
   // تشغيل أولي
-  renderPresets();
-  updateOwnerUI();
   calc();
 </script>
 </body>
