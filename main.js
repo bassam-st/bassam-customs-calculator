@@ -2,164 +2,324 @@
 // main.js — Bassam Customs Pro
 // ===============================
 
-// ---------- PWA ----------
+// ---------- PWA: SW + Install Button ----------
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(()=>{});
 }
-let deferredPrompt=null;
-const installBtn=document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt',(e)=>{
-  e.preventDefault(); deferredPrompt=e; if(installBtn) installBtn.style.display='block';
+
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBtn) installBtn.style.display = 'block';
 });
-if(installBtn){
-  installBtn.addEventListener('click', async ()=>{
-    if(!deferredPrompt) return; installBtn.style.display='none';
-    deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null;
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    installBtn.style.display = 'none';
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
   });
 }
 
-// ---------- Admin ----------
-const ADMIN_PIN="bassam1234";
-let __isOwner=false;
-const pin=document.getElementById('pin');
-const unlock=document.getElementById('unlock');
-const lockBtn=document.getElementById('lock');
-const state=document.getElementById('state');
+// ---------- Admin / Presets ----------
+const ADMIN_PIN = "bassam1234";
+const PRESETS_KEY = 'customQuickPresetsV2';
+
+let isOwner = false;
+
+// DOM (وجودها اختياري؛ لو ناقص عنصر الكود يتخطاه)
+const el = (id) => document.getElementById(id);
+const pin = el('pin');
+const unlock = el('unlock');
+const lockBtn = el('lock');
+const state = el('state');
+const adminForm = el('adminForm');
+const pName = el('pName');
+const pVal  = el('pVal');
+const pUnit = el('pUnit');
+const addPresetBtn = el('addPreset');
+const clearPresetsBtn = el('clearPresets');
+const presetsEl = el('presets');
+
+// فتح / قفل وضع المالك
+if (unlock) {
+  unlock.addEventListener('click', () => {
+    if (pin && pin.value === ADMIN_PIN) {
+      isOwner = true; updateOwnerUI(); alert('✅ تم فتح وضع المالك');
+    } else {
+      alert('❌ رمز غير صحيح');
+    }
+  });
+}
+if (lockBtn) {
+  lockBtn.addEventListener('click', () => { isOwner = false; updateOwnerUI(); });
+}
 
 function updateOwnerUI(){
-  if(state) state.textContent='الحالة: '+(__isOwner?'مالك (تحرير مفعّل)':'قراءة فقط');
-  // تمكين/تعطيل عناصر الفئة
-  const radios = Array.from(document.querySelectorAll('input[name="rate"]'));
-  const rc = document.getElementById('rateCustom');
-  radios.forEach(r=> r.disabled=!__isOwner && r.value!=='custom'); // للمستخدم: مقفول
-  if(rc) rc.disabled = (!__isOwner || !document.querySelector('input[name="rate"][value="custom"]')?.checked);
+  if (state) state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
+  if (adminForm) adminForm.style.display = isOwner ? '' : 'none';
+  renderPresets();
 }
-if(unlock){ unlock.addEventListener('click',()=>{ if(pin && pin.value===ADMIN_PIN){ __isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); } else alert('❌ رمز غير صحيح'); }); }
-if(lockBtn){ lockBtn.addEventListener('click',()=>{ __isOwner=false; updateOwnerUI(); }); }
 
-// ---------- توحيد الفئة ----------
-window.normalizeRate = function(input){
-  if(input==null) return null;
-  const s = String(input).trim().replace('٪','%');
-  if(!s) return null;
-  // حالات شائعة:
-  // "5", "5%", "٠٥%", "0.05", 0.05, "10", "10%", "0.1", 0.1
-  const pctMatch = s.match(/(\d+(\.\d+)?)/);
-  if(pctMatch){
-    const n = parseFloat(pctMatch[1]);
-    if(n>1) return (n/100);   // 5 => 0.05
-    return n;                 // 0.05
-  }
-  return null;
-};
-window.prettyRate = function(input){
-  const n = window.normalizeRate(input);
-  if(n==null) return '';
-  return (Math.round(n*100)) + '%';
-};
+function loadPresets(){
+  try { return JSON.parse(localStorage.getItem(PRESETS_KEY)) || []; }
+  catch { return []; }
+}
+function savePresets(arr){
+  localStorage.setItem(PRESETS_KEY, JSON.stringify(arr));
+}
 
-// تطبيق الفئة على واجهة الآلة الحاسبة
-window.applyRate = function(decimal, lockForUser){
-  const radios = Array.from(document.querySelectorAll('input[name="rate"]'));
-  const rc = document.getElementById('rateCustom');
-  let matched=false;
+if (addPresetBtn) {
+  addPresetBtn.addEventListener('click', () => {
+    if (!isOwner) return alert('هذا الإجراء للمالك فقط');
+    const name = (pName?.value || '').trim();
+    const val = parseFloat(pVal?.value || 0);
+    const unit = pUnit?.value || 'pcs';
+    if (!name || !val) return alert('أكمل البيانات أولاً');
 
-  if(radios.length){
-    for(const r of radios){
-      const v = (r.value==='custom')? null : parseFloat(r.value);
-      if(v!=null && Math.abs(v - decimal) < 1e-6){
-        r.checked = true; matched=true;
-      }
+    const arr = loadPresets();
+    const i = arr.findIndex(x => x.name === name);
+    if (i >= 0) arr[i] = { name, value: val, unit };
+    else arr.push({ name, value: val, unit });
+
+    savePresets(arr);
+    if (pName) pName.value = '';
+    if (pVal)  pVal.value = '';
+    renderPresets();
+  });
+}
+
+if (clearPresetsBtn) {
+  clearPresetsBtn.addEventListener('click', () => {
+    if (!isOwner) return alert('للمالك فقط');
+    if (confirm('سيتم حذف جميع الأسعار المختصرة. متابعة؟')) {
+      savePresets([]); renderPresets();
     }
-    if(!matched){
-      const customRadio = radios.find(r=>r.value==='custom');
-      if(customRadio){
-        customRadio.checked=true;
-        if(rc){ rc.value=String(decimal); rc.disabled = false; }
-      }
-    }
+  });
+}
+
+function unitLabel(u){
+  // للعرض فقط
+  switch (u) {
+    case 'ton': return 'للطن';
+    case 'kg':  return 'للكيلو';
+    case 'dz':  return 'للدُزْن';
+    case 'pcs': return 'للحبة';
+    case 'ltr': return 'للتر';
+    case 'Ah':  return 'Ah/أمبير';
+    case 'W':   return 'W/واط';
+    default:    return u || '';
   }
-  // اقفال للمستخدم إن طُلب
-  if(lockForUser){
-    __isOwner=false;
-    updateOwnerUI();
-  } else {
-    updateOwnerUI();
-  }
+}
+
+function renderPresets(){
+  if (!presetsEl) return;
+  const arr = loadPresets();
+  if (!arr.length) { presetsEl.innerHTML = ''; return; }
+  presetsEl.innerHTML = arr.map(x => (
+    `<span class="chip ${isOwner ? 'admin' : ''}" onclick="fillValue(${x.value})">
+       ${x.name} <small>(${unitLabel(x.unit)})</small> – ${x.value}$
+       ${isOwner ? `<span class="x" onclick="event.stopPropagation(); delPreset(${JSON.stringify(x.name)})">×</span>` : ''}
+     </span>`
+  )).join('');
+}
+
+// واجهات عامة لزر الحذف والملء من المختصرات
+window.fillValue = (v) => {
+  const usd = el('usd');
+  if (usd) usd.value = v;
+  calc();
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+};
+window.delPreset = (name) => {
+  if (!isOwner) return;
+  savePresets(loadPresets().filter(x => x.name !== name));
+  renderPresets();
 };
 
-// ---------- الحاسبة ----------
-const LS={usd:'bc_pro_usd',rate:'bc_pro_rate',fx:'bc_pro_fx'};
+// ---------- Calculator Pro ----------
 const enFmt = new Intl.NumberFormat('en-US');
 
+const usdInput   = el('usd');          // قيمة بالدولار
+const outEl      = el('out');          // النتيجة
+const formulaEl  = el('formula');      // المعادلة المعروضة
+
+// فئة جمركية (5%/10%/مخصص)
+const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
+const pills = Array.from(document.querySelectorAll('.pill'));
+const rateCustom = el('rateCustom');   // إن وجد
+
+// سعر الصرف — إن وجد حقل؛ وإلا نستخدم 750
+const fxInput = el('fxInput');
+
+// المعامل — إن وجدت قائمة/حقل مخصص
+const factorSelect = el('factorSelect');
+const factorCustom = el('factorCustom');
+
+// مفاتيح التخزين للحالة
+const LS = {
+  usd: 'bc_pro_usd',
+  rate: 'bc_pro_rate',
+  rateCustom: 'bc_pro_rate_c',
+  fx: 'bc_pro_fx',
+  factor: 'bc_pro_factor',
+  factorCustom: 'bc_pro_factor_c'
+};
+
+// افتراضات
+const DEFAULTS = {
+  fx: 750,
+  rate: 0.10,      // 10%
+  factor: 0.2506
+};
+
+function getRate(){
+  // إن كان لديك راديو: 5%/10%/custom
+  const r = rateRadios.find(x => x.checked);
+  if (!r) {
+    // لا توجد راديوهات؟ استخدم 10% افتراضياً أو المحفوظ
+    const saved = parseFloat(localStorage.getItem(LS.rate) || '0');
+    return isFinite(saved) && saved > 0 ? saved : DEFAULTS.rate;
+  }
+  if (r.value === 'custom') {
+    const v = parseFloat(rateCustom?.value || '0');
+    return isFinite(v) && v > 0 ? v : 0;
+  }
+  return parseFloat(r.value || '0.10');
+}
+
+function getFx(){
+  const v = parseFloat(fxInput?.value || '0');
+  if (isFinite(v) && v > 0) return v;
+  // لو لا يوجد حقل، استخدم المحفوظ أو الافتراضي
+  const saved = parseFloat(localStorage.getItem(LS.fx) || '0');
+  return (isFinite(saved) && saved > 0) ? saved : DEFAULTS.fx;
+}
+
+function getFactor(){
+  if (factorSelect) {
+    if (factorSelect.value === 'custom') {
+      const v = parseFloat(factorCustom?.value || '0');
+      return isFinite(v) && v > 0 ? v : 0;
+    }
+    return parseFloat(factorSelect.value || String(DEFAULTS.factor));
+  }
+  // لا توجد عناصر معامل: استخدم المحفوظ أو الافتراضي
+  const saved = parseFloat(localStorage.getItem(LS.factor) || '0');
+  return (isFinite(saved) && saved > 0) ? saved : DEFAULTS.factor;
+}
+
 function formatYER(n){
-  try { return new Intl.NumberFormat('ar-YE',{maximumFractionDigits:0}).format(Math.round(n)); }
+  try { return new Intl.NumberFormat('ar-YE', { maximumFractionDigits: 0 }).format(Math.round(n)); }
   catch { return Math.round(n).toLocaleString(); }
 }
 
-window.calc = function(){
-  const usd = parseFloat(document.getElementById('usd')?.value || '0');
-  const fx  = parseFloat(document.getElementById('fxInput')?.value || '750');
+function calc(){
+  const usdVal = parseFloat(usdInput?.value || '0');
+  const rate   = getRate();
+  const fx     = getFx();
+  const factor = getFactor();
 
-  // اجلب الفئة من الراديو/المخصص
-  let rate=0.10; // افتراضي
-  const r = Array.from(document.querySelectorAll('input[name="rate"]')).find(x=>x.checked);
-  if(r){
-    if(r.value==='custom'){
-      const rc = parseFloat(document.getElementById('rateCustom')?.value || '0');
-      if(isFinite(rc) && rc>0) rate=rc; 
-    }else{
-      rate = parseFloat(r.value||'0.10');
+  const duty = usdVal * factor * fx * rate;
+
+  if (outEl) outEl.textContent = formatYER(duty);
+  if (formulaEl) {
+    const f = `${enFmt.format(usdVal||0)} × ${factor||0} × ${enFmt.format(fx||0)} × ${rate||0} = ${enFmt.format(Math.round(duty))}`;
+    formulaEl.textContent = f;
+  }
+
+  // حفظ الحالة
+  localStorage.setItem(LS.usd, String(usdVal || ''));
+  localStorage.setItem(LS.rate, String(rate));
+  if (fxInput) localStorage.setItem(LS.fx, String(fx));
+  if (factorSelect) localStorage.setItem(LS.factor, String(factor));
+  if (rateCustom) localStorage.setItem(LS.rateCustom, rateCustom.value || '');
+  if (factorCustom) localStorage.setItem(LS.factorCustom, factorCustom.value || '');
+}
+
+// ربط أحداث الحاسبة
+if (usdInput) usdInput.addEventListener('input', calc);
+
+rateRadios.forEach((r, i) => {
+  r.addEventListener('change', () => {
+    pills.forEach(p => p.classList.remove('active'));
+    if (pills[i]) pills[i].classList.add('active');
+    // تفعيل/تعطيل حقل الفئة المخصّصة
+    if (rateCustom) rateCustom.disabled = (r.value !== 'custom');
+    calc();
+  });
+});
+
+if (fxInput) fxInput.addEventListener('input', calc);
+
+if (factorSelect) {
+  factorSelect.addEventListener('change', () => {
+    if (factorCustom) factorCustom.style.display = (factorSelect.value === 'custom') ? 'block' : 'none';
+    calc();
+  });
+}
+if (factorCustom) factorCustom.addEventListener('input', calc);
+if (rateCustom) rateCustom.addEventListener('input', calc);
+
+// أدوات المشاركة/النسخ (استدعَها من أزرارك في HTML)
+function copyResult(){
+  const text = `الرسوم الجمركية: ${outEl?.textContent || ''} ريال يمني\nالمعادلة: ${formulaEl?.textContent || ''}`;
+  navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
+}
+function shareWhatsApp(){
+  const msg = `الرسوم الجمركية: ${outEl?.textContent || ''} ريال يمني\n${formulaEl?.textContent || ''}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+window.copyResult = copyResult;
+window.shareWhatsApp = shareWhatsApp;
+
+// استعادة الحالة عند التحميل
+(function restore(){
+  if (usdInput) usdInput.value = localStorage.getItem(LS.usd) ?? '';
+  if (fxInput)  fxInput.value  = localStorage.getItem(LS.fx)  ?? '750';
+
+  // فئة (لو ما عندك راديو، نتجاهل ونستخدم الحفظ/الافتراضي بالحساب)
+  const savedRate = parseFloat(localStorage.getItem(LS.rate) || '0');
+  if (rateRadios.length) {
+    // حاول مطابقة 0.05 أو 0.10
+    const std = rateRadios.find(r => parseFloat(r.value) === savedRate);
+    if (std) { std.checked = true; }
+    else if (rateCustom) {
+      // مخصص
+      const rc = localStorage.getItem(LS.rateCustom) || '';
+      const customRadio = rateRadios.find(r => r.value === 'custom');
+      if (customRadio) customRadio.checked = true;
+      rateCustom.value = rc;
+      rateCustom.disabled = false;
+    } else {
+      // افتراضي 10%
+      const r10 = rateRadios.find(r => r.value === '0.10');
+      if (r10) r10.checked = true;
     }
   }
 
-  // معامل ثابت 0.2075 (أو استبدله إذا لزم)
-  const factor = 0.2075;
-  const duty = (usd||0) * factor * (fx||0) * (rate||0);
+  // معامل
+  const savedFactor = parseFloat(localStorage.getItem(LS.factor) || '0');
+  const savedFactorCustom = localStorage.getItem(LS.factorCustom) || '';
+  if (factorSelect) {
+    if (String(savedFactor) === '0.2506' || String(savedFactor) === '0.205') {
+      factorSelect.value = String(savedFactor);
+      if (factorCustom) factorCustom.style.display = 'none';
+    } else if (savedFactorCustom || (savedFactor && savedFactor !== 0.2506 && savedFactor !== 0.205)) {
+      factorSelect.value = 'custom';
+      if (factorCustom) {
+        factorCustom.style.display = 'block';
+        factorCustom.value = savedFactorCustom || String(savedFactor);
+      }
+    } else {
+      factorSelect.value = String(DEFAULTS.factor);
+    }
+  }
 
-  const out = document.getElementById('out');
-  const formula = document.getElementById('formula');
-  if(out) out.textContent = formatYER(duty);
-  if(formula) formula.textContent = `${enFmt.format(Math.round(duty))} = ${factor} × ${enFmt.format(fx||0)} × ${enFmt.format(usd||0)} × ${rate}`;
-
-  // حفظات بسيطة
-  localStorage.setItem(LS.usd, String(usd||''));
-  localStorage.setItem(LS.rate, String(rate));
-  localStorage.setItem(LS.fx,  String(fx));
-};
-
-// تهيئة عامة
-(function init(){
-  // استعادة بعض القيم
-  const usd = document.getElementById('usd');
-  const fx  = document.getElementById('fxInput');
-  if(usd && localStorage.getItem(LS.usd)!=null) usd.value = localStorage.getItem(LS.usd);
-  if(fx  && localStorage.getItem(LS.fx)!=null)  fx.value  = localStorage.getItem(LS.fx);
-
-  // ربط الأحداث
-  usd?.addEventListener('input', window.calc);
-  fx?.addEventListener('input', window.calc);
-  document.querySelectorAll('input[name="rate"]').forEach(r=>{
-    r.addEventListener('change', ()=>{
-      const rc = document.getElementById('rateCustom');
-      rc && (rc.disabled = (r.value!=='custom'));
-      window.calc();
-    });
-  });
-  document.getElementById('rateCustom')?.addEventListener('input', window.calc);
-
+  renderPresets();
   updateOwnerUI();
-  window.calc();
+  calc();
 })();
-
-// نسخ/واتساب
-window.copyResult = function(){
-  const out=document.getElementById('out')?.textContent||'';
-  const f  =document.getElementById('formula')?.textContent||'';
-  navigator.clipboard.writeText(`الرسوم الجمركية: ${out} ريال يمني\n${f}`).then(()=>alert('✔ تم النسخ'));
-};
-window.shareWhatsApp = function(){
-  const out=document.getElementById('out')?.textContent||'';
-  const f  =document.getElementById('formula')?.textContent||'';
-  open('https://wa.me/?text='+encodeURIComponent(`الرسوم الجمركية: ${out} ريال يمني\n${f}`),'_blank');
-};
