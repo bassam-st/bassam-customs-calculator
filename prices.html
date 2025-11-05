@@ -1,162 +1,107 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>إدارة أسعار السلع (USD)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>قائمة الأسعار (USD)</title>
 <style>
   body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .top{background:#2563eb;color:#fff;padding:14px 16px}
+  .top{background:#2563eb;color:#fff;padding:14px 16px;font-weight:800;text-align:center}
   .wrap{max-width:880px;margin:16px auto;padding:0 12px}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
-  .row{display:grid;grid-template-columns:1fr 160px 140px;gap:10px}
-  label{display:block;font-size:13px;color:#475569;margin-bottom:4px}
-  input,select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:14px}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn-blue{background:#2563eb;color:#fff}
-  .btn-green{background:#16a34a;color:#fff}
-  .btn-gray{background:#e2e8f0;color:#0f172a}
-  .btn-orange{background:#f97316;color:#fff}
-  .btn-red{background:#ef4444;color:#fff}
-  .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1;align-items:center;flex-wrap:wrap}
   .muted{color:#64748b;font-size:12px}
-  .tag{display:inline-block;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;padding:2px 8px;border-radius:999px;font-size:12px;margin-inline-start:6px}
-  .nav{margin:10px 0}
-  .nav a{display:inline-block;margin-left:8px;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
-  @media(max-width:640px){.row{grid-template-columns:1fr}}
-  .owner-bar{display:flex;gap:8px;align-items:center}
-  .owner-hint{font-size:12px;color:#475569}
+  input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:#fff}
+  .item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px dashed #e2e8f0;align-items:center;flex-wrap:wrap}
+  .name{font-weight:800}
+  .tag{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;color:#1e3a8a;border-radius:999px;padding:2px 8px;font-size:12px;margin-inline-start:8px}
+  .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn-green{background:#16a34a;color:#fff}
+  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
 </style>
 </head>
 <body>
-  <div class="top"><b>$ إدارة أسعار السلع (USD)</b></div>
+  <div class="top">💲 إدارة أسعار السلع (USD)</div>
   <div class="wrap">
     <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
 
-    <!-- شريط المالك -->
     <div class="card">
-      <div class="owner-bar">
-        <span>🔒 وضع المالك:</span>
-        <input id="pin" type="password" placeholder="PIN" />
-        <button class="btn btn-blue" id="unlock">فتح</button>
-        <button class="btn btn-gray" id="lock">قفل</button>
-        <span id="ownerState" class="owner-hint">الحالة: قراءة فقط</span>
-      </div>
-      <div class="owner-hint">بدون فتح، لا يمكن الإضافة/التعديل/الحذف أو الاستيراد/التصدير.</div>
+      <input id="q" placeholder="ابحث بالاسم… مثال: بطاريات، شبك، ملابس" />
+      <div class="muted" style="margin-top:6px">يتم قراءة الفئة تلقائيًا من الحقل (rate) أو من الملاحظات التي تحتوي على “الفئه5% / الفئة 10% …”.</div>
     </div>
 
-    <!-- أدوات + قائمة -->
-    <div class="card">
-      <div class="actions">
-        <input id="q" placeholder="ابحث بالاسم… مثال: شبك، بطاطس، بطاريات" />
-        <button class="btn btn-blue" id="exportBtn" disabled>تصدير JSON</button>
-        <button class="btn btn-gray" id="importBtn" disabled>استيراد JSON</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none" />
-      </div>
-      <div class="list" id="list" style="margin-top:8px"></div>
+    <div class="card" id="list">
+      <div class="muted">جاري تحميل البيانات…</div>
     </div>
   </div>
 
-<script src="./main.js"></script>
 <script>
-const KEY='pricesCatalogV2';
-const q=document.getElementById('q');
-const list=document.getElementById('list');
-const exportBtn=document.getElementById('exportBtn');
-const importBtn=document.getElementById('importBtn');
-const importFile=document.getElementById('importFile');
+  const FILE_URL = './assets/prices_catalog.json';
 
-let baseData=[];
-async function loadBase(){
-  try{ baseData = await fetch('./assets/prices_catalog.json?ts='+Date.now()).then(r=>r.json()); }
-  catch{ baseData=[]; }
-}
-function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY))||[] }catch{ return [] } }
-function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
-function merged(){
-  const m=new Map();
-  baseData.forEach(x=> m.set((x.name||'').trim(), x));
-  loadLocal().forEach(x=> m.set((x.name||'').trim(), x));
-  return Array.from(m.values());
-}
+  function normalizeArabicDigits(s=""){
+    return String(s).replace(/[٠-٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)] ?? d);
+  }
+  function extractRate(text=""){
+    const t = normalizeArabicDigits(text).replace(/\s/g,'');
+    // يدعم: rate: "5%" أو مذكورة في notes مثل: "الفئه5%"، "الفئة 10%"، "5%"
+    const m = t.match(/(\d{1,2})\s*%/);
+    if (m) {
+      const n = parseInt(m[1],10);
+      return (n===5||n===10) ? n : null;
+    }
+    return null;
+  }
+  function unitLabel(u){
+    return u==='ton'?'الطن':u==='kg'?'الكيلو':u==='dz'?'الدرزن':u==='pcs'?'الحبة':u==='Ah'?'الأمبير/ساعة':u==='W'?'الوات':u==='ltr'?'اللتر':(u||'');
+  }
 
-function unitLabel(u){ return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='Ah'?'Ah/أمبير':u==='W'?'W/واط':u==='ltr'?'للتر':u; }
+  const q = document.getElementById('q');
+  const list = document.getElementById('list');
+  let DATA=[];
 
-// يعرض العناصر ويُمرّر الفئة الصحيحة
-function render(){
-  const arr=merged();
-  const s=(q.value||'').trim();
-  const filtered = s ? arr.filter(x=> (x.name||'').includes(s)) : arr;
-  if(!filtered.length){ list.innerHTML='<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
+  function render(items){
+    if(!items.length){ list.innerHTML = '<div class="muted">لا توجد بيانات…</div>'; return; }
+    list.innerHTML = items.map(x=>{
+      const rateNum = (x.rate ? extractRate(x.rate) : extractRate(x.notes||'')); // 5 أو 10 أو null
+      const rateTag = rateNum ? `<span class="tag">${rateNum}%</span>` : '';
+      return `
+        <div class="item">
+          <div>
+            <div class="name">${x.name||''} ${rateTag}</div>
+            <div class="muted">USD ${x.price||0} • <span class="tag">${unitLabel(x.unit||'')}</span> ${x.notes?('• '+x.notes):''}</div>
+          </div>
+          <button class="btn btn-green" onclick='useInCalc(${JSON.stringify(x.name||'')}, ${Number(x.price||0)}, ${JSON.stringify(x.unit||'')}, ${JSON.stringify(x.notes||'')}, ${JSON.stringify(x.rate||'')})'>استخدام السعر</button>
+        </div>
+      `;
+    }).join('');
+  }
 
-  list.innerHTML = filtered.map(x=>{
-    const normRate = normalizeRate(x.rate);         // 0.05 أو 0.10
-    const badge    = prettyRate(x.rate);            // "5%" أو "10%"
-    const nameQ = JSON.stringify(x.name||'');
-    const unitQ = x.unit||'';
-    const priceQ= Number(x.price||0);
+  function search(text){
+    const s = (text||'').trim();
+    if(!s) return DATA;
+    return DATA.filter(x=> (x.name||'').includes(s));
+  }
 
-    return `<div class="item">
-      <div>
-        <div><b>${x.name||''}</b>
-             <span class="tag">${unitLabel(unitQ||'')}</span>
-             <span class="tag">${badge}</span></div>
-        <div class="muted">USD ${priceQ}${x.notes?(' • '+x.notes):''}</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-green"
-          onclick="useInCalc(${nameQ}, ${priceQ}, '${unitQ}', '${badge}')">استخدام السعر</button>
-      </div>
-    </div>`;
-  }).join('');
-}
+  window.useInCalc = function(name, price, unit, notes, rateRaw){
+    // استخرج الفئة كرقم 5 أو 10 ثم أرسلها للحاسبة
+    const rateNum = extractRate(rateRaw)||extractRate(notes)||null;
+    const params = new URLSearchParams({
+      name, price, unit,
+      rate: rateNum ? String(rateNum) : '' ,   // تُحوّل داخل الحاسبة إلى 0.05 أو 0.10
+      note: notes||''
+    });
+    location.href = './index.html?' + params.toString();
+  }
 
-// يذهب للحاسبة مع الفئة المحسّنة
-window.useInCalc = function(name, price, unit, rateBadge){
-  const r = normalizeRate(rateBadge);  // 0.05 / 0.10
-  const params = new URLSearchParams({
-    name, price, unit,
-    qty: '1',
-    rate: String(r)
-  });
-  location.href = './index.html?' + params.toString();
-}
+  q.addEventListener('input', ()=>render(search(q.value)));
 
-// استيراد/تصدير
-exportBtn.addEventListener('click', ()=>{
-  if(!window.__isOwner) return alert('للمالك فقط');
-  const data = JSON.stringify(merged(), null, 2);
-  const blob = new Blob([data], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), {href:url, download:'prices_catalog.json'});
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),500);
-});
-
-importBtn.addEventListener('click', ()=>{ if(!window.__isOwner) return alert('للمالك فقط'); importFile.click(); });
-importFile.addEventListener('change', async ()=>{
-  if(!window.__isOwner) return;
-  const f=importFile.files[0]; if(!f) return;
-  try{
-    const text=await f.text(); const arr=JSON.parse(text);
-    const cleaned=arr.filter(x=>x&&typeof x==='object').map(x=>({
-      name:String(x.name||'').trim(),
-      price:Number(x.price||0),
-      unit:x.unit||'pcs',
-      rate: prettyRate(x.rate), // نخزنها بشكل متّسق "5%" / "10%"
-      notes:String(x.notes||'').trim()
-    })).filter(x=>x.name && x.price>0);
-    saveLocal(cleaned); render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
-  }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
-  finally{ importFile.value=''; }
-});
-
-q.addEventListener('input', render);
-
-(async function init(){
-  await loadBase();
-  render();
-})();
+  (async function init(){
+    try{
+      DATA = await fetch(FILE_URL).then(r=>r.json());
+      render(DATA);
+    }catch(e){
+      list.innerHTML = '<div class="muted">تعذّر تحميل ملف الأسعار. تأكد من وجود assets/prices_catalog.json</div>';
+    }
+  })();
 </script>
 </body>
 </html>
