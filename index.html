@@ -1,213 +1,168 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>بسام مساعدك الجمركي</title>
-<link rel="manifest" href="./manifest.json" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بسّام مساعدك الجمركي</title>
+<link rel="manifest" href="/manifest.json">
 <style>
-  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f3f4f6;margin:0}
-  .hero{background:#16a34a;color:#fff;padding:22px 16px;border-bottom-left-radius:28px;border-bottom-right-radius:28px}
-  .wrap{max-width:920px;margin:-20px auto 24px;padding:0 12px}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:14px;margin-top:16px}
-  .title{font-size:20px;margin:0 0 10px}
-  label{display:block;margin:10px 0 6px;font-size:13px;color:#334155}
-  input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:640px){.row{grid-template-columns:1fr}}
+  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f6f7fb;margin:0}
+  .hero{background:#16a34a;color:#fff;padding:18px;border-radius:18px;margin:14px}
+  .hero h1{margin:0 0 6px;font-size:20px}
+  .wrap{max-width:880px;margin:0 auto;padding:0 12px}
+  .row{display:grid;gap:10px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin:12px 0}
+  label{display:block;font-size:13px;color:#475569;margin-bottom:6px}
+  input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:15px}
   .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
   .btn-green{background:#16a34a;color:#fff}
-  .btn-blue{background:#2563eb;color:#fff}
   .btn-gray{background:#e2e8f0}
-  .pill{display:flex;align-items:center;gap:8px;background:#e5f3e8;border-radius:999px;padding:10px 14px;user-select:none}
-  .pills{display:flex;gap:10px;flex-wrap:wrap}
-  .result{border:2px dashed #cbd5e1;border-radius:16px;padding:18px;text-align:center;margin-top:12px}
-  .result b{font-size:42px;color:#065f46}
-  .muted{color:#6b7280;font-size:13px}
-  .top-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .pill{display:flex;align-items:center;justify-content:space-between;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;margin:8px 0}
+  .pill.active{background:#e8fff0;border-color:#16a34a}
+  .result{border:2px dashed #cbd5e1;border-radius:14px;padding:18px;text-align:center}
+  .result .big{font-size:44px;color:#065f46;font-weight:900;margin:0}
+  .muted{color:#64748b;font-size:12px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap}
+  .nav-grid{display:flex;gap:10px;flex-wrap:wrap}
+  .nav-grid a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:10px 12px;border-radius:10px;font-weight:700}
+  .lock-hint{font-size:12px;color:#475569;margin-top:6px}
 </style>
 </head>
 <body>
+<div class="wrap">
   <div class="hero">
-    <div class="wrap" style="color:#fff">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <div>
-          <h1 style="margin:0 0 6px">بسام مساعدك الجمركي</h1>
-          <div class="muted" style="color:#e7ffe7">للاستفسار وخدمات التخليص: 009677719997809</div>
-        </div>
-        <div class="top-buttons">
-          <a class="btn btn-blue" href="./prices.html" style="text-decoration:none">قائمة الأسعار 💲</a>
-        </div>
-      </div>
+    <h1>بسّام مساعدك الجمركي</h1>
+    <div class="nav-grid">
+      <a href="./prices.html">$ قائمة الأسعار</a>
+      <a href="./items.html">🔎 البنود الجمركية</a>
+      <button id="installBtn" class="btn btn-gray">⬇️ تثبيت التطبيق</button>
     </div>
+    <div style="margin-top:8px">للاستفسار: 00967771997809</div>
   </div>
 
-  <div class="wrap">
-    <!-- وضع المالك -->
-    <div class="card">
-      <div class="row" style="align-items:end">
-        <div>
-          <label>وضع المالك: PIN</label>
-          <input id="pin" placeholder="PIN" />
-          <div class="muted" id="state">الحالة: قراءة فقط</div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-blue" id="unlock">فتح</button>
-          <button class="btn btn-gray" id="lock">قفل</button>
-        </div>
+  <!-- وضع المالك -->
+  <div class="card">
+    <label>وضع المالك: <span class="muted">أدخل PIN لفتح التعديل على الفئة الجمركية</span></label>
+    <div class="bar">
+      <input id="pin" placeholder="PIN">
+      <button id="unlock" class="btn btn-green">فتح</button>
+      <button id="lock"   class="btn btn-gray">قفل</button>
+    </div>
+    <div id="state" class="lock-hint">الحالة: قراءة فقط</div>
+  </div>
+
+  <!-- بيانات السلعة (تُملأ تلقائياً عند القدوم من قائمة الأسعار) -->
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>اسم السلعة</label>
+        <input id="itemName" placeholder="اختياري – يُملأ تلقائياً عند القدوم من قائمة الأسعار">
       </div>
-      <div class="muted">الفئة تبقى مقفولة للمستخدم. فقط المالك يمكنه تغييرها عند الضغط على “فتح”.</div>
+      <div>
+        <label>الوحدة</label>
+        <input id="unitLabel" placeholder="مثال: للحبة / للطن">
+      </div>
     </div>
 
-    <!-- الحاسبة -->
-    <div class="card">
-      <h3 class="title">الحاسبة</h3>
-
-      <div class="row">
-        <div>
-          <label>السعر للوحدة (USD)</label>
-          <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15" />
-        </div>
-        <div>
-          <label>العدد الكلي</label>
-          <input id="qty" type="number" inputmode="numeric" placeholder="مثال: 20" />
-        </div>
+    <div class="row" style="margin-top:8px">
+      <div>
+        <label>السعر للوحدة (USD)</label>
+        <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15">
       </div>
-
-      <div style="margin-top:8px">
+      <div>
+        <label>العدد الكلي</label>
+        <input id="qty" type="number" inputmode="numeric" placeholder="مثال: 20" value="1">
+      </div>
+      <div>
         <label>قيمة السلعة الإجمالية (USD)</label>
-        <input id="usd" placeholder="يُحسب تلقائيًا = سعر × عدد (يمكن الكتابة يدويًا)" />
+        <input id="usd" placeholder="يُحسب تلقائياً = سعر × عدد — ويمكن الكتابة يدويّاً">
       </div>
+    </div>
 
-      <div class="row" style="margin-top:8px">
-        <div>
-          <label>سعر الصرف (ريال/دولار)</label>
-          <input id="fxInput" type="number" inputmode="decimal" value="750" />
-        </div>
-        <div>
-          <label>المعامل</label>
-          <input id="factorInput" type="number" inputmode="decimal" value="0.2075" />
-        </div>
-      </div>
-
-      <div style="margin-top:10px">
-        <label>الفئة الجمركية</label>
-        <div class="pills" id="rateGroup">
-          <label class="pill">
-            <input type="radio" name="rate" value="0.05" /> 5%
-          </label>
-          <label class="pill">
-            <input type="radio" name="rate" value="0.10" /> 10%
-          </label>
-        </div>
-      </div>
-
-      <div class="result">
-        <div class="muted">الرسوم الجمركية (ريال يمني)</div>
-        <b id="out">0</b>
-        <div class="muted" id="formula" style="margin-top:6px">0 = 0.2075 × 750 × 0</div>
-      </div>
-
-      <div class="top-buttons" style="justify-content:center;margin-top:12px">
-        <button class="btn btn-blue" onclick="window.print()">طباعة / حفظ PDF</button>
-        <button class="btn btn-green" onclick="copyResult()">نسخ النتيجة</button>
+    <div class="row" style="margin-top:8px">
+      <div>
+        <label>سعر الصرف (ريال/دولار)</label>
+        <input id="fxInput" type="number" inputmode="decimal" value="750">
       </div>
     </div>
   </div>
 
+  <!-- الفئة الجمركية (تُقفل للمستخدم وتُفتح مع PIN) -->
+  <div class="card">
+    <label>الفئة الجمركية</label>
+
+    <label class="pill"><span>5% (فئة خمسة بالمئة)</span>
+      <input type="radio" name="rate" value="0.05">
+    </label>
+
+    <label class="pill"><span>10% (فئة عشرة بالمئة)</span>
+      <input type="radio" name="rate" value="0.10">
+    </label>
+
+    <label class="pill"><span>مخصّص</span>
+      <input type="radio" name="rate" value="custom">
+    </label>
+    <input id="rateCustom" type="number" inputmode="decimal" placeholder="أدخل نسبة مثل 0.08" disabled>
+    <div class="muted">⚠️ للمستخدم العادي: هذه الفئة تُحدَّد تلقائيًا من قاعدة الأسعار ولا يمكن تعديلها. تُفتح فقط بوضع المالك.</div>
+  </div>
+
+  <!-- النتيجة -->
+  <div class="card">
+    <div class="result">
+      <h2 class="big" id="out">0</h2>
+      <div id="formula" class="muted">0 = 0.2075 × 750 × 0</div>
+    </div>
+    <div class="bar" style="margin-top:10px">
+      <button class="btn btn-gray" onclick="copyResult()">نسخ النتيجة</button>
+      <button class="btn btn-green" onclick="shareWhatsApp()">مشاركة واتساب</button>
+    </div>
+  </div>
+</div>
+
+<script src="./main.js"></script>
 <script>
-  // ======== إعدادات عامة
-  const ADMIN_PIN = 'bassam1234';
-  let isOwner = false;
+// ملء الحقول تلقائيًا من prices.html
+(function fromQuery(){
+  const params = new URLSearchParams(location.search);
+  const name = params.get('name') || '';
+  const unit = params.get('unit') || '';
+  const price = parseFloat(params.get('price') || '0');
+  const qty   = parseFloat(params.get('qty')   || '1');
+  const rateQ = params.get('rate'); // قد تكون "5", "5%", "0.05", "10",...
 
-  const pinEl = document.getElementById('pin');
-  const unlockBtn = document.getElementById('unlock');
-  const lockBtn = document.getElementById('lock');
-  const stateEl = document.getElementById('state');
-
-  function setOwnerUI(){
-    stateEl.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-    // قفل/فتح الفئة
-    document.querySelectorAll('input[name="rate"]').forEach(r => r.disabled = !isOwner);
-  }
-  unlockBtn.addEventListener('click', ()=>{
-    if(pinEl.value===ADMIN_PIN){ isOwner=true; setOwnerUI(); alert('✅ تم فتح وضع المالك'); }
-    else alert('❌ رمز غير صحيح');
-  });
-  lockBtn.addEventListener('click', ()=>{ isOwner=false; setOwnerUI(); });
-
-  // ======== عناصر الحاسبة
+  const itemName  = document.getElementById('itemName');
+  const unitLabel = document.getElementById('unitLabel');
   const unitPrice = document.getElementById('unitPrice');
-  const qty       = document.getElementById('qty');
-  const usdInput  = document.getElementById('usd');
-  const fxInput   = document.getElementById('fxInput');
-  const factorInp = document.getElementById('factorInput');
-  const rateRadios= Array.from(document.querySelectorAll('input[name="rate"]'));
-  const outEl     = document.getElementById('out');
-  const formulaEl = document.getElementById('formula');
+  const qtyEl     = document.getElementById('qty');
+  const usd       = document.getElementById('usd');
 
-  function fmt(n){ return new Intl.NumberFormat('en-US').format(Math.round(n||0)); }
-  function fmtYer(n){ try{ return new Intl.NumberFormat('ar-YE',{maximumFractionDigits:0}).format(Math.round(n||0)); } catch{ return fmt(n);} }
+  if (name) itemName.value = name;
+  if (unit) unitLabel.value = unit;
+  if (!isNaN(price) && price>0) unitPrice.value = String(price);
+  if (!isNaN(qty) && qty>0) qtyEl.value = String(qty);
 
-  function getRate(){
-    const r = rateRadios.find(x=>x.checked);
-    return r ? parseFloat(r.value) : 0.10;
-  }
+  // احسب الإجمالي تلقائيًا
+  const total = (!isNaN(price)&&!isNaN(qty)) ? price*qty : 0;
+  if (total>0) usd.value = String(total);
 
-  function calcTotalUSD(){
-    const u = parseFloat(unitPrice.value||'0');
-    const q = parseFloat(qty.value||'0');
-    if (u>0 && q>0) usdInput.value = String(u*q);
-  }
+  // اضبط الفئة تلقائيًا واقفلها (لغير المالك)
+  const r = window.normalizeRate(rateQ); // 0.05 / 0.10
+  if (r) window.applyRate(r, /*lockForUser=*/true);
 
-  function calc(){
-    const usd = parseFloat(usdInput.value||'0');
-    const fx  = parseFloat(fxInput.value||'750') || 750;
-    const fac = parseFloat(factorInp.value||'0.2075') || 0.2075;
-    const rate= getRate();
-    const duty = usd * fx * fac * rate;
-    outEl.textContent = fmtYer(duty);
-    formulaEl.textContent = `${fmt(usd)} = ${fac} × ${fmt(fx)} × ${fmt(usd)} × ${rate}`;
-  }
+  // حدث الآلة الحاسبة أول مرة
+  window.calc();
+})();
 
-  [unitPrice, qty].forEach(el=> el.addEventListener('input', ()=>{ calcTotalUSD(); calc(); }));
-  [usdInput, fxInput, factorInp].forEach(el=> el.addEventListener('input', calc));
-  rateRadios.forEach(r=> r.addEventListener('change', calc));
-
-  // ======== قراءة بارامترات من الرابط (من قائمة الأسعار)
-  (function fromQuery(){
-    const url = new URL(location.href);
-    const price = url.searchParams.get('price'); // سعر الوحدة
-    const unit  = url.searchParams.get('unit');  // لا نستخدمه هنا لكن محفوظ لو أردت عرضه
-    const qtyQ  = url.searchParams.get('qty') || '1';
-    const rateQ = url.searchParams.get('rate');  // "5" أو "10"
-
-    if (price){ unitPrice.value = price; }
-    if (qtyQ){  qty.value = qtyQ; }
-    calcTotalUSD();
-
-    // فرض الفئة القادمة من القائمة + قفلها للمستخدم
-    if (rateQ === '5' || rateQ === '10') {
-      const v = rateQ === '5' ? '0.05' : '0.10';
-      const radio = rateRadios.find(r=> r.value===v);
-      if (radio) radio.checked = true;
-    } else {
-      // افتراضي 10% إن لم يأتِ شيء
-      const r10 = rateRadios.find(r=> r.value==='0.10'); if (r10) r10.checked = true;
-    }
-
-    // المستخدم العادي لا يستطيع تغيير الفئة (تُفتح فقط بوضع المالك)
-    isOwner = false;
-    setOwnerUI();
-    calc();
-  })();
-
-  // ======== أدوات
-  function copyResult(){
-    const text = `الرسوم الجمركية: ${outEl.textContent} ريال يمني\n${formulaEl.textContent}`;
-    navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
-  }
-  window.copyResult = copyResult;
+// ربط تغيير السعر/العدد لتحديث الإجمالي تلقائيًا
+document.getElementById('unitPrice').addEventListener('input', syncUSD);
+document.getElementById('qty').addEventListener('input', syncUSD);
+function syncUSD(){
+  const p = parseFloat(document.getElementById('unitPrice').value || '0');
+  const q = parseFloat(document.getElementById('qty').value || '0');
+  const usd = document.getElementById('usd');
+  usd.value = (isFinite(p) && isFinite(q)) ? String(p*q) : '';
+  window.calc();
+}
 </script>
 </body>
 </html>
