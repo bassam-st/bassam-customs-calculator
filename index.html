@@ -1,168 +1,178 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بسّام مساعدك الجمركي</title>
-<link rel="manifest" href="/manifest.json">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>حاسبة الرسوم الجمركية</title>
 <style>
-  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f6f7fb;margin:0}
-  .hero{background:#16a34a;color:#fff;padding:18px;border-radius:18px;margin:14px}
-  .hero h1{margin:0 0 6px;font-size:20px}
-  .wrap{max-width:880px;margin:0 auto;padding:0 12px}
-  .row{display:grid;gap:10px}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin:12px 0}
-  label{display:block;font-size:13px;color:#475569;margin-bottom:6px}
-  input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:15px}
+  body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
+  .top{background:#16a34a;color:#fff;padding:16px;text-align:center;font-weight:800}
+  .wrap{max-width:880px;margin:16px auto;padding:0 12px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
+  label{display:block;font-size:13px;color:#475569;margin:6px 0 4px}
+  input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;background:#fff}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .btn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
   .btn-green{background:#16a34a;color:#fff}
   .btn-gray{background:#e2e8f0}
-  .pill{display:flex;align-items:center;justify-content:space-between;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;margin:8px 0}
-  .pill.active{background:#e8fff0;border-color:#16a34a}
-  .result{border:2px dashed #cbd5e1;border-radius:14px;padding:18px;text-align:center}
-  .result .big{font-size:44px;color:#065f46;font-weight:900;margin:0}
+  .res{font-size:40px;font-weight:800;color:#065f46;text-align:center}
   .muted{color:#64748b;font-size:12px}
-  .bar{display:flex;gap:8px;flex-wrap:wrap}
-  .nav-grid{display:flex;gap:10px;flex-wrap:wrap}
-  .nav-grid a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:10px 12px;border-radius:10px;font-weight:700}
-  .lock-hint{font-size:12px;color:#475569;margin-top:6px}
+  .pill{padding:10px;border-radius:999px;border:1px solid #cbd5e1;display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .pill.locked{opacity:.6;pointer-events:none}
+  .row2{display:flex;gap:10px;flex-wrap:wrap}
+  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="hero">
-    <h1>بسّام مساعدك الجمركي</h1>
-    <div class="nav-grid">
-      <a href="./prices.html">$ قائمة الأسعار</a>
-      <a href="./items.html">🔎 البنود الجمركية</a>
-      <button id="installBtn" class="btn btn-gray">⬇️ تثبيت التطبيق</button>
-    </div>
-    <div style="margin-top:8px">للاستفسار: 00967771997809</div>
-  </div>
+  <div class="top">📦 بسّام مساعدك الجمركي – الحاسبة</div>
+  <div class="wrap">
 
-  <!-- وضع المالك -->
-  <div class="card">
-    <label>وضع المالك: <span class="muted">أدخل PIN لفتح التعديل على الفئة الجمركية</span></label>
-    <div class="bar">
-      <input id="pin" placeholder="PIN">
-      <button id="unlock" class="btn btn-green">فتح</button>
-      <button id="lock"   class="btn btn-gray">قفل</button>
-    </div>
-    <div id="state" class="lock-hint">الحالة: قراءة فقط</div>
-  </div>
+    <div class="nav"><a href="./prices.html">← قائمة الأسعار</a> <a href="./hs.html">البنود الجمركية</a></div>
 
-  <!-- بيانات السلعة (تُملأ تلقائياً عند القدوم من قائمة الأسعار) -->
-  <div class="card">
-    <div class="row">
-      <div>
-        <label>اسم السلعة</label>
-        <input id="itemName" placeholder="اختياري – يُملأ تلقائياً عند القدوم من قائمة الأسعار">
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>اسم السلعة</label>
+          <input id="name" placeholder="اختياري — يُملأ تلقائيًا عند القدوم من قائمة الأسعار" />
+        </div>
+        <div>
+          <label>الوحدة</label>
+          <input id="unit" placeholder="مثال: للحبة / للطن" />
+        </div>
       </div>
-      <div>
-        <label>الوحدة</label>
-        <input id="unitLabel" placeholder="مثال: للحبة / للطن">
-      </div>
-    </div>
 
-    <div class="row" style="margin-top:8px">
-      <div>
-        <label>السعر للوحدة (USD)</label>
-        <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15">
+      <div class="row">
+        <div>
+          <label>السعر للوحدة (USD)</label>
+          <input id="unitPrice" type="number" inputmode="decimal" placeholder="مثال: 15" />
+        </div>
+        <div>
+          <label>العدد الكلي</label>
+          <input id="qty" type="number" inputmode="numeric" placeholder="مثال: 20" value="1" />
+        </div>
       </div>
-      <div>
-        <label>العدد الكلي</label>
-        <input id="qty" type="number" inputmode="numeric" placeholder="مثال: 20" value="1">
-      </div>
+
       <div>
         <label>قيمة السلعة الإجمالية (USD)</label>
-        <input id="usd" placeholder="يُحسب تلقائياً = سعر × عدد — ويمكن الكتابة يدويّاً">
+        <input id="usdTotal" placeholder="يُحسب تلقائيًا = سعر × عدد — ويمكنك الكتابة يدويًا لو أردت" />
+        <div class="muted">إذا كتبت هنا يدويًا سيتجاوز الحسبة التلقائية.</div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>سعر الصرف (ريال/دولار)</label>
+          <input id="fx" type="number" inputmode="decimal" value="750" />
+        </div>
+        <div>
+          <label>الفئة الجمركية</label>
+          <div id="rateBox" class="pill locked">
+            <span id="rateLabel">—</span>
+            <input id="rateValue" type="hidden" value="0.05" />
+            <small class="muted">هذه الفئة تُحدّد تلقائيًا من قائمة الأسعار (مقفولة للمستخدم)</small>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="row" style="margin-top:8px">
-      <div>
-        <label>سعر الصرف (ريال/دولار)</label>
-        <input id="fxInput" type="number" inputmode="decimal" value="750">
+    <div class="card">
+      <div class="res" id="out">0</div>
+      <div class="muted" id="formula">0 = 0 × 750 × 0</div>
+      <div class="row2" style="margin-top:10px">
+        <button class="btn btn-green" onclick="copyResult()">نسخ النتيجة</button>
+        <button class="btn btn-gray" onclick="shareWhatsApp()">مشاركة واتساب</button>
       </div>
     </div>
   </div>
 
-  <!-- الفئة الجمركية (تُقفل للمستخدم وتُفتح مع PIN) -->
-  <div class="card">
-    <label>الفئة الجمركية</label>
-
-    <label class="pill"><span>5% (فئة خمسة بالمئة)</span>
-      <input type="radio" name="rate" value="0.05">
-    </label>
-
-    <label class="pill"><span>10% (فئة عشرة بالمئة)</span>
-      <input type="radio" name="rate" value="0.10">
-    </label>
-
-    <label class="pill"><span>مخصّص</span>
-      <input type="radio" name="rate" value="custom">
-    </label>
-    <input id="rateCustom" type="number" inputmode="decimal" placeholder="أدخل نسبة مثل 0.08" disabled>
-    <div class="muted">⚠️ للمستخدم العادي: هذه الفئة تُحدَّد تلقائيًا من قاعدة الأسعار ولا يمكن تعديلها. تُفتح فقط بوضع المالك.</div>
-  </div>
-
-  <!-- النتيجة -->
-  <div class="card">
-    <div class="result">
-      <h2 class="big" id="out">0</h2>
-      <div id="formula" class="muted">0 = 0.2075 × 750 × 0</div>
-    </div>
-    <div class="bar" style="margin-top:10px">
-      <button class="btn btn-gray" onclick="copyResult()">نسخ النتيجة</button>
-      <button class="btn btn-green" onclick="shareWhatsApp()">مشاركة واتساب</button>
-    </div>
-  </div>
-</div>
-
-<script src="./main.js"></script>
 <script>
-// ملء الحقول تلقائيًا من prices.html
-(function fromQuery(){
+  // —— Helpers ——
+  const $ = id => document.getElementById(id);
+  const enFmt = new Intl.NumberFormat('en-US');
+
+  function normalizeArabicDigits(s=""){
+    return String(s).replace(/[٠-٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)] ?? d);
+  }
+  function extractRate(text=""){
+    const t = normalizeArabicDigits(text).replace(/\s/g,'');
+    // يدعم: الفئة5% ، الفئه10% ، 5% ، rate:5% …
+    const m = t.match(/(\d{1,2})\s*%/);
+    if (m) {
+      const n = parseInt(m[1],10);
+      if (n===5) return 0.05;
+      if (n===10) return 0.10;
+    }
+    return null; // غير موجودة
+  }
+  function formatYER(n){
+    try { return new Intl.NumberFormat('ar-YE',{maximumFractionDigits:0}).format(Math.round(n)); }
+    catch { return Math.round(n).toLocaleString(); }
+  }
+  function setRateUIFromNumber(r){
+    $('#rateValue').value = r;
+    $('#rateLabel').textContent = (r===0.05?'5%':r===0.10?'10%': (Math.round(r*100)+'%'));
+  }
+
+  // —— قراءة باراميترات الانتقال من قائمة الأسعار ——
   const params = new URLSearchParams(location.search);
-  const name = params.get('name') || '';
-  const unit = params.get('unit') || '';
-  const price = parseFloat(params.get('price') || '0');
-  const qty   = parseFloat(params.get('qty')   || '1');
-  const rateQ = params.get('rate'); // قد تكون "5", "5%", "0.05", "10",...
+  const name  = params.get('name') || '';
+  const unit  = params.get('unit') || '';
+  const price = parseFloat(params.get('price')||'');
+  const rateP = params.get('rate'); // '5' أو '10' لو وصلت
+  const note  = params.get('note') || '';
 
-  const itemName  = document.getElementById('itemName');
-  const unitLabel = document.getElementById('unitLabel');
-  const unitPrice = document.getElementById('unitPrice');
-  const qtyEl     = document.getElementById('qty');
-  const usd       = document.getElementById('usd');
+  if (name) $('#name').value = name;
+  if (unit) $('#unit').value = unit;
+  if (!isNaN(price)) $('#unitPrice').value = price;
 
-  if (name) itemName.value = name;
-  if (unit) unitLabel.value = unit;
-  if (!isNaN(price) && price>0) unitPrice.value = String(price);
-  if (!isNaN(qty) && qty>0) qtyEl.value = String(qty);
+  // الفئة: أولوية (rateP) ثم استخراج من الملاحظات، وإن لم توجد لا نحدد
+  let rateAuto = null;
+  if (rateP && !isNaN(parseFloat(rateP))) {
+    rateAuto = parseFloat(rateP)/100;
+  } else {
+    const rFromNote = extractRate(note);
+    if (rFromNote!==null) rateAuto = rFromNote;
+  }
+  if (rateAuto!==null) {
+    setRateUIFromNumber(rateAuto);
+  } else {
+    // إن لم نجد شيئًا، لا نجبر فئة: تبقى “—” وقيمة 0
+    $('#rateValue').value = 0;
+    $('#rateLabel').textContent = 'غير محددة';
+  }
 
-  // احسب الإجمالي تلقائيًا
-  const total = (!isNaN(price)&&!isNaN(qty)) ? price*qty : 0;
-  if (total>0) usd.value = String(total);
+  // —— أحداث الحقول ——
+  function currentUSD(){
+    const manual = parseFloat($('#usdTotal').value||'');
+    if (!isNaN(manual) && manual>0) return manual;
+    const up = parseFloat($('#unitPrice').value||'0') || 0;
+    const q  = parseFloat($('#qty').value||'0') || 0;
+    return up*q;
+  }
+  function calc(){
+    const usd = currentUSD();
+    const fx  = parseFloat($('#fx').value||'750') || 750;
+    const rate= parseFloat($('#rateValue').value||'0') || 0;
+    const duty = usd * fx * rate;
+    $('#out').textContent = formatYER(duty);
+    $('#formula').textContent = `${enFmt.format(Math.round(duty))} = ${rate} × ${enFmt.format(fx)} × ${enFmt.format(usd)}`;
+  }
 
-  // اضبط الفئة تلقائيًا واقفلها (لغير المالك)
-  const r = window.normalizeRate(rateQ); // 0.05 / 0.10
-  if (r) window.applyRate(r, /*lockForUser=*/true);
+  ['unitPrice','qty','usdTotal','fx'].forEach(id => { $('#'+id).addEventListener('input', calc); });
 
-  // حدث الآلة الحاسبة أول مرة
-  window.calc();
-})();
+  // مبدئيًا
+  calc();
 
-// ربط تغيير السعر/العدد لتحديث الإجمالي تلقائيًا
-document.getElementById('unitPrice').addEventListener('input', syncUSD);
-document.getElementById('qty').addEventListener('input', syncUSD);
-function syncUSD(){
-  const p = parseFloat(document.getElementById('unitPrice').value || '0');
-  const q = parseFloat(document.getElementById('qty').value || '0');
-  const usd = document.getElementById('usd');
-  usd.value = (isFinite(p) && isFinite(q)) ? String(p*q) : '';
-  window.calc();
-}
+  // — أدوات المشاركة —
+  function copyResult(){
+    const txt = `الرسوم الجمركية: ${$('#out').textContent} ريال يمني\n${$('#formula').textContent}`;
+    navigator.clipboard.writeText(txt).then(()=>alert('✔ تم النسخ'));
+  }
+  function shareWhatsApp(){
+    const msg = `الرسوم الجمركية: ${$('#out').textContent} ريال يمني\n${$('#formula').textContent}`;
+    open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  }
+  window.copyResult = copyResult;
+  window.shareWhatsApp = shareWhatsApp;
 </script>
 </body>
 </html>
