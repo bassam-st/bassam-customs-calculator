@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>قائمة الأسعار (USD)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة أسعار السلع (USD)</title>
 <style>
   body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
-  .top{background:#2563eb;color:#fff;padding:14px 16px;font-weight:700}
-  .wrap{max-width:920px;margin:16px auto;padding:0 12px}
+  .top{background:#2563eb;color:#fff;padding:14px 16px}
+  .wrap{max-width:880px;margin:16px auto;padding:0 12px}
   .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:14px;margin-top:12px}
   .row{display:grid;grid-template-columns:1fr 160px 140px;gap:10px}
   label{display:block;font-size:13px;color:#475569;margin-bottom:4px}
@@ -19,7 +19,7 @@
   .btn-gray{background:#e2e8f0;color:#0f172a}
   .btn-orange{background:#f97316;color:#fff}
   .btn-red{background:#ef4444;color:#fff}
-  .list .item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px dashed #cbd5e1;align-items:center;flex-wrap:wrap}
+  .list .item{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px dashed #cbd5e1;align-items:center;flex-wrap:wrap}
   .muted{color:#64748b;font-size:12px}
   .tag{display:inline-block;background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe;padding:2px 8px;border-radius:999px;font-size:12px;margin-inline-start:6px}
   .nav{margin:10px 0}
@@ -30,7 +30,7 @@
 </style>
 </head>
 <body>
-  <div class="top">💲 إدارة أسعار السلع (USD)</div>
+  <div class="top"><b>$ إدارة أسعار السلع (USD)</b></div>
   <div class="wrap">
     <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
 
@@ -46,51 +46,6 @@
       <div class="owner-hint">بدون فتح، لا يمكن الإضافة/التعديل/الحذف أو الاستيراد/التصدير.</div>
     </div>
 
-    <!-- نموذج الإضافة/التعديل -->
-    <div class="card" id="adminForm" style="display:none">
-      <h3 style="margin:4px 0 10px">إضافة / تعديل سعر سلعة</h3>
-      <div class="row">
-        <div>
-          <label>اسم السلعة</label>
-          <input id="name" placeholder="مثال: شبك حديد (للطن)" />
-        </div>
-        <div>
-          <label>السعر بالدولار</label>
-          <input id="price" type="number" inputmode="decimal" placeholder="مثال: 1600" />
-        </div>
-        <div>
-          <label>الوحدة</label>
-          <select id="unit">
-            <option value="ton">للطن</option>
-            <option value="kg">للكيلو</option>
-            <option value="dz">للدُزْن</option>
-            <option value="pcs">للحبة</option>
-            <option value="Ah">Ah (لكل أمبير/ساعة)</option>
-            <option value="W">W (لكل وات)</option>
-            <option value="ltr">للتر</option>
-          </select>
-        </div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <div>
-          <label>الفئة الجمركية</label>
-          <select id="rateSel">
-            <option value="5%">5%</option>
-            <option value="10%">10%</option>
-          </select>
-        </div>
-        <div style="grid-column:1/-1">
-          <label>ملاحظات (اختياري)</label>
-          <input id="notes" placeholder="مصدر السعر / تاريخ التحديث… ويمكن كتابة الفئة مثل: الفئه5% أو 10%" />
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn btn-green" id="saveBtn">احفظ/حدّث</button>
-        <button class="btn btn-gray" id="clearBtn">تفريغ النموذج</button>
-        <span class="muted" id="msg" style="display:none">✔ تم الحفظ</span>
-      </div>
-    </div>
-
     <!-- أدوات + قائمة -->
     <div class="card">
       <div class="actions">
@@ -103,179 +58,105 @@
     </div>
   </div>
 
+<script src="./main.js"></script>
 <script>
-  // ===== إعدادات عامة
-  const ADMIN_PIN = "bassam1234";
-  let isOwner = false;
+const KEY='pricesCatalogV2';
+const q=document.getElementById('q');
+const list=document.getElementById('list');
+const exportBtn=document.getElementById('exportBtn');
+const importBtn=document.getElementById('importBtn');
+const importFile=document.getElementById('importFile');
 
-  const pin = document.getElementById('pin');
-  const unlock = document.getElementById('unlock');
-  const lockBtn = document.getElementById('lock');
-  const ownerState = document.getElementById('ownerState');
-  const adminForm = document.getElementById('adminForm');
+let baseData=[];
+async function loadBase(){
+  try{ baseData = await fetch('./assets/prices_catalog.json?ts='+Date.now()).then(r=>r.json()); }
+  catch{ baseData=[]; }
+}
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY))||[] }catch{ return [] } }
+function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+function merged(){
+  const m=new Map();
+  baseData.forEach(x=> m.set((x.name||'').trim(), x));
+  loadLocal().forEach(x=> m.set((x.name||'').trim(), x));
+  return Array.from(m.values());
+}
 
-  function updateOwnerUI(){
-    ownerState.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-    adminForm.style.display = isOwner ? '' : 'none';
-    document.getElementById('exportBtn').disabled = !isOwner;
-    document.getElementById('importBtn').disabled = !isOwner;
-    render();
-  }
-  unlock.addEventListener('click', ()=>{ if(pin.value===ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); } else alert('❌ رمز غير صحيح'); });
-  lockBtn.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
+function unitLabel(u){ return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='Ah'?'Ah/أمبير':u==='W'?'W/واط':u==='ltr'?'للتر':u; }
 
-  // ===== قاعدة البيانات
-  const KEY='pricesCatalogV2';
-  const nameEl=document.getElementById('name');
-  const priceEl=document.getElementById('price');
-  const unitEl=document.getElementById('unit');
-  const rateSel=document.getElementById('rateSel');
-  const notesEl=document.getElementById('notes');
-  const q=document.getElementById('q');
-  const list=document.getElementById('list');
-  const saveBtn=document.getElementById('saveBtn');
-  const clearBtn=document.getElementById('clearBtn');
-  const msg=document.getElementById('msg');
-  const exportBtn=document.getElementById('exportBtn');
-  const importBtn=document.getElementById('importBtn');
-  const importFile=document.getElementById('importFile');
+// يعرض العناصر ويُمرّر الفئة الصحيحة
+function render(){
+  const arr=merged();
+  const s=(q.value||'').trim();
+  const filtered = s ? arr.filter(x=> (x.name||'').includes(s)) : arr;
+  if(!filtered.length){ list.innerHTML='<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
 
-  let baseData=[];
-  async function loadBase(){
-    try{ baseData = await fetch('./assets/prices_catalog.json').then(r=>r.json()); }
-    catch{ baseData=[]; }
-  }
-  function loadLocal(){ try{ return JSON.parse(localStorage.getItem(KEY))||[] }catch{ return [] } }
-  function saveLocal(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
-  function merged(){
-    const m=new Map();
-    baseData.forEach(x=> m.set((x.name||'').trim(), x));
-    loadLocal().forEach(x=> m.set((x.name||'').trim(), x));
-    return Array.from(m.values());
-  }
+  list.innerHTML = filtered.map(x=>{
+    const normRate = normalizeRate(x.rate);         // 0.05 أو 0.10
+    const badge    = prettyRate(x.rate);            // "5%" أو "10%"
+    const nameQ = JSON.stringify(x.name||'');
+    const unitQ = x.unit||'';
+    const priceQ= Number(x.price||0);
 
-  // ===== استنتاج الفئة من الملاحظات
-  function detectRateFromNotes(notes=''){
-    const t = (notes || '').replace(/\s+/g,'').replace('ة','ه'); // قبول "الفئة/الفئه"
-    // أرقام عربية وإنجليزية
-    if (/((الفئه|الفئه:)?5%|٥%)/.test(t)) return '5%';
-    if (/((الفئه|الفئه:)?10%|١٠%)/.test(t)) return '10%';
-    // أيضًا لو كتب فقط "5" أو "10" مع علامة %
-    if (/^5%$/.test(t)) return '5%';
-    if (/^10%$/.test(t)) return '10%';
-    return '';
-  }
-  function shownRate(x){ return x.rate || detectRateFromNotes(x.notes) || ''; }
-
-  function unitLabel(u){
-    return u==='ton'?'للطن':u==='kg'?'للكيلو':u==='dz'?'للدُزْن':u==='pcs'?'للحبة':u==='Ah'?'Ah':u==='W'?'W':u==='ltr'?'للتر':(u||'');
-  }
-
-  function render(){
-    const arr=merged();
-    const s=(q.value||'').trim();
-    const filtered = s ? arr.filter(x=> (x.name||'').includes(s)) : arr;
-    if(!filtered.length){ list.innerHTML='<div class="muted" style="padding:10px">لا توجد بيانات…</div>'; return; }
-    list.innerHTML = filtered.map(x=>`
-      <div class="item">
-        <div>
-          <div><b>${x.name}</b>
-            <span class="tag">${unitLabel(x.unit||'')}</span>
-            ${shownRate(x)?`<span class="tag">${shownRate(x)}</span>`:''}
-          </div>
-          <div class="muted">USD ${x.price}${x.notes?(' • '+x.notes):''}</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-green"
-            onclick="useInCalc(${JSON.stringify(x.name)}, ${x.price}, '${x.unit||''}',
-                               '${(x.rate || detectRateFromNotes(x.notes) || '5%').replace('%','')}')">
-            استخدام السعر
-          </button>
-          ${isOwner?`<button class="btn btn-orange" onclick='editItem(${JSON.stringify(x)})'>تعديل</button>
-                     <button class="btn btn-red" onclick='delItem(${JSON.stringify(x.name)})'>حذف</button>`:''}
-        </div>
+    return `<div class="item">
+      <div>
+        <div><b>${x.name||''}</b>
+             <span class="tag">${unitLabel(unitQ||'')}</span>
+             <span class="tag">${badge}</span></div>
+        <div class="muted">USD ${priceQ}${x.notes?(' • '+x.notes):''}</div>
       </div>
-    `).join('');
-  }
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-green"
+          onclick="useInCalc(${nameQ}, ${priceQ}, '${unitQ}', '${badge}')">استخدام السعر</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  // الانتقال للحاسبة مع تمرير الفئة
-  window.useInCalc = function(name, price, unit, ratePercent){
-    const params = new URLSearchParams({
-      name, price, unit, qty:'1', rate:String(ratePercent) // 5 أو 10
-    });
-    location.href = './index.html?' + params.toString();
-  }
-
-  window.editItem = function(rec){
-    nameEl.value = rec.name||'';
-    priceEl.value = rec.price||'';
-    unitEl.value  = rec.unit||'pcs';
-    rateSel.value = rec.rate||'5%';
-    notesEl.value = rec.notes||'';
-  }
-
-  window.delItem = function(name){
-    if(!isOwner) return alert('للمالك فقط');
-    if(!confirm('حذف؟')) return;
-    saveLocal(loadLocal().filter(x=>x.name!==name));
-    render();
-  }
-
-  function upsert(rec){
-    if(!isOwner) return alert('للمالك فقط');
-    const arr=loadLocal();
-    const i=arr.findIndex(x=> (x.name||'').trim()===(rec.name||'').trim());
-    if(i>=0) arr[i]=rec; else arr.push(rec);
-    saveLocal(arr);
-  }
-
-  saveBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('للمالك فقط');
-    const rec = {
-      name:(nameEl.value||'').trim(),
-      price: parseFloat(priceEl.value||0),
-      unit: unitEl.value||'pcs',
-      rate: rateSel.value||'',         // إن تركتها فارغة سيتكفّل detectRateFromNotes
-      notes: (notesEl.value||'').trim()
-    };
-    if(!rec.name || !rec.price){ alert('أكمل الاسم والسعر'); return; }
-    upsert(rec); msg.style.display='inline'; setTimeout(()=>msg.style.display='none',1200); render();
+// يذهب للحاسبة مع الفئة المحسّنة
+window.useInCalc = function(name, price, unit, rateBadge){
+  const r = normalizeRate(rateBadge);  // 0.05 / 0.10
+  const params = new URLSearchParams({
+    name, price, unit,
+    qty: '1',
+    rate: String(r)
   });
+  location.href = './index.html?' + params.toString();
+}
 
-  clearBtn.addEventListener('click', ()=>{ nameEl.value=''; priceEl.value=''; unitEl.value='pcs'; rateSel.value='5%'; notesEl.value=''; });
-  q.addEventListener('input', render);
+// استيراد/تصدير
+exportBtn.addEventListener('click', ()=>{
+  if(!window.__isOwner) return alert('للمالك فقط');
+  const data = JSON.stringify(merged(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), {href:url, download:'prices_catalog.json'});
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),500);
+});
 
-  exportBtn.addEventListener('click', ()=>{
-    if(!isOwner) return alert('للمالك فقط');
-    const data = JSON.stringify(merged(), null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement('a'), {href:url, download:'prices_catalog.json'});
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),500);
-  });
+importBtn.addEventListener('click', ()=>{ if(!window.__isOwner) return alert('للمالك فقط'); importFile.click(); });
+importFile.addEventListener('change', async ()=>{
+  if(!window.__isOwner) return;
+  const f=importFile.files[0]; if(!f) return;
+  try{
+    const text=await f.text(); const arr=JSON.parse(text);
+    const cleaned=arr.filter(x=>x&&typeof x==='object').map(x=>({
+      name:String(x.name||'').trim(),
+      price:Number(x.price||0),
+      unit:x.unit||'pcs',
+      rate: prettyRate(x.rate), // نخزنها بشكل متّسق "5%" / "10%"
+      notes:String(x.notes||'').trim()
+    })).filter(x=>x.name && x.price>0);
+    saveLocal(cleaned); render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
+  }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
+  finally{ importFile.value=''; }
+});
 
-  importBtn.addEventListener('click', ()=>{ if(!isOwner) return alert('للمالك فقط'); importFile.click(); });
-  importFile.addEventListener('change', async ()=>{
-    if(!isOwner) return;
-    const f=importFile.files[0]; if(!f) return;
-    try{
-      const text=await f.text(); const arr=JSON.parse(text);
-      const cleaned=arr.filter(x=>x&&typeof x==='object').map(x=>({
-        name:String(x.name||'').trim(),
-        price:Number(x.price||0),
-        unit:x.unit||'pcs',
-        rate:x.rate||'', // قد تكون فارغة
-        notes:String(x.notes||'').trim()
-      })).filter(x=>x.name && x.price>0);
-      saveLocal(cleaned); render(); alert('تم الاستيراد: '+cleaned.length+' عنصر');
-    }catch(e){ alert('تعذّر الاستيراد: '+e.message); }
-    finally{ importFile.value=''; }
-  });
+q.addEventListener('input', render);
 
-  (async function init(){
-    await loadBase();
-    updateOwnerUI();
-  })();
+(async function init(){
+  await loadBase();
+  render();
+})();
 </script>
 </body>
 </html>
