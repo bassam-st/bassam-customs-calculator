@@ -323,3 +323,41 @@ window.shareWhatsApp = shareWhatsApp;
   updateOwnerUI();
   calc();
 })();
+// ========= Patch: التقاط السعر والفئة من رابط "استخدام السعر" =========
+(function applyPresetFromQuery(){
+  try {
+    const q = new URLSearchParams(location.search);
+    const price = parseFloat(q.get('price') || q.get('usd') || '0');
+    const qty   = parseFloat(q.get('qty') || '1');       // اختياري من القائمة
+    const rateP = parseFloat(q.get('rate') || '');       // 5 أو 10 (بالمئة)
+
+    if (price > 0 && usdInput) {
+      usdInput.value = String(price * (isFinite(qty) && qty>0 ? qty : 1));
+    }
+
+    // ضبط الفئة تلقائياً إن وُجدت (5% أو 10%)
+    if (!isNaN(rateP) && rateRadios.length) {
+      const val = (rateP === 5 ? '0.05' : rateP === 10 ? '0.10' : null);
+      if (val) {
+        const r = rateRadios.find(r => r.value === val);
+        if (r) {
+          r.checked = true;
+          // مظهر الأقراص
+          const idx = rateRadios.indexOf(r);
+          pills.forEach(p => p.classList.remove('active'));
+          if (pills[idx]) pills[idx].classList.add('active');
+        }
+      }
+    }
+
+    // نفّذ الحساب مباشرة بعد الملء
+    calc();
+
+    // أزل البارامترات من الرابط (شكل أنظف بعد الاستخدام)
+    if (location.search) {
+      history.replaceState({}, '', location.pathname);
+    }
+  } catch(e) {
+    // تجاهل أي خطأ صامتًا
+  }
+})();
