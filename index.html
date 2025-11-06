@@ -113,7 +113,8 @@
       <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
       <div class="result">
         <div class="big" id="out">0</div>
-        <div class="mini" id="formula">0 × 750 × 0 = 0</div>
+        <!-- تُحدّث لكن مخفية للمستخدم — تُظهر فقط عند تشغيل وضع المالك -->
+        <div class="mini" id="formula" style="display:none">0 × 750 × 0 = 0</div>
       </div>
 
       <div class="actions">
@@ -126,95 +127,6 @@
 
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
-<script>
-  // PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(console.error);
-  }
-  let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
-  window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block';});
-  installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;installBtn.style.display='none';deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});
-
-  // الحاسبة
-  const usd   = document.getElementById('usd');
-  const out   = document.getElementById('out');
-  const formula = document.getElementById('formula');
-  const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
-  const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
-  const enFmt = new Intl.NumberFormat('en-US');
-
-  rateRadios.forEach((r,i)=>{
-    r.addEventListener('change',()=>{
-      pills.forEach(p=>p.classList.remove('active'));
-      pills[i].classList.add('active');
-      calc();
-    });
-  });
-  usd.addEventListener('input', calc);
-
-  function getRate(){
-    const r = rateRadios.find(x=>x.checked);
-    return r ? parseFloat(r.value) : 0.2075;
-  }
-
-  function calc(){
-    const v = parseFloat(usd.value || 0);
-    const rate = getRate();
-    const result = v * 750 * rate;
-    out.textContent = enFmt.format(Math.round(result));
-    const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
-    formula.textContent = f;
-  }
-
-  // نسخ/واتساب
-  function copyResult(){
-    const text = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
-    navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
-  }
-  function shareWhatsApp(){
-    const msg = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
-    open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
-  }
-  window.copyResult = copyResult;
-  window.shareWhatsApp = shareWhatsApp;
-
-  // ✅ التقاط السعر والكمية والفئة تلقائيًا من قائمة الأسعار
-  (function applyFromQuery(){
-    try{
-      const q = new URLSearchParams(location.search);
-      const price = parseFloat(q.get('price') || q.get('usd') || '0'); // السعر بالدولار/حبة/طن…
-      const qty   = parseFloat(q.get('qty') || '1');                   // عدد (اختياري)
-      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || ''); // 0.2075 أو 0.265
-      const ratePct = parseFloat(q.get('ratePct') || '');                 // 5 أو 10
-
-      if (price > 0) {
-        const totalUSD = price * (isFinite(qty)&&qty>0 ? qty : 1);
-        usd.value = String(totalUSD);
-      }
-
-      // اضبط الفئة إن تم تمريرها
-      const setRadioByValue = (valStr)=>{
-        const r = rateRadios.find(x=>x.value === valStr);
-        if (r){
-          r.checked = true;
-          const idx = rateRadios.indexOf(r);
-          pills.forEach(p=>p.classList.remove('active'));
-          if (pills[idx]) pills[idx].classList.add('active');
-        }
-      };
-      if (!isNaN(rateMul) && (rateMul===0.2075 || rateMul===0.265)) {
-        setRadioByValue(String(rateMul));
-      } else if (!isNaN(ratePct)) {
-        setRadioByValue(ratePct===5 ? '0.2075' : ratePct===10 ? '0.265' : '0.265');
-      }
-
-      calc();
-      if (location.search) history.replaceState({}, '', location.pathname); // نظافة الرابط
-    }catch(e){}
-  })();
-
-  // تشغيل أولي
-  calc();
-</script>
+  <script src="./main.js"></script>
 </body>
 </html>
