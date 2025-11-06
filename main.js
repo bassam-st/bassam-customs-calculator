@@ -8,7 +8,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // ===============================
-// القسم 1: الحاسبة الأساسية (كما في كودك الأصلي)
+// القسم 1: الحاسبة الأساسية
 // ===============================
 (function(){
   const usdInput   = document.getElementById('usd');
@@ -28,6 +28,7 @@ if ('serviceWorker' in navigator) {
     const rate = getRate();
     const result = v * 750 * rate;
     outEl.textContent = enFmt.format(Math.round(result));
+    // ⚙️ تبقى المعادلة تُحدّث داخليًا
     const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
     formulaEl.textContent = f;
   }
@@ -79,7 +80,7 @@ if ('serviceWorker' in navigator) {
 })();
 
 // ===============================
-// القسم 2: حماية المالك (PIN) + منع استيراد/تصدير JSON
+// القسم 2: حماية المالك (PIN) + إظهار/إخفاء المعادلة
 // ===============================
 
 // مفاتيح التخزين
@@ -114,14 +115,22 @@ function incTries(){
 }
 function resetTries(){ localStorage.setItem(OWNER_TRIES_KEY, "0"); }
 
-// تحديث واجهة المالك إن وُجدت
+// تحديث واجهة المالك
 function applyOwnerUi(){
+  // عناصر خاصة بقائمة الأسعار (إن وُجدت)
   const s = document.getElementById("ownerState");
   if(s) s.textContent = "الحالة: " + (isOwner() ? "مالك (تحرير مفعّل)" : "قراءة فقط");
   const ex = document.getElementById("exportBtn");
   const im = document.getElementById("importBtn");
   if(ex) ex.style.display = isOwner() ? "" : "none";
   if(im) im.style.display = isOwner() ? "" : "none";
+
+  // ⭐ إظهار/إخفاء المعادلة في صفحة الحاسبة
+  const formulaEl = document.getElementById("formula");
+  if (formulaEl) {
+    formulaEl.style.display = isOwner() ? "" : "none";
+    formulaEl.setAttribute("aria-hidden", isOwner() ? "false" : "true");
+  }
 }
 
 // تهيئة شريط المالك وحماية الاستيراد/التصدير
@@ -158,9 +167,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // حارس قوي لتصدير JSON
   ex?.addEventListener("click",(e)=>{
     if(!isOwner()){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation?.();
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
       alert("هذا الإجراء للمالك فقط");
       return false;
     }
@@ -169,31 +176,25 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // حارس قوي لاستيراد JSON
   im?.addEventListener("click",(e)=>{
     if(!isOwner()){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation?.();
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
       alert("هذا الإجراء للمالك فقط");
       return false;
     } else {
-      file?.click(); // للمالك فقط
+      file?.click();
     }
   }, true);
 
   // تأمين عنصر الملف نفسه
   file?.addEventListener("click",(e)=>{
     if(!isOwner()){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation?.();
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
       alert("هذا الإجراء للمالك فقط");
       return false;
     }
   }, true);
   file?.addEventListener("change",(e)=>{
     if(!isOwner()){
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation?.();
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
       e.target.value = "";
       alert("هذا الإجراء للمالك فقط");
       return false;
