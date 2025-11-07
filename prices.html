@@ -17,7 +17,7 @@
     .card{background:var(--card);border-radius:18px;padding:14px;margin-top:14px;border:1px solid #e5e7eb;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-    .btn-blue{background:var(--accent);color:#fff} .btn-gray{background:#e2e8f0;color:#0f172a}
+    .btn-blue{background:var(--accent);color:#fff} .btn-gray{background:#e2e8ف0;color:#0f172a}
     .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:var(--orange);color:#fff}
     .owner input, .owner select{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
     .state{color:#065f46;font-weight:800}
@@ -73,7 +73,7 @@
         <option value="yd">الياردة</option>
         <option value="pair">الزوج</option>
         <option value="bbl">البرميل</option>
-        <option value="m2">المتر المربع</option>
+        <option value="م2">المتر المربع</option>
         <option value="m3">المتر المكعب</option>
         <option value="mg">مليجرام</option>
         <option value="g">جرام</option>
@@ -327,7 +327,6 @@ function updateOwnerUI(){
   state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
   formRow.style.display = isOwner ? '' : 'none';
 
-  // تعطيل بصري ووظيفي لأزرار الاستيراد/التصدير عندما تكون قراءة فقط
   [exportBtn, importBtn].forEach(btn=>{
     if(!btn) return;
     btn.disabled = !isOwner;
@@ -345,5 +344,8 @@ lockBtn.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
 updateOwnerUI();
 boot();
 </script>
+
+<!-- ✅ تم إضافة كود التتبع هنا -->
+<script src="assets/tracker.js"></script>
 </body>
 </html>
