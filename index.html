@@ -178,21 +178,17 @@
   window.copyResult = copyResult;
   window.shareWhatsApp = shareWhatsApp;
 
-  // ✅ التقاط السعر والكمية والفئة تلقائيًا من قائمة الأسعار
   (function applyFromQuery(){
     try{
       const q = new URLSearchParams(location.search);
-      const price = parseFloat(q.get('price') || q.get('usd') || '0'); // السعر بالدولار/حبة/طن…
-      const qty   = parseFloat(q.get('qty') || '1');                   // عدد (اختياري)
-      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || ''); // 0.2075 أو 0.265
-      const ratePct = parseFloat(q.get('ratePct') || '');                 // 5 أو 10
-
+      const price = parseFloat(q.get('price') || q.get('usd') || '0');
+      const qty   = parseFloat(q.get('qty') || '1');
+      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || '');
+      const ratePct = parseFloat(q.get('ratePct') || '');
       if (price > 0) {
         const totalUSD = price * (isFinite(qty)&&qty>0 ? qty : 1);
         usd.value = String(totalUSD);
       }
-
-      // اضبط الفئة إن تم تمريرها
       const setRadioByValue = (valStr)=>{
         const r = rateRadios.find(x=>x.value === valStr);
         if (r){
@@ -207,14 +203,15 @@
       } else if (!isNaN(ratePct)) {
         setRadioByValue(ratePct===5 ? '0.2075' : ratePct===10 ? '0.265' : '0.265');
       }
-
       calc();
-      if (location.search) history.replaceState({}, '', location.pathname); // نظافة الرابط
+      if (location.search) history.replaceState({}, '', location.pathname);
     }catch(e){}
   })();
 
-  // تشغيل أولي
   calc();
 </script>
+
+<!-- ✅ تم إضافة كود التتبع هنا -->
+<script src="assets/tracker.js"></script>
 </body>
 </html>
