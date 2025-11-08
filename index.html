@@ -79,6 +79,43 @@
       padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
     }
   </style>
+
+  <!-- Force PWA update & gentle reload -->
+  <script>
+  (function () {
+    if (!('serviceWorker' in navigator)) return;
+
+    // تسجيل SW (أنت بالفعل تسجلّه لاحقًا برقم نسخة، لا مشكلة إن تكرر)
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) return;
+
+      // افحص تحديث فور فتح الصفحة
+      reg.update().catch(()=>{});
+
+      // عند توفر إصدار جديد
+      reg.addEventListener('updatefound', function () {
+        const worker = reg.installing;
+        if (!worker) return;
+        worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            // اطلب تجاوز الانتظار
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+    });
+
+    // عند تغير المتحكم → أعد التحميل مرة واحدة
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  })();
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -129,6 +166,7 @@
 <script>
   // PWA
   if ('serviceWorker' in navigator) {
+    // احتفظت بتسجيلك الأصلي مع نسخة sw.js?v=2 — جيد لإجبار التحديث عند تغييرات كبيرة
     navigator.serviceWorker.register('/sw.js?v=2').catch(console.error);
   }
   let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
@@ -182,17 +220,16 @@
   (function applyFromQuery(){
     try{
       const q = new URLSearchParams(location.search);
-      const price = parseFloat(q.get('price') || q.get('usd') || '0'); // السعر بالدولار/حبة/طن…
-      const qty   = parseFloat(q.get('qty') || '1');                   // عدد (اختياري)
-      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || ''); // 0.2075 أو 0.265
-      const ratePct = parseFloat(q.get('ratePct') || '');                 // 5 أو 10
+      const price = parseFloat(q.get('price') || q.get('usd') || '0');
+      const qty   = parseFloat(q.get('qty') || '1');
+      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || '');
+      const ratePct = parseFloat(q.get('ratePct') || '');
 
       if (price > 0) {
         const totalUSD = price * (isFinite(qty)&&qty>0 ? qty : 1);
         usd.value = String(totalUSD);
       }
 
-      // اضبط الفئة إن تم تمريرها
       const setRadioByValue = (valStr)=>{
         const r = rateRadios.find(x=>x.value === valStr);
         if (r){
@@ -209,7 +246,7 @@
       }
 
       calc();
-      if (location.search) history.replaceState({}, '', location.pathname); // نظافة الرابط
+      if (location.search) history.replaceState({}, '', location.pathname);
     }catch(e){}
   })();
 
