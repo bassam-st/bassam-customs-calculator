@@ -14,114 +14,57 @@
   .item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px dashed #e2e8f0;flex-wrap:wrap}
   .code{font-weight:800;color:#065f46}
   .name{font-weight:700}
-  .desc{color:#475569;font-size:13px;margin-top:2px}
   .tag{display:inline-block;background:#dcfce7;border:1px solid #16a34a;color:#166534;border-radius:999px;padding:2px 8px;font-size:12px;margin-inline-start:8px}
   .btn{border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
   .btn-copy{background:#e2e8f0}
   .btn-go{background:#16a34a;color:#fff}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0ف172a;padding:8px 12px;border-radius:10px}
   mark{background:#fef08a}
 </style>
-
-<!-- Force PWA update & gentle reload -->
 <script>
-(function () {
-  if (!('serviceWorker' in navigator)) return;
-
-  // تأكيد تسجيل sw.js
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
-  navigator.serviceWorker.getRegistration().then(function (reg) {
-    if (!reg) return;
-
-    // افحص تحديث فور فتح الصفحة
-    reg.update().catch(()=>{});
-
-    // عند توفر إصدار جديد
-    reg.addEventListener('updatefound', function () {
-      const worker = reg.installing;
-      if (!worker) return;
-      worker.addEventListener('statechange', function () {
-        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-          // اطلب تجاوز الانتظار
-          worker.postMessage({ type: 'SKIP_WAITING' });
-        }
-      });
-    });
-  });
-
-  // عند تغير المتحكم → أعد التحميل مرة واحدة
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', function () {
-    if (reloaded) return;
-    reloaded = true;
-    location.reload();
-  });
-})();
+if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 </script>
 </head>
 <body>
-  <div class="top">🔍 البحث في البنود الجمركية (يدعم العربية)</div>
+  <div class="top">🔍 البحث في البنود الجمركية (يتطلّب اتصالًا بالإنترنت)</div>
   <div class="wrap">
-    <div class="nav"><a href="./index.html">← العودة للحاسبة</a></div>
-
     <div class="card">
-      <input id="q" placeholder="اكتب أول حرف… مثال: ب (بطاريات/بلاستيك)، م (ملابس/مسامير)…" autofocus />
-      <div class="muted" style="margin-top:6px">يبدأ العرض من أول حرف – البحث يدعم إزالة التشكيل وتوحيد الأرقام.</div>
+      <input id="q" placeholder="اكتب أول حرف… مثال: ب ، م ، س…" autofocus />
+      <div class="muted" id="netHint">يجب أن يكون الإنترنت متصلًا لإظهار النتائج.</div>
     </div>
-
-    <div class="card" id="results">
-      <div class="muted">جاري تحميل البيانات…</div>
-    </div>
+    <div class="card" id="results"><div class="muted">جاهز…</div></div>
   </div>
 
 <script>
-  // — أدوات التطبيع —
   const rim=/[\u064B-\u065F\u0670\u06D6-\u06ED]/g;
   function normalizeArabic(s){
     if(!s) return "";
     return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d=> String("0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]||d))
-            .replace(rim,'')
-            .replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
+            .replace(rim,'').replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
             .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ').replace(/\s+/g,' ').trim();
   }
-
   function highlight(text, q){
     if(!q) return text;
     const tn=normalizeArabic(text), qn=normalizeArabic(q);
     const i=tn.indexOf(qn); if(i<0) return text;
-    // تقريب موضع الإبراز على النص الأصلي
-    let oi=0, ni=0, start=-1, end=-1;
-    while(oi<text.length && ni<=i){
-      const seg=normalizeArabic(text[oi])||text[oi]; ni+=seg.length; oi++;
-      if(ni>=i && start<0) start=oi-1;
-    }
-    while(oi<text.length && ni<i+qn.length){
-      const seg=normalizeArabic(text[oi])||text[oi]; ni+=seg.length; oi++;
-      if(ni>=i+qn.length){ end=oi; break; }
-    }
-    if(start>=0 && end>=0) return text.slice(0,start)+'<mark>'+text.slice(start,end)+'</mark>'+text.slice(end);
-    return text;
+    return text.replace(new RegExp(q,'i'), m=>`<mark>${m}</mark>`);
   }
 
   const HS_URL='./assets/hs_catalog.json';
-  let HS=[], HSn=[];
+  let HS=[], HSn=[], ready=false;
 
-  async function loadHS(){
-    try{
-      HS = await fetch(HS_URL).then(r=>r.json());
-      HSn = HS.map(x=>({ ...x, n: normalizeArabic(x.name||''), c: String(x.code||'') }));
-      render(HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200), '');
-    }catch(e){
-      document.getElementById('results').innerHTML = '<div class="muted">تعذّر تحميل البيانات. تأكد من وجود الملف assets/hs_catalog.json</div>';
-    }
+  async function loadHSOnline(){
+    if(!navigator.onLine){ ready=false; return; }
+    const r = await fetch(HS_URL,{cache:'no-store'});
+    HS = await r.json();
+    HSn = HS.map(x=>({ ...x, n: normalizeArabic(x.name||''), c: String(x.code||'') }));
+    ready=true;
   }
 
   function search(query){
     const q = normalizeArabic(query);
-    if(!q) return HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200);
-    const starts = [], contains = [];
+    if(!q) return [];
+    const starts=[], contains=[];
     for(const x of HSn){
       if(x.n.startsWith(q) || x.c.startsWith(q)) starts.push(x);
       else if(x.n.includes(q)) contains.push(x);
@@ -132,58 +75,53 @@
   }
 
   function render(list, query){
-    const box = document.getElementById('results');
-    if(!list.length){ box.innerHTML='<div class="muted">لا نتائج… جرّب حرفًا آخر.</div>'; return; }
-    box.innerHTML = list.slice(0,200).map(x=>{
-      const nameHTML = highlight(x.name||'', query);
+    const box=document.getElementById('results');
+    if(!navigator.onLine){ box.innerHTML='<div class="muted">📴 غير متصل — الاتصال مطلوب للبحث.</div>'; return; }
+    if(!ready){ box.innerHTML='<div class="muted">جاري تحميل البيانات…</div>'; return; }
+    if(!list.length){ box.innerHTML='<div class="muted">لا نتائج…</div>'; return; }
+    box.innerHTML=list.slice(0,200).map(x=>{
       const rateTag = x.rate ? `<span class="tag">فئة ${x.rate}</span>` : '';
-      return `
-        <div class="item">
-          <div>
-            <div class="name">${nameHTML} ${rateTag}</div>
-            <div class="code">البند: ${x.code}</div>
-          </div>
-          <div class="row">
-            <button class="btn btn-copy" onclick="navigator.clipboard.writeText('${x.code}').then(()=>alert('✔ نُسخ: ${x.code}'))">نسخ الكود</button>
-            <button class="btn btn-go" onclick="location.href='./index.html?hs=${encodeURIComponent(x.code)}'">استخدام في الحاسبة</button>
-          </div>
-        </div>`;
+      return `<div class="item">
+        <div><div class="name">${highlight(x.name||'',query)} ${rateTag}</div><div class="code">البند: ${x.code}</div></div>
+        <div class="row">
+          <button class="btn btn-copy" onclick="navigator.clipboard.writeText('${x.code}').then(()=>alert('✔ نُسخ: ${x.code}'))">نسخ الكود</button>
+          <button class="btn btn-go" onclick="location.href='./index.html?hs=${encodeURIComponent(x.code)}'">استخدام في الحاسبة</button>
+        </div>
+      </div>`;
     }).join('');
   }
 
   const q = document.getElementById('q');
   let ts=null;
-  q.addEventListener('input', ()=>{
+  q.addEventListener('input', async ()=>{
     clearTimeout(ts);
-    ts=setTimeout(()=>{
+    ts=setTimeout(async ()=>{
+      if(!navigator.onLine){ render([], q.value); return; }
+      if(!ready) await loadHSOnline();
       render(search(q.value), q.value);
       try{ window.trackSearch && window.trackSearch(q.value); }catch(_){}
-    }, 400);
+    }, 350);
   });
 
-  loadHS();
+  // حالة الشبكة
+  const netHint=document.getElementById('netHint');
+  function updateNet(){
+    netHint.textContent = navigator.onLine ? 'متصل — اكتب للبحث.' : 'غير متصل — الاتصال مطلوب للبحث.';
+    if(!navigator.onLine) ready=false;
+  }
+  window.addEventListener('online',  ()=>{ updateNet(); });
+  window.addEventListener('offline', ()=>{ updateNet(); });
+  updateNet();
 </script>
 
-<!-- ✅ تتبُّع Inline -->
+<!-- تتبّع -->
 <script>
 (function(){
-  const TRACK_URL="https://bassam-tracker.onrender.com/track";
-  function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
-    const r=crypto.getRandomValues(new Uint8Array(1))[0]&15,v=c==='x'?r:(r&3|8);return v.toString(16);
-  });}
-  const LS=localStorage; let deviceId=LS.getItem("deviceId"); if(!deviceId){deviceId=uuid();LS.setItem("deviceId",deviceId);}
-  async function send(event,payload){
-    const body=JSON.stringify({event,deviceId,payload:payload||{}});
-    try{
-      if(navigator.sendBeacon){navigator.sendBeacon(TRACK_URL,new Blob([body],{type:"application/json"}));}
-      else{await fetch(TRACK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body});}
-    }catch(_){}
-  }
+  const URL="https://bassam-tracker.onrender.com/track";
+  function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=crypto.getRandomValues(new Uint8Array(1))[0]&15,v=c==='x'?r:(r&3|8);return v.toString(16);});}
+  const LS=localStorage;let id=LS.getItem("deviceId");if(!id){id=uuid();LS.setItem("deviceId",id);}
+  function send(event,payload){const body=JSON.stringify({event,deviceId:id,payload:payload||{}});try{navigator.sendBeacon?navigator.sendBeacon(URL,new Blob([body],{type:"application/json"})):fetch(URL,{method:"POST",headers:{"Content-Type":"application/json"},body});}catch{}}
   document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
-  document.addEventListener("submit",(e)=>{try{
-    const f=e.target; const q=f.querySelector('input[type="search"],[name*="search"],[id*="search"],[name*="query"],[id*="query"]');
-    const val=q?String(q.value||"").trim():""; if(val) send("search",{q:val,page:location.pathname});
-  }catch(_){ }},true);
   window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
 })();
 </script>
