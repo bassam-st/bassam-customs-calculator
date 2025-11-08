@@ -23,6 +23,43 @@
   .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0ف172a;padding:8px 12px;border-radius:10px}
   mark{background:#fef08a}
 </style>
+
+<!-- Force PWA update & gentle reload -->
+<script>
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+
+  // تأكيد تسجيل sw.js
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+  navigator.serviceWorker.getRegistration().then(function (reg) {
+    if (!reg) return;
+
+    // افحص تحديث فور فتح الصفحة
+    reg.update().catch(()=>{});
+
+    // عند توفر إصدار جديد
+    reg.addEventListener('updatefound', function () {
+      const worker = reg.installing;
+      if (!worker) return;
+      worker.addEventListener('statechange', function () {
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+          // اطلب تجاوز الانتظار
+          worker.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    });
+  });
+
+  // عند تغير المتحكم → أعد التحميل مرة واحدة
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
+})();
+</script>
 </head>
 <body>
   <div class="top">🔍 البحث في البنود الجمركية (يدعم العربية)</div>
