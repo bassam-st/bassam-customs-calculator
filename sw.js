@@ -1,4 +1,4 @@
-// sw.js — نسخة آمنة لا تتدخل في الأصول
+// sw.js — نسخة آمنة لا تتدخل في الأصول (بدون skipWaiting لتجنب التحديث المفاجئ)
 const CACHE_NAME = 'bassam-v1';
 const PRECACHE = [
   '/', '/index.html', '/prices.html', '/hs.html',
@@ -7,7 +7,7 @@ const PRECACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)));
-  self.skipWaiting();
+  // تمت إزالة self.skipWaiting(); كي لا يحدث "رفرش" مفاجئ
 });
 
 self.addEventListener('activate', (event) => {
