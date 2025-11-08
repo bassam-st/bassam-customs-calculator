@@ -18,7 +18,7 @@
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn-blue{background:var(--accent);color:#fff} .btn-gray{background:#e2e8f0;color:#0f172a}
-    .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:#f97316;color:#fff}
+    .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:var(--orange);color:#fff}
     .owner input, .owner select{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
     .state{color:#065f46;font-weight:800}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -35,43 +35,6 @@
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     .muted{color:#64748b;font-size:12px;margin-top:4px}
   </style>
-
-  <!-- Force PWA update & gentle reload -->
-  <script>
-  (function () {
-    if (!('serviceWorker' in navigator)) return;
-
-    // تأكيد تسجيل sw.js
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
-    navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) return;
-
-      // افحص تحديث فور فتح الصفحة
-      reg.update().catch(()=>{});
-
-      // عند توفر إصدار جديد
-      reg.addEventListener('updatefound', function () {
-        const worker = reg.installing;
-        if (!worker) return;
-        worker.addEventListener('statechange', function () {
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            // اطلب تجاوز الانتظار
-            worker.postMessage({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-    });
-
-    // عند تغير المتحكم → أعد التحميل مرة واحدة
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (reloaded) return;
-      reloaded = true;
-      location.reload();
-    });
-  })();
-  </script>
 </head>
 <body>
 <div class="wrap">
@@ -320,6 +283,8 @@ q.addEventListener('input', ()=>{
     try{ window.trackSearch && window.trackSearch(q.value); }catch(_){}
   }, 400);
 });
+// ✅ منع إعادة تحميل الصفحة عند الضغط Enter في خانة البحث
+q.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); } });
 
 // تصدير JSON — ممنوع لغير المالك
 exportBtn.addEventListener('click', (e)=>{
