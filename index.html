@@ -62,7 +62,7 @@
         <h1>بسام مساعدك الجمركي</h1>
         <div class="badge">💼</div>
       </div>
-      <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
+      <div class="phone">للاستفسار وخدمات التخليص: <b>‎+967771997809</b></div>
       <div class="nav">
         <a href="./prices.html">💲 قائمة الأسعار</a>
         <a href="./hs.html">🔍 البنود الجمركية</a>
@@ -137,16 +137,7 @@
   window.addEventListener("appinstalled",()=>{box.style.display="none";});
   </script>
 
-  <!-- 📊 تتبّع -->
-  <script>
-  (function(){
-    const URL="https://bassam-tracker.onrender.com/track";
-    function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=crypto.getRandomValues(new Uint8Array(1))[0]&15,v=c==='x'?r:(r&3|8);return v.toString(16);});}
-    const LS=localStorage;let id=LS.getItem("deviceId");if(!id){id=uuid();LS.setItem("deviceId",id);}
-    function send(event,payload){const body=JSON.stringify({event,deviceId:id,payload:payload||{}});try{navigator.sendBeacon?navigator.sendBeacon(URL,new Blob([body],{type:"application/json"})):fetch(URL,{method:"POST",headers:{"Content-Type":"application/json"},body});}catch{}}
-    document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
-    window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
-  })();
-  </script>
+  <!-- 📊 تتبّع Bassam Tracker -->
+  <script src="https://bassam-tracker.onrender.com/assets/tracker.js"></script>
 </body>
 </html>
