@@ -22,13 +22,6 @@
     .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
     .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
     .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
-    .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .owner small{color:var(--muted)}
-    .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
-    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-    .btn-blue{background:var(--accent);color:#fff}
-    .btn-gray{background:#e2e8f0;color:#0f172a}
-    .owner-on{color:#065f46;font-weight:800}
     label{display:block;font-weight:700;margin-bottom:6px}
     input[type="number"]{width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;font-size:18px;background:#fff;outline:none}
     .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
@@ -42,14 +35,24 @@
     .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
     .result .mini{margin-top:8px;color:var(--muted)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn.copy{background:#22c55e;color:#fff}
     .btn.pdf{background:var(--accent);color:#fff}
     .btn.wa{background:#16a34a;color:#fff}
     @media (max-width:420px){ .result .big{font-size:36px} }
-    #installBtn{position:fixed;bottom:16px;inset-inline:16px;z-index:9999;background:#16a34a;color:#fff;border:none;border-radius:14px;padding:12px 16px;font-weight:900;display:none;box-shadow:0 8px 20px rgba(22,163,74,.25)}
+
+    /* 🔽 زر التثبيت */
+    #installBox{position:fixed;bottom:20px;right:20px;left:20px;
+      background:#16a34a;color:#fff;padding:14px 18px;
+      border-radius:14px;display:none;justify-content:space-between;align-items:center;
+      box-shadow:0 8px 24px rgba(0,0,0,.2);font-family:'Noto Kufi Arabic',system-ui,sans-serif;
+      z-index:9999;animation:fadeIn .5s ease}
+    #installBox button{background:#fff;color:#16a34a;font-weight:800;
+      border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   </style>
 
-  <!-- تسجيل SW (لن نخزّن ملفات البحث) -->
+  <!-- تسجيل Service Worker -->
   <script>if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
 </head>
 <body>
@@ -90,11 +93,51 @@
     </section>
   </div>
 
-  <button id="installBtn">⤵️ تثبيت التطبيق</button>
+  <!-- 🔽 زر التثبيت -->
+  <div id="installBox">
+    <span id="installMsg">⬇️ قم بتثبيت تطبيق بسّام الجمركي للوصول السريع</span>
+    <button id="installBtn">تثبيت</button>
+  </div>
 
   <script src="./main.js"></script>
 
-  <!-- تتبّع بسيط -->
+  <!-- 📲 منطق التثبيت -->
+  <script>
+  let deferredPrompt;
+  const box=document.getElementById("installBox"),btn=document.getElementById("installBtn"),msg=document.getElementById("installMsg");
+
+  window.addEventListener('beforeinstallprompt',(e)=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    box.style.display="flex";
+  });
+
+  btn.addEventListener("click",async()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if(outcome==="accepted"){
+      msg.textContent="✅ تم تثبيت التطبيق بنجاح!";
+      setTimeout(()=>box.remove(),2500);
+    }else{
+      msg.textContent="ℹ️ يمكنك التثبيت لاحقًا من شريط العنوان.";
+    }
+    deferredPrompt=null;
+  });
+
+  // دعم iPhone
+  if(/iphone|ipad|ipod/i.test(navigator.userAgent)){
+    setTimeout(()=>{
+      box.style.display="flex";
+      msg.textContent="📱 لإضافة التطبيق على iPhone: اضغط 'مشاركة' ثم 'أضف إلى الشاشة الرئيسية'";
+      btn.style.display="none";
+    },1500);
+  }
+
+  window.addEventListener("appinstalled",()=>{box.style.display="none";});
+  </script>
+
+  <!-- 📊 تتبّع -->
   <script>
   (function(){
     const URL="https://bassam-tracker.onrender.com/track";
