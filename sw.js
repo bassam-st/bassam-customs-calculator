@@ -1,4 +1,4 @@
-// sw.js — نسخة آمنة لا تتدخل في الأصول (بدون skipWaiting لتجنب التحديث المفاجئ)
+// sw.js — شبكة أولاً للصفحات فقط، ولا نتدخل في أصول /assets ولا json
 const CACHE_NAME = 'bassam-v1';
 const PRECACHE = [
   '/', '/index.html', '/prices.html', '/hs.html',
@@ -7,7 +7,6 @@ const PRECACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)));
-  // تمت إزالة self.skipWaiting(); كي لا يحدث "رفرش" مفاجئ
 });
 
 self.addEventListener('activate', (event) => {
@@ -17,17 +16,15 @@ self.addEventListener('activate', (event) => {
   clients.claim();
 });
 
-// Network-first للصفحات فقط — لا نتدخل في الأصول (js/json/png/…)
+// لا نتدخل مطلقًا في: js/json/svg/png/css و/أو أي شيء داخل /assets/
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // لا تتدخل في ملفات الأصول إطلاقًا
   if (/\.(js|json|svg|png|ico|css|txt|map)$/.test(url.pathname) || url.pathname.startsWith('/assets/')) {
-    return; // دع المتصفح يتصرف
+    return; // اتركه للمتصفح (لن يُخزَّن في كاش SW)
   }
 
-  // لطلبات التنقل فقط
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req).catch(() => caches.match(url.pathname).then(r => r || caches.match('/index.html')))
