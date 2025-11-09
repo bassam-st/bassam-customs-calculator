@@ -84,30 +84,20 @@
   <script>
   (function () {
     if (!('serviceWorker' in navigator)) return;
-
-    // تسجيل SW (أنت بالفعل تسجلّه لاحقًا برقم نسخة، لا مشكلة إن تكرر)
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
     navigator.serviceWorker.getRegistration().then(function (reg) {
       if (!reg) return;
-
-      // افحص تحديث فور فتح الصفحة
       reg.update().catch(()=>{});
-
-      // عند توفر إصدار جديد
       reg.addEventListener('updatefound', function () {
         const worker = reg.installing;
         if (!worker) return;
         worker.addEventListener('statechange', function () {
           if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            // اطلب تجاوز الانتظار
             worker.postMessage({ type: 'SKIP_WAITING' });
           }
         });
       });
     });
-
-    // عند تغير المتحكم → أعد التحميل مرة واحدة
     let reloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', function () {
       if (reloaded) return;
@@ -164,9 +154,8 @@
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
 <script>
-  // PWA
+  // PWA register (نسخة مُرقّمة لإجبار التحديث عند تغييرات كبيرة)
   if ('serviceWorker' in navigator) {
-    // احتفظت بتسجيلك الأصلي مع نسخة sw.js?v=2 — جيد لإجبار التحديث عند تغييرات كبيرة
     navigator.serviceWorker.register('/sw.js?v=2').catch(console.error);
   }
   let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
@@ -254,7 +243,7 @@
   calc();
 </script>
 
-<!-- ✅ تتبُّع Inline (لا يغيّر أي سلوك مرئي) -->
+<!-- تتبُّع بسيط -->
 <script>
 (function(){
   const TRACK_URL="https://bassam-tracker.onrender.com/track";
@@ -270,10 +259,6 @@
     }catch(_){}
   }
   document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
-  document.addEventListener("submit",(e)=>{try{
-    const f=e.target; const q=f.querySelector('input[type="search"],[name*="search"],[id*="search"],[name*="query"],[id*="query"]');
-    const val=q?String(q.value||"").trim():""; if(val) send("search",{q:val,page:location.pathname});
-  }catch(_){ }},true);
   window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
 })();
 </script>
