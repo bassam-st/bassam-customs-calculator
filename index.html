@@ -5,55 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>بسام مساعدك الجمركي</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#16a34a">
   <link rel="icon" href="/icons/icon-192.png">
 
   <style>
-    :root{--green:#16a34a;--green2:#22c55e;--ink:#0f172a;--muted:#64748b;--card:#fff;--bg:#f1f5f9;--accent:#2563eb}
+    :root{
+      --green:#16a34a; --green2:#22c55e; --ink:#0f172a; --muted:#64748b;
+      --card:#ffffff; --bg:#f1f5f9; --accent:#2563eb;
+    }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
     .wrap{max-width:720px;margin:16px auto;padding:12px}
-    .hero{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:24px;padding:22px 18px;position:relative;box-shadow:0 10px 30px rgba(22,163,74,.18)}
+
+    .hero{
+      background:linear-gradient(135deg,var(--green),var(--green2));
+      color:#fff;border-radius:24px;padding:22px 18px;position:relative;
+      box-shadow:0 10px 30px rgba(22,163,74,.18);
+    }
     .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand h1{margin:0;font-size:22px;line-height:1.35}
-    .badge{background:#fff;border:2px solid #fff;color:#064e3b;width:64px;height:64px;display:grid;place-items:center;border-radius:18px;font-weight:800;font-size:22px}
+    .badge{
+      background:#fff;border:2px solid #fff;color:#064e3b;
+      width:64px;height:64px;display:grid;place-items:center;border-radius:18px;
+      font-weight:800;font-size:22px
+    }
     .phone{margin-top:6px;opacity:.95;font-size:14px}
     .nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
     .nav a{background:#e2e8f0;color:#0f172a;text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:700}
-    .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
+
+    .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
+          box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
+    .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .owner small{color:var(--muted)}
+    .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .btn-blue{background:var(--accent);color:#fff}
+    .btn-gray{background:#e2e8f0;color:#0f172a}
+    .owner-on{color:#065f46;font-weight:800}
+
     label{display:block;font-weight:700;margin-bottom:6px}
-    input[type="number"]{width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;font-size:18px;background:#fff;outline:none}
+    input[type="number"]{
+      width:100%;padding:14px 16px;border:1px solid #cbd5e1;border-radius:14px;
+      font-size:18px;background:#fff;outline:none
+    }
     .group-title{margin:16px 0 8px;font-weight:700;color:#334155}
     .rates{display:flex;flex-direction:column;gap:12px}
-    .pill{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:999px;border:2px solid #cbead9;background:#f0fdf4;cursor:pointer}
+    .pill{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:14px;border-radius:999px;border:2px solid #cbead9;
+      background:#f0fdf4;cursor:pointer
+    }
     .pill input{appearance:none;width:22px;height:22px;border:2px solid #84d1b0;border-radius:50%;margin:0}
     .pill.active{background:#14532d;color:#fff;border-color:#14532d}
     .pill.active input{border-color:#fff;box-shadow:inset 0 0 0 6px #fff;background:#fff}
     .hint{font-size:13px;color:#0f5132;opacity:.9}
-    .result{border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;text-align:center}
+    .result{
+      border:2px dashed #cbd5e1;border-radius:18px;padding:18px;background:#f8fafc;margin-top:8px;
+      text-align:center
+    }
     .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
     .result .mini{margin-top:8px;color:var(--muted)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn.copy{background:#22c55e;color:#fff}
     .btn.pdf{background:var(--accent);color:#fff}
     .btn.wa{background:#16a34a;color:#fff}
     @media (max-width:420px){ .result .big{font-size:36px} }
 
-    /* 🔽 زر التثبيت */
-    #installBox{position:fixed;bottom:20px;right:20px;left:20px;
-      background:#16a34a;color:#fff;padding:14px 18px;
-      border-radius:14px;display:none;justify-content:space-between;align-items:center;
-      box-shadow:0 8px 24px rgba(0,0,0,.2);font-family:'Noto Kufi Arabic',system-ui,sans-serif;
-      z-index:9999;animation:fadeIn .5s ease}
-    #installBox button{background:#fff;color:#16a34a;font-weight:800;
-      border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    #installBtn{
+      position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
+      background:#16a34a; color:#fff; border:none; border-radius:14px;
+      padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
+    }
   </style>
 
-  <!-- تسجيل Service Worker -->
-  <script>if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
+  <!-- Force PWA update & gentle reload -->
+  <script>
+  (function () {
+    if (!('serviceWorker' in navigator)) return;
+
+    // تسجيل SW (أنت بالفعل تسجلّه لاحقًا برقم نسخة، لا مشكلة إن تكرر)
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) return;
+
+      // افحص تحديث فور فتح الصفحة
+      reg.update().catch(()=>{});
+
+      // عند توفر إصدار جديد
+      reg.addEventListener('updatefound', function () {
+        const worker = reg.installing;
+        if (!worker) return;
+        worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            // اطلب تجاوز الانتظار
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+    });
+
+    // عند تغير المتحكم → أعد التحميل مرة واحدة
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  })();
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -62,7 +124,7 @@
         <h1>بسام مساعدك الجمركي</h1>
         <div class="badge">💼</div>
       </div>
-      <div class="phone">للاستفسار وخدمات التخليص: <b>‎+967771997809</b></div>
+      <div class="phone">للاستفسار وخدمات التخليص: <b>00967771997809</b></div>
       <div class="nav">
         <a href="./prices.html">💲 قائمة الأسعار</a>
         <a href="./hs.html">🔍 البنود الجمركية</a>
@@ -75,8 +137,14 @@
 
       <div class="group-title">اختر الفئة الجمركية</div>
       <div class="rates">
-        <label class="pill" id="pill5"><div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div><input type="radio" name="rate" value="0.2075"></label>
-        <label class="pill active" id="pill10"><div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div><input type="radio" name="rate" value="0.265" checked></label>
+        <label class="pill" id="pill5">
+          <div><b>5%</b> <span class="hint">(فئة خمسة بالمئة)</span></div>
+          <input type="radio" name="rate" value="0.2075" />
+        </label>
+        <label class="pill active" id="pill10">
+          <div><b>10%</b> <span class="hint">(فئة عشرة بالمئة)</span></div>
+          <input type="radio" name="rate" value="0.265" checked />
+        </label>
       </div>
 
       <div class="group-title">الرسوم الجمركية (ريال يمني)</div>
@@ -93,51 +161,121 @@
     </section>
   </div>
 
-  <!-- 🔽 زر التثبيت -->
-  <div id="installBox">
-    <span id="installMsg">⬇️ قم بتثبيت تطبيق بسّام الجمركي للوصول السريع</span>
-    <button id="installBtn">تثبيت</button>
-  </div>
+  <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
-  <script src="./main.js"></script>
+<script>
+  // PWA
+  if ('serviceWorker' in navigator) {
+    // احتفظت بتسجيلك الأصلي مع نسخة sw.js?v=2 — جيد لإجبار التحديث عند تغييرات كبيرة
+    navigator.serviceWorker.register('/sw.js?v=2').catch(console.error);
+  }
+  let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block';});
+  installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;installBtn.style.display='none';deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});
 
-  <!-- 📲 منطق التثبيت -->
-  <script>
-  let deferredPrompt;
-  const box=document.getElementById("installBox"),btn=document.getElementById("installBtn"),msg=document.getElementById("installMsg");
+  // الحاسبة
+  const usd   = document.getElementById('usd');
+  const out   = document.getElementById('out');
+  const formula = document.getElementById('formula');
+  const rateRadios = Array.from(document.querySelectorAll('input[name="rate"]'));
+  const pills = [document.getElementById('pill5'), document.getElementById('pill10')];
+  const enFmt = new Intl.NumberFormat('en-US');
 
-  window.addEventListener('beforeinstallprompt',(e)=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    box.style.display="flex";
+  rateRadios.forEach((r,i)=>{
+    r.addEventListener('change',()=>{
+      pills.forEach(p=>p.classList.remove('active'));
+      pills[i].classList.add('active');
+      calc();
+    });
   });
+  usd.addEventListener('input', calc);
 
-  btn.addEventListener("click",async()=>{
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if(outcome==="accepted"){
-      msg.textContent="✅ تم تثبيت التطبيق بنجاح!";
-      setTimeout(()=>box.remove(),2500);
-    }else{
-      msg.textContent="ℹ️ يمكنك التثبيت لاحقًا من شريط العنوان.";
-    }
-    deferredPrompt=null;
-  });
-
-  // دعم iPhone
-  if(/iphone|ipad|ipod/i.test(navigator.userAgent)){
-    setTimeout(()=>{
-      box.style.display="flex";
-      msg.textContent="📱 لإضافة التطبيق على iPhone: اضغط 'مشاركة' ثم 'أضف إلى الشاشة الرئيسية'";
-      btn.style.display="none";
-    },1500);
+  function getRate(){
+    const r = rateRadios.find(x=>x.checked);
+    return r ? parseFloat(r.value) : 0.2075;
   }
 
-  window.addEventListener("appinstalled",()=>{box.style.display="none";});
-  </script>
+  function calc(){
+    const v = parseFloat(usd.value || 0);
+    const rate = getRate();
+    const result = v * 750 * rate;
+    out.textContent = enFmt.format(Math.round(result));
+    const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
+    formula.textContent = f;
+  }
 
-  <!-- 📊 تتبّع Bassam Tracker -->
-  <script src="https://bassam-tracker.onrender.com/assets/tracker.js"></script>
+  // نسخ/واتساب
+  function copyResult(){
+    const text = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
+    navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
+  }
+  function shareWhatsApp(){
+    const msg = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
+    open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  window.copyResult = copyResult;
+  window.shareWhatsApp = shareWhatsApp;
+
+  // ✅ التقاط السعر والكمية والفئة تلقائيًا من قائمة الأسعار
+  (function applyFromQuery(){
+    try{
+      const q = new URLSearchParams(location.search);
+      const price = parseFloat(q.get('price') || q.get('usd') || '0');
+      const qty   = parseFloat(q.get('qty') || '1');
+      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || '');
+      const ratePct = parseFloat(q.get('ratePct') || '');
+
+      if (price > 0) {
+        const totalUSD = price * (isFinite(qty)&&qty>0 ? qty : 1);
+        usd.value = String(totalUSD);
+      }
+
+      const setRadioByValue = (valStr)=>{
+        const r = rateRadios.find(x=>x.value === valStr);
+        if (r){
+          r.checked = true;
+          const idx = rateRadios.indexOf(r);
+          pills.forEach(p=>p.classList.remove('active'));
+          if (pills[idx]) pills[idx].classList.add('active');
+        }
+      };
+      if (!isNaN(rateMul) && (rateMul===0.2075 || rateMul===0.265)) {
+        setRadioByValue(String(rateMul));
+      } else if (!isNaN(ratePct)) {
+        setRadioByValue(ratePct===5 ? '0.2075' : ratePct===10 ? '0.265' : '0.265');
+      }
+
+      calc();
+      if (location.search) history.replaceState({}, '', location.pathname);
+    }catch(e){}
+  })();
+
+  // تشغيل أولي
+  calc();
+</script>
+
+<!-- ✅ تتبُّع Inline (لا يغيّر أي سلوك مرئي) -->
+<script>
+(function(){
+  const TRACK_URL="https://bassam-tracker.onrender.com/track";
+  function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+    const r=crypto.getRandomValues(new Uint8Array(1))[0]&15,v=c==='x'?r:(r&3|8);return v.toString(16);
+  });}
+  const LS=localStorage; let deviceId=LS.getItem("deviceId"); if(!deviceId){deviceId=uuid();LS.setItem("deviceId",deviceId);}
+  async function send(event,payload){
+    const body=JSON.stringify({event,deviceId,payload:payload||{}});
+    try{
+      if(navigator.sendBeacon){navigator.sendBeacon(TRACK_URL,new Blob([body],{type:"application/json"}));}
+      else{await fetch(TRACK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body});}
+    }catch(_){}
+  }
+  document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
+  document.addEventListener("submit",(e)=>{try{
+    const f=e.target; const q=f.querySelector('input[type="search"],[name*="search"],[id*="search"],[name*="query"],[id*="query"]');
+    const val=q?String(q.value||"").trim():""; if(val) send("search",{q:val,page:location.pathname});
+  }catch(_){ }},true);
+  window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
+})();
+</script>
 </body>
 </html>
