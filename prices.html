@@ -34,6 +34,8 @@
     .price{color:#0f172a;opacity:.9;font-size:13px;margin-top:4px}
     .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     .muted{color:#64748b;font-size:12px;margin-top:4px}
+    .owner-only{display:none}
+    .commit{min-width:200px}
   </style>
 </head>
 <body>
@@ -58,7 +60,7 @@
     </div>
 
     <!-- نموذج إضافة/تعديل -->
-    <div class="owner" style="gap:8px;margin-top:10px;display:none" id="formRow">
+    <div class="owner owner-only" style="gap:8px;margin-top:10px" id="formRow">
       <input id="fName" placeholder="اسم السلعة" />
       <input id="fPrice" type="number" inputmode="decimal" placeholder="السعر بالدولار" />
       <select id="fUnit">
@@ -69,7 +71,6 @@
         <option value="ltr">اللتر</option>
         <option value="Ah">Ah/أمبير</option>
         <option value="W">W/واط</option>
-        <!-- وحدات إضافية مطلوبة -->
         <option value="yd">الياردة</option>
         <option value="pair">الزوج</option>
         <option value="bbl">البرميل</option>
@@ -93,6 +94,11 @@
       <button class="btn btn-gray" id="exportBtn">تصدير JSON</button>
       <input type="file" id="importFile" accept="application/json" style="display:none">
       <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
+
+      <!-- 🆕 أدوات المالك للحفظ إلى GitHub -->
+      <input id="commitMsg" class="owner-only commit" placeholder="رسالة الحفظ (اختياري)">
+      <button id="pushBtn" class="btn btn-blue owner-only">💾 حفظ إلى GitHub</button>
+
       <small class="muted">المصدر الأساسي: <code>assets/prices_catalog.json</code> (مع دمج المحلي).</small>
     </div>
   </section>
@@ -104,11 +110,12 @@
 
 <script>
 /* ===== إعدادات عامة ===== */
-const ADMIN_PIN = "bassam1234"; // إبقيناه كما هو
+const ADMIN_PIN = "bassam1234";
 const STORAGE_KEY = 'prices_catalog_v3';
 const REMOTE_JSON = '/assets/prices_catalog.json';
 
 let isOwner = false;
+let ownerPin = null;
 let items = [];
 let editIndex = -1;
 
@@ -119,6 +126,7 @@ const formRow = $('formRow'), fName=$('fName'), fPrice=$('fPrice'), fUnit=$('fUn
 const saveBtn=$('saveBtn'), clearBtn=$('clearBtn');
 const list=$('list'), q=$('q');
 const exportBtn=$('exportBtn'), importBtn=$('importBtn'), importFile=$('importFile');
+const pushBtn=$('pushBtn'), commitMsg=$('commitMsg');
 
 /* ===== وحدات ===== */
 function unitMap(u){
@@ -257,8 +265,8 @@ window.deleteItem = function(idx){
   }
 };
 
-/* ===== حفظ/تفريغ ===== */
-saveBtn.addEventListener('click', ()=>{
+/* ===== حفظ/تفريغ محلي ===== */
+saveBtn?.addEventListener('click', ()=>{
   if(!isOwner) return alert('هذا الإجراء للمالك فقط');
   const rec = normalize({name:fName.value, price:fPrice.value, unit:fUnit.value, notes:fNotes.value});
   if(!rec.name) return alert('اكتب اسم السلعة');
@@ -272,7 +280,7 @@ saveBtn.addEventListener('click', ()=>{
   saveLocal(); render();
   fName.value=''; fPrice.value=''; fNotes.value='';
 });
-clearBtn.addEventListener('click', ()=>{ editIndex=-1; fName.value=''; fPrice.value=''; fNotes.value=''; });
+clearBtn?.addEventListener('click', ()=>{ editIndex=-1; fName.value=''; fPrice.value=''; fNotes.value=''; });
 
 /* ===== بحث/استيراد/تصدير (محمي) ===== */
 let ts=null;
@@ -283,10 +291,8 @@ q.addEventListener('input', ()=>{
     try{ window.trackSearch && window.trackSearch(q.value); }catch(_){}
   }, 400);
 });
-// ✅ منع إعادة تحميل الصفحة عند الضغط Enter في خانة البحث
 q.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); } });
 
-// تصدير JSON — ممنوع لغير المالك
 exportBtn.addEventListener('click', (e)=>{
   if(!isOwner){
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
@@ -298,7 +304,6 @@ exportBtn.addEventListener('click', (e)=>{
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
 
-// استيراد JSON — ممنوع لغير المالك
 importBtn.addEventListener('click', (e)=>{
   if(!isOwner){
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
@@ -306,8 +311,6 @@ importBtn.addEventListener('click', (e)=>{
   }
   importFile.click();
 });
-
-// تأمين مدخل الملف نفسه
 importFile.addEventListener('click', (e)=>{
   if(!isOwner){
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation?.();
@@ -331,30 +334,54 @@ importFile.addEventListener('change', async (e)=>{
   importFile.value = '';
 });
 
+/* ===== حفظ إلى GitHub عبر /api/update ===== */
+async function pushToGitHub(){
+  if(!isOwner) return alert('هذا الإجراء للمالك فقط');
+  if(!ownerPin){ return alert('أعد فتح وضع المالك أولًا'); }
+  const payload = {
+    pin: ownerPin,
+    items: items.map(normalize),
+    message: (commitMsg.value || '').trim() || 'تحديث قائمة الأسعار من داخل التطبيق'
+  };
+  try{
+    const r = await fetch('/api/update', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok){ throw new Error(data.detail || r.statusText); }
+    alert('✅ تم الحفظ إلى GitHub بنجاح');
+  }catch(err){
+    alert('❌ فشل الحفظ إلى GitHub: ' + err.message);
+  }
+}
+pushBtn?.addEventListener('click', pushToGitHub);
+
 /* ===== فتح/قفل ===== */
 function updateOwnerUI(){
   state.textContent = 'الحالة: ' + (isOwner ? 'مالك (تحرير مفعّل)' : 'قراءة فقط');
-  formRow.style.display = isOwner ? '' : 'none';
-
-  [exportBtn, importBtn].forEach(btn=>{
-    if(!btn) return;
-    btn.disabled = !isOwner;
-    btn.style.pointerEvents = isOwner ? '' : 'none';
-    btn.style.opacity = isOwner ? '' : '.55';
+  formRow.classList.toggle('owner-only', !isOwner);
+  [exportBtn, importBtn, pushBtn, commitMsg].forEach(el=>{
+    if(!el) return;
+    el.disabled = !isOwner;
+    el.classList.toggle('owner-only', !isOwner);
+    if(!isOwner){ el.value !== undefined && (el.value=''); }
   });
 }
 unlock.addEventListener('click', ()=>{
-  if(pin.value === ADMIN_PIN){ isOwner=true; updateOwnerUI(); alert('✅ تم فتح وضع المالك'); }
-  else alert('❌ رمز غير صحيح');
+  if(pin.value === ADMIN_PIN){
+    isOwner=true; ownerPin=pin.value; updateOwnerUI(); alert('✅ تم فتح وضع المالك');
+  } else alert('❌ رمز غير صحيح');
 });
-lockBtn.addEventListener('click', ()=>{ isOwner=false; updateOwnerUI(); });
+lockBtn.addEventListener('click', ()=>{ isOwner=false; ownerPin=null; updateOwnerUI(); });
 
 /* ===== بدء التشغيل ===== */
 updateOwnerUI();
 boot();
 </script>
 
-<!-- ✅ تتبُّع Inline -->
+<!-- تتبُّع بسيط -->
 <script>
 (function(){
   const TRACK_URL="https://bassam-tracker.onrender.com/track";
@@ -370,10 +397,6 @@ boot();
     }catch(_){}
   }
   document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
-  document.addEventListener("submit",(e)=>{try{
-    const f=e.target; const q=f.querySelector('input[type="search"],[name*="search"],[id*="search"],[name*="query"],[id*="query"]');
-    const val=q?String(q.value||"").trim():""; if(val) send("search",{q:val,page:location.pathname});
-  }catch(_){ }},true);
   window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
 })();
 </script>
