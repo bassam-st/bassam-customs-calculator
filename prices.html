@@ -90,15 +90,21 @@
         <option value="kg">الكيلو</option>
         <option value="dz">الدُزْن</option>
         <option value="pcs">الحبة</option>
-        <option value="ltr">اللتر</option>
-        <option value="Ah">Ah/أمبير</option>
-        <option value="W">W/واط</option>
-        <option value="yd">الياردة</option>
-        <option value="roll">اللفة</option>
         <option value="pair">الزوج</option>
-        <option value="bbl">البرميل</option>
+        <option value="roll">اللفة</option>
+        <option value="yd">الياردة</option>
+        <option value="m">المتر (طولي)</option>
+        <option value="cm">السنتيمتر</option>
+        <option value="mm">المليمتر</option>
         <option value="m2">المتر المربع</option>
         <option value="m3">المتر المكعب</option>
+        <option value="ft">القدم (ft)</option>
+        <option value="in">البوصة / الإنش</option>
+        <option value="ltr">اللتر (L)</option>
+        <option value="ml">المليلتر (ml)</option>
+        <option value="Ah">Ah/أمبير</option>
+        <option value="W">W/واط</option>
+        <option value="bbl">البرميل</option>
         <option value="mg">مليجرام</option>
         <option value="g">جرام</option>
       </select>
@@ -172,46 +178,65 @@ const smartModal=$('smartModal'), dlgBody=$('dlgBody'), dlgTitle=$('dlgTitle'), 
 /* ===== وحدات & فئة ===== */
 function unitMap(u){
   const s = String(u||'').toLowerCase();
+
+  // قياسات عامة
   if (s.includes('طن') || s === 'ton') return 'ton';
   if (s.includes('كجم') || s.includes('كيلو') || s === 'kg') return 'kg';
-  if (s.includes('dz') || s.includes('درزن')) return 'dz';
-  if (s.includes('لتر') || s === 'ltr') return 'ltr';
+  if (s.includes('dz') || s.includes('درزن') || s.includes('الدزن') || s.includes('الدُزن')) return 'dz';
+  if (s.includes('لتر') || s === 'ltr' || s === 'l' || s.includes('(l)')) return 'ltr';
+  if (s.includes('مل') && (s.includes('مللتر') || s.includes('مليلتر') || s.includes('مل لتر') || s === 'ml')) return 'ml';
   if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
-  if (s.startsWith('w') || s.includes('واط')) return 'W';
+  if (s.startsWith('w') || s.includes('واط') || s.includes('وات')) return 'W';
   if (s === 'yd' || s.includes('يارد') || s.includes('ياردة')) return 'yd';
+  if (s === 'm2' || s.includes('متر مربع')) return 'm2';
+  if (s === 'm3' || s.includes('متر مكعب')) return 'm3';
+  if (s === 'm'  || s.includes('متر') && !s.includes('مربع') && !s.includes('مكعب')) return 'm';
+  if (s === 'cm' || s.includes('سنتيمتر') || s.includes('سم')) return 'cm';
+  if (s === 'mm' || s.includes('مليمتر') || s.includes('مم')) return 'mm';
+  if (s === 'ft' || s.includes('قدم')) return 'ft';
+  if (s === 'in' || s.includes('بوصه') || s.includes('بوصة') || s.includes('إنش') || s.includes('انش') || s.includes('هنش')) return 'in';
   if (s === 'roll' || s.includes('لفة') || s.includes('لفه')) return 'roll';
   if (s === 'pair' || s.includes('زوج')) return 'pair';
   if (s === 'bbl' || s.includes('برميل')) return 'bbl';
-  if (s === 'm2' || s.includes('متر مربع')) return 'm2';
-  if (s === 'm3' || s.includes('متر مكعب')) return 'm3';
-  if (s === 'mg' || s.includes('مليجرام')) return 'mg';
-  if (s === 'g'  || s.includes('جرام')) return 'g';
+  if (s === 'mg' || s.includes('مليجرام') || s.includes('ملغ')) return 'mg';
+  if (s === 'g'  || s.includes('جرام') || s.includes('غرام')) return 'g';
+
+  // افتراضي = حبة
+  if (s.includes('حبه') || s.includes('حبة') || s.includes('قطعة') || s === 'pcs') return 'pcs';
   return 'pcs';
 }
+
 function unitLabel(u){
   switch(u){
     case 'ton': return 'الطن';
     case 'kg' : return 'الكيلو';
     case 'dz' : return 'الدُزْن';
     case 'pcs': return 'الحبة';
-    case 'ltr': return 'اللتر';
-    case 'Ah' : return 'Ah/أمبير';
-    case 'W'  : return 'W/واط';
+    case 'pair':return 'الزوج';
+    case 'roll':return 'اللفة';
     case 'yd' : return 'الياردة';
-    case 'roll': return 'اللفة';
-    case 'pair': return 'الزوج';
-    case 'bbl': return 'البرميل';
+    case 'm'  : return 'المتر (طولي)';
+    case 'cm' : return 'السنتيمتر';
+    case 'mm' : return 'المليمتر';
     case 'm2' : return 'المتر المربع';
     case 'm3' : return 'المتر المكعب';
+    case 'ft' : return 'القدم (ft)';
+    case 'in' : return 'البوصة (in)';
+    case 'ltr': return 'اللتر';
+    case 'ml' : return 'المليلتر';
+    case 'Ah' : return 'Ah/أمبير';
+    case 'W'  : return 'W/واط';
+    case 'bbl': return 'البرميل';
     case 'mg' : return 'مليجرام';
     case 'g'  : return 'جرام';
     default   : return u;
   }
 }
+
 function parseRateFromNotes(notes){
   const s = String(notes||'').replace(/\s+/g,'');
-  if (/الفئة?10%|10%/.test(s)) return {pct:10, value:0.265, cls:'rate10'};
-  if (/الفئة?5%|5%/.test(s))  return {pct:5,  value:0.2075, cls:'rate5'};
+  if (/الفئة?10%|10%/i.test(s)) return {pct:10, value:0.265, cls:'rate10'};
+  if (/الفئة?5%|5%/i.test(s))  return {pct:5,  value:0.2075, cls:'rate5'};
   return {pct:10, value:0.265, cls:'rate10'};
 }
 
@@ -417,7 +442,7 @@ function tmplKG(){
   `;
 }
 function tmplScalar(kindLabel, unitSymbol){
-  // Ah / W / Ltr … السعر للوحدة
+  // Ah / W / Ltr / ml … السعر للوحدة
   return `
     <label>اختر طريقة الإدخال (${kindLabel})</label>
     <select id="scMode">
@@ -445,7 +470,6 @@ function tmplScalar(kindLabel, unitSymbol){
 function openForItem(index){
   const it = items[index];
   const u  = unitMap(it.unit);
-  const rate = parseRateFromNotes(it.notes);
 
   // تلفزيون حسب الاسم
   if (isTVItem(it)){
@@ -482,11 +506,15 @@ function openForItem(index){
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
     case 'ltr':
-      openSmartModal(index, 'ltr', 'حساب بالليتر (Ltr)', '🛢️', tmplScalar('لتر','L'));
+      openSmartModal(index, 'ltr', 'حساب بالليتر (L)', '🛢️', tmplScalar('لتر','L'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
+    case 'ml':
+      openSmartModal(index, 'ltr', 'حساب بالمليلتر (ml)', '🧪', tmplScalar('ml','ml'));
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
     default:
-      // الافتراضي: كمية بسيطة مباشرة
+      // الافتراضي: كمية بسيطة مباشرة لأي وحدة أخرى (متر/قدم/إنش/سم/مم/م²/م³/برميل…)
       openSmartModal(index, 'other', `حساب سريع — ${unitLabel(u)}`, '🧮', `
         <label>الكمية (${unitLabel(u)})</label>
         <input id="otherQty" type="number" inputmode="decimal" placeholder="مثال: 1" value="1" />
@@ -611,7 +639,7 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  // other
+  // other (يشمل m, cm, mm, ft, in, m2, m3, bbl, mg, g …)
   if (_pendingKind === 'other'){
     const qty = num('otherQty') || 0;
     if (!(qty>0)) return alert('أدخل الكمية');
@@ -629,7 +657,6 @@ function goToCalc(totalUSD, qty, ratePct){
 
 /* ===== استخدام السعر → الحاسبة (يفتح المودال الذكي) ===== */
 window.usePrice = function(idx){
-  const it = items[idx]; if(!it) return;
   openForItem(idx);
 };
 
