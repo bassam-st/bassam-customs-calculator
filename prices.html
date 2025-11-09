@@ -95,7 +95,7 @@
       <input type="file" id="importFile" accept="application/json" style="display:none">
       <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
 
-      <!-- 🆕 أدوات المالك للحفظ إلى GitHub -->
+      <!-- أدوات المالك للحفظ إلى GitHub -->
       <input id="commitMsg" class="owner-only commit" placeholder="رسالة الحفظ (اختياري)">
       <button id="pushBtn" class="btn btn-blue owner-only">💾 حفظ إلى GitHub</button>
 
@@ -236,9 +236,33 @@ function render(){
   list.innerHTML = rows || '<div class="muted">لا توجد عناصر مطابقة.</div>';
 }
 
+/* ===== كشف أن الصنف «شاشة تلفزيون» ===== */
+function isTVItem(it){
+  const txt = (String(it.name||'') + ' ' + String(it.notes||'')).toLowerCase();
+  return /تلفز|تلفزيون|tv/.test(txt);        // نتجنب "شاشات كمبيوتر" لأن شرطنا يبحث عن "تلفزيون/TV"
+}
+
 /* ===== استخدام السعر → الحاسبة ===== */
 window.usePrice = function(idx){
   const it = items[idx]; if(!it) return;
+
+  // إن كان تلفزيون: اسأل عن عدد البوصات واحسب حسب القاعدة
+  if (isTVItem(it)){
+    const raw = prompt('كم بوصة للشاشة؟ (أدخل رقمًا مثل 32 أو 43)');
+    if (raw===null) return; // إلغاء
+    const inches = parseFloat(String(raw).trim().replace(',', '.'));
+    if (!(inches>0)) { alert('الرجاء إدخال رقم صحيح للبوصة'); return; }
+
+    const pricePerInch = inches < 40 ? 3 : 4; // <40 → 3$ ؛ ≥40 → 4$
+    const totalUSD = inches * pricePerInch;
+
+    // نرسلها للحاسبة مع فئة 5%
+    const url = `./index.html?price=${encodeURIComponent(totalUSD)}&qty=1&ratePct=5`;
+    location.href = url;
+    return;
+  }
+
+  // غير ذلك: السلوك المعتاد
   const rate = parseRateFromNotes(it.notes);
   const qty = 1;
   const url = `./index.html?price=${encodeURIComponent(it.price)}&qty=${qty}&ratePct=${rate.pct}`;
