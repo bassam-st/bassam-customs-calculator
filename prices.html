@@ -18,7 +18,7 @@
     .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn-blue{background:var(--accent);color:#fff} .btn-gray{background:#e2e8f0;color:#0f172a}
-    .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:var(--orange);color:#fff}
+    .btn-green{background:#16a34a;color:#fff} .btn-red{background:var(--danger);color:#fff} .btn-orange{background:#f97316;color:#fff}
     .owner input, .owner select{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
     .state{color:#065f46;font-weight:800}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -37,13 +37,13 @@
     .owner-only{display:none}
     .commit{min-width:200px}
 
-    /* ===== مودال البوصة (بنفس الهوية البصرية) ===== */
+    /* ===== المودال الذكي الموحّد ===== */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
     .modal.show{display:flex}
     .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35)}
     .dialog{
       position:relative;background:#fff;border-radius:20px;border:1px solid #e5e7eb;
-      max-width:420px;width:100%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden
+      max-width:480px;width:100%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden
     }
     .dlg-head{
       background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;
@@ -52,10 +52,12 @@
     .dlg-body{padding:16px 18px}
     .dlg-foot{padding:14px 18px;display:flex;gap:8px;justify-content:flex-start;background:#f8fafc;border-top:1px solid #e5e7eb}
     .dlg-body label{display:block;font-weight:800;margin-bottom:6px}
-    .dlg-body input{
-      width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;font-size:18px
+    .dlg-body input, .dlg-body select{
+      width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;font-size:16px;margin-bottom:8px
     }
-    .dlg-hint{color:#0f5132;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;padding:8px 10px;font-size:13px;margin-top:10px}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .row > *{flex:1}
+    .hint{color:#0f5132;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;padding:8px 10px;font-size:13px;margin:8px 0}
   </style>
 </head>
 <body>
@@ -92,13 +94,13 @@
         <option value="Ah">Ah/أمبير</option>
         <option value="W">W/واط</option>
         <option value="yd">الياردة</option>
+        <option value="roll">اللفة</option>
         <option value="pair">الزوج</option>
         <option value="bbl">البرميل</option>
         <option value="m2">المتر المربع</option>
         <option value="m3">المتر المكعب</option>
         <option value="mg">مليجرام</option>
         <option value="g">جرام</option>
-        <option value="roll">اللفة</option>
       </select>
       <input id="fNotes" style="min-width:180px" placeholder="ملاحظات (مثال: الفئة5%)" />
       <button class="btn btn-blue" id="saveBtn">حفظ/تحديث</button>
@@ -114,11 +116,8 @@
       <button class="btn btn-gray" id="exportBtn">تصدير JSON</button>
       <input type="file" id="importFile" accept="application/json" style="display:none">
       <button class="btn btn-gray" id="importBtn">استيراد JSON</button>
-
-      <!-- أدوات المالك للحفظ إلى GitHub -->
       <input id="commitMsg" class="owner-only commit" placeholder="رسالة الحفظ (اختياري)">
       <button id="pushBtn" class="btn btn-blue owner-only">💾 حفظ إلى GitHub</button>
-
       <small class="muted">المصدر الأساسي: <code>assets/prices_catalog.json</code> (مع دمج المحلي).</small>
     </div>
   </section>
@@ -128,25 +127,18 @@
 
 </div>
 
-<!-- ===== مودال إدخال البوصة للشاشات ===== -->
-<div class="modal" id="tvModal" role="dialog" aria-modal="true" aria-labelledby="tvTitle">
-  <div class="backdrop" onclick="closeTvModal()"></div>
+<!-- ===== المودال الذكي ===== -->
+<div class="modal" id="smartModal" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+  <div class="backdrop" onclick="closeSmartModal()"></div>
   <div class="dialog">
     <div class="dlg-head">
-      <span style="font-size:20px">📺</span>
-      <div id="tvTitle">احسب سعر شاشة التلفزيون</div>
+      <span id="dlgIcon" style="font-size:20px">🧮</span>
+      <div id="dlgTitle">الحساب السريع</div>
     </div>
-    <div class="dlg-body">
-      <label for="tvInches">كم بوصة للشاشة؟</label>
-      <input id="tvInches" type="number" inputmode="decimal" placeholder="مثال: 32 أو 43" />
-      <div class="dlg-hint">
-        القاعدة: أقل من 40 بوصة = <b>$3</b> لكل بوصة — من 40 وأعلى = <b>$4</b> لكل بوصة.
-        <br>سيتم الإرسال إلى الحاسبة على فئة <b>5%</b> تلقائيًا.
-      </div>
-    </div>
+    <div class="dlg-body" id="dlgBody"><!-- حقول ديناميكية --></div>
     <div class="dlg-foot">
-      <button class="btn btn-green" onclick="confirmTvModal()">متابعة</button>
-      <button class="btn btn-gray"  onclick="closeTvModal()">إلغاء</button>
+      <button class="btn btn-green" onclick="confirmSmartModal()">متابعة</button>
+      <button class="btn btn-gray"  onclick="closeSmartModal()">إلغاء</button>
     </div>
   </div>
 </div>
@@ -163,7 +155,8 @@ let items = [];
 let editIndex = -1;
 
 // حالة المودال
-let _tvPendingIndex = null;
+let _pendingIndex = null;
+let _pendingKind  = null; // 'tv' | 'pcs' | 'dz' | 'yd' | 'roll' | 'kg' | 'ah' | 'w' | 'ltr' | 'other'
 
 /* ===== DOM ===== */
 const $ = id => document.getElementById(id);
@@ -173,9 +166,10 @@ const saveBtn=$('saveBtn'), clearBtn=$('clearBtn');
 const list=$('list'), q=$('q');
 const exportBtn=$('exportBtn'), importBtn=$('importBtn'), importFile=$('importFile');
 const pushBtn=$('pushBtn'), commitMsg=$('commitMsg');
-const tvModal=$('tvModal'), tvInches=$('tvInches');
 
-/* ===== وحدات ===== */
+const smartModal=$('smartModal'), dlgBody=$('dlgBody'), dlgTitle=$('dlgTitle'), dlgIcon=$('dlgIcon');
+
+/* ===== وحدات & فئة ===== */
 function unitMap(u){
   const s = String(u||'').toLowerCase();
   if (s.includes('طن') || s === 'ton') return 'ton';
@@ -185,13 +179,13 @@ function unitMap(u){
   if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
   if (s.startsWith('w') || s.includes('واط')) return 'W';
   if (s === 'yd' || s.includes('يارد') || s.includes('ياردة')) return 'yd';
+  if (s === 'roll' || s.includes('لفة') || s.includes('لفه')) return 'roll';
   if (s === 'pair' || s.includes('زوج')) return 'pair';
   if (s === 'bbl' || s.includes('برميل')) return 'bbl';
   if (s === 'm2' || s.includes('متر مربع')) return 'm2';
   if (s === 'm3' || s.includes('متر مكعب')) return 'm3';
   if (s === 'mg' || s.includes('مليجرام')) return 'mg';
   if (s === 'g'  || s.includes('جرام')) return 'g';
-  if (s === 'roll' || s.includes('لفة') || s.includes('لفه')) return 'roll';
   return 'pcs';
 }
 function unitLabel(u){
@@ -204,18 +198,16 @@ function unitLabel(u){
     case 'Ah' : return 'Ah/أمبير';
     case 'W'  : return 'W/واط';
     case 'yd' : return 'الياردة';
+    case 'roll': return 'اللفة';
     case 'pair': return 'الزوج';
     case 'bbl': return 'البرميل';
     case 'm2' : return 'المتر المربع';
     case 'm3' : return 'المتر المكعب';
     case 'mg' : return 'مليجرام';
     case 'g'  : return 'جرام';
-    case 'roll': return 'اللفة';
     default   : return u;
   }
 }
-
-/* ===== معدل الفئة من الملاحظات ===== */
 function parseRateFromNotes(notes){
   const s = String(notes||'').replace(/\s+/g,'');
   if (/الفئة?10%|10%/.test(s)) return {pct:10, value:0.265, cls:'rate10'};
@@ -283,48 +275,362 @@ function render(){
   list.innerHTML = rows || '<div class="muted">لا توجد عناصر مطابقة.</div>';
 }
 
-/* ===== كشف أن الصنف «شاشة تلفزيون» ===== */
+/* ===== كشف الفئات الخاصة بالأسماء ===== */
 function isTVItem(it){
   const txt = (String(it.name||'') + ' ' + String(it.notes||'')).toLowerCase();
   return /تلفز|تلفزيون|tv/.test(txt);
 }
 
-/* ===== مودال البوصة ===== */
-function openTvModal(index){
-  _tvPendingIndex = index;
-  tvInches.value = '';
-  tvModal.classList.add('show');
-  setTimeout(()=>tvInches?.focus(), 30);
+/* ===== مودال ذكي ديناميكي ===== */
+function openSmartModal(index, kind, title, icon, bodyHtml){
+  _pendingIndex = index;
+  _pendingKind  = kind;
+  dlgTitle.textContent = title;
+  dlgIcon.textContent  = icon || '🧮';
+  dlgBody.innerHTML    = bodyHtml;
+  smartModal.classList.add('show');
+  const firstInput = dlgBody.querySelector('input,select');
+  setTimeout(()=>firstInput?.focus(), 30);
 }
-function closeTvModal(){
-  _tvPendingIndex = null;
-  tvModal.classList.remove('show');
-}
-function confirmTvModal(){
-  const raw = tvInches.value;
-  const inches = parseFloat(String(raw||'').trim().replace(',', '.'));
-  if (!(inches>0)) { alert('الرجاء إدخال رقم صحيح للبوصة'); return; }
-  const pricePerInch = inches < 40 ? 3 : 4;
-  const totalUSD = inches * pricePerInch;
-  closeTvModal();
-  const url = `./index.html?price=${encodeURIComponent(totalUSD)}&qty=1&ratePct=5`;
-  location.href = url;
+function closeSmartModal(){
+  _pendingIndex = null;
+  _pendingKind  = null;
+  smartModal.classList.remove('show');
 }
 
-/* ===== استخدام السعر → الحاسبة ===== */
-window.usePrice = function(idx){
-  const it = items[idx]; if(!it) return;
+/* ===== قوالب الحقول حسب النوع ===== */
+function tmplTV(){
+  return `
+    <label>كم بوصة للشاشة؟</label>
+    <input id="tvInches" type="number" inputmode="decimal" placeholder="مثال: 32 أو 43" />
+    <div class="hint">أقل من 40 بوصة = <b>3$</b>/بوصة — 40+ = <b>4$</b>/بوصة. تُرسل على فئة <b>5%</b>.</div>
+  `;
+}
+function tmplPCS(){
+  return `
+    <label>اختر طريقة الحساب</label>
+    <select id="pcsMode">
+      <option value="carton">بحسب الكرتون (عدد الحبات في الكرتون)</option>
+      <option value="direct">أحسب بالحبة مباشرة</option>
+    </select>
+    <div id="pcsCarton" class="row">
+      <div>
+        <label>عدد الكراتين</label>
+        <input id="pcsCartons" type="number" inputmode="numeric" placeholder="1" value="1" />
+      </div>
+      <div>
+        <label>حبات/كرتون</label>
+        <input id="pcsPerCarton" type="number" inputmode="numeric" placeholder="مثال: 12" />
+      </div>
+    </div>
+    <div id="pcsDirect" style="display:none">
+      <label>عدد الحبات</label>
+      <input id="pcsCount" type="number" inputmode="numeric" placeholder="مثال: 24" />
+    </div>
+  `;
+}
+function tmplDZ(){
+  return `
+    <label>اختر طريقة الحساب</label>
+    <select id="dzMode">
+      <option value="carton">بحسب الكرتون (عدد الدُزْن في الكرتون)</option>
+      <option value="direct">أحسب بالحبة مباشرة (سعر الحبة = سعر الدرزن ÷ 12)</option>
+    </select>
+    <div id="dzCarton" class="row">
+      <div>
+        <label>عدد الكراتين</label>
+        <input id="dzCartons" type="number" inputmode="numeric" value="1" />
+      </div>
+      <div>
+        <label>دُزْن/كرتون</label>
+        <input id="dzPerCarton" type="number" inputmode="numeric" placeholder="مثال: 10" />
+      </div>
+    </div>
+    <div id="dzDirect" style="display:none">
+      <div class="row">
+        <div>
+          <label>عدد الحبات</label>
+          <input id="dzPieces" type="number" inputmode="numeric" placeholder="مثال: 120" />
+        </div>
+        <div>
+          <label>ثابت التحويل</label>
+          <input value="12" disabled />
+        </div>
+      </div>
+      <div class="hint">سيتم احتساب سعر الحبة تلقائيًا: <b>سعر الدرزن ÷ 12</b>.</div>
+    </div>
+  `;
+}
+function tmplYD(){
+  return `
+    <div class="row">
+      <div>
+        <label>عدد اللفات في الطرد</label>
+        <input id="rolls" type="number" inputmode="numeric" value="1" />
+      </div>
+      <div>
+        <label>ياردة/لفة</label>
+        <input id="ydPerRoll" type="number" inputmode="decimal" placeholder="مثال: 50" />
+      </div>
+    </div>
+    <div class="hint">السعر هنا للياردة الواحدة. الإجمالي = (اللفات × ياردة/لفة × سعر/ياردة).</div>
+  `;
+}
+function tmplROLL(){
+  return `
+    <label>اختر طريقة الحساب</label>
+    <select id="rollMode">
+      <option value="carton">بحسب الطرد (عدد اللفات)</option>
+      <option value="direct">أحسب باللفات مباشرة</option>
+    </select>
+    <div id="rollCarton">
+      <label>عدد اللفات في الطرد</label>
+      <input id="rollsInCarton" type="number" inputmode="numeric" value="1" />
+    </div>
+    <div id="rollDirect" style="display:none">
+      <label>عدد اللفات</label>
+      <input id="rollCount" type="number" inputmode="numeric" placeholder="مثال: 5" />
+    </div>
+  `;
+}
+function tmplKG(){
+  return `
+    <label>اختر طريقة الحساب</label>
+    <select id="kgMode">
+      <option value="carton">بحسب الكرتون (كجم/كرتون)</option>
+      <option value="direct">أحسب بالكيلو مباشرة</option>
+    </select>
+    <div id="kgCarton" class="row">
+      <div>
+        <label>عدد الكراتين</label>
+        <input id="kgCartons" type="number" inputmode="numeric" value="1" />
+      </div>
+      <div>
+        <label>كجم/كرتون</label>
+        <input id="kgPerCarton" type="number" inputmode="decimal" placeholder="مثال: 25" />
+      </div>
+    </div>
+    <div id="kgDirect" style="display:none">
+      <label>إجمالي الكيلوات</label>
+      <input id="kgTotal" type="number" inputmode="decimal" placeholder="مثال: 100" />
+    </div>
+  `;
+}
+function tmplScalar(kindLabel, unitSymbol){
+  // Ah / W / Ltr … السعر للوحدة
+  return `
+    <label>اختر طريقة الإدخال (${kindLabel})</label>
+    <select id="scMode">
+      <option value="total">أدخل الإجمالي (${unitSymbol})</option>
+      <option value="perUnit">عدد القطع × ${unitSymbol}/قطعة</option>
+    </select>
+    <div id="scTotal">
+      <label>الإجمالي (${unitSymbol})</label>
+      <input id="scTotalVal" type="number" inputmode="decimal" placeholder="مثال: 1200" />
+    </div>
+    <div id="scPerUnit" class="row" style="display:none">
+      <div>
+        <label>عدد القطع</label>
+        <input id="scCount" type="number" inputmode="numeric" placeholder="مثال: 10" />
+      </div>
+      <div>
+        <label>${unitSymbol}/قطعة</label>
+        <input id="scPer" type="number" inputmode="decimal" placeholder="مثال: 120" />
+      </div>
+    </div>
+  `;
+}
 
-  // إن كان تلفزيون: افتح المودال الأنيق نفسه
+/* ===== افتح المودال المناسب للصنف ===== */
+function openForItem(index){
+  const it = items[index];
+  const u  = unitMap(it.unit);
+  const rate = parseRateFromNotes(it.notes);
+
+  // تلفزيون حسب الاسم
   if (isTVItem(it)){
-    openTvModal(idx);
+    openSmartModal(index, 'tv', 'احسب سعر شاشة التلفزيون', '📺', tmplTV());
     return;
   }
 
-  // غير ذلك: السلوك المعتاد
+  switch(u){
+    case 'pcs':
+      openSmartModal(index, 'pcs', 'حساب بالحبة (PCS)', '📦', tmplPCS());
+      bindToggle('pcsMode', 'pcsCarton', 'pcsDirect');
+      break;
+    case 'dz':
+      openSmartModal(index, 'dz', 'حساب بالدُزْن (DZ)', '🧮', tmplDZ());
+      bindToggle('dzMode', 'dzCarton', 'dzDirect');
+      break;
+    case 'yd':
+      openSmartModal(index, 'yd', 'حساب القماش بالياردة (YD)', '🧵', tmplYD());
+      break;
+    case 'roll':
+      openSmartModal(index, 'roll', 'حساب باللفة (ROLL)', '🧵', tmplROLL());
+      bindToggle('rollMode', 'rollCarton', 'rollDirect');
+      break;
+    case 'kg':
+      openSmartModal(index, 'kg', 'حساب بالكيلو (KG)', '⚖️', tmplKG());
+      bindToggle('kgMode', 'kgCarton', 'kgDirect');
+      break;
+    case 'Ah':
+      openSmartModal(index, 'ah', 'حساب بالأمبير/ساعة (Ah)', '🔋', tmplScalar('Ah','Ah'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
+    case 'W':
+      openSmartModal(index, 'w', 'حساب بالواط (W)', '💡', tmplScalar('W','W'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
+    case 'ltr':
+      openSmartModal(index, 'ltr', 'حساب بالليتر (Ltr)', '🛢️', tmplScalar('لتر','L'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
+    default:
+      // الافتراضي: كمية بسيطة مباشرة
+      openSmartModal(index, 'other', `حساب سريع — ${unitLabel(u)}`, '🧮', `
+        <label>الكمية (${unitLabel(u)})</label>
+        <input id="otherQty" type="number" inputmode="decimal" placeholder="مثال: 1" value="1" />
+      `);
+  }
+}
+function bindToggle(selId, onId, offId){
+  const sel = document.getElementById(selId);
+  const on  = document.getElementById(onId);
+  const off = document.getElementById(offId);
+  if (!sel||!on||!off) return;
+  sel.addEventListener('change', ()=>{
+    const mode = sel.value;
+    if (mode==='carton' || mode==='total'){ on.style.display=''; off.style.display='none'; }
+    else { on.style.display='none'; off.style.display=''; }
+  });
+}
+
+/* ===== تأكيد المودال وحساب المجموع بالدولار ===== */
+function confirmSmartModal(){
+  const idx = _pendingIndex;
+  if (idx==null) return;
+  const it = items[idx];
+  const u  = unitMap(it.unit);
   const rate = parseRateFromNotes(it.notes);
-  const url = `./index.html?price=${encodeURIComponent(it.price)}&qty=1&ratePct=${rate.pct}`;
+  let totalUSD = 0;
+
+  function num(id){ const el = document.getElementById(id); return el? parseFloat(String(el.value||'').replace(',','.')) : NaN; }
+
+  if (_pendingKind === 'tv'){
+    const inches = num('tvInches');
+    if (!(inches>0)) return alert('اكتب عدد البوصات');
+    const pricePerInch = inches < 40 ? 3 : 4;
+    totalUSD = inches * pricePerInch;
+    goToCalc(totalUSD, 1, 5); return;
+  }
+
+  if (_pendingKind === 'pcs'){
+    const mode = (document.getElementById('pcsMode')||{}).value || 'carton';
+    if (mode==='carton'){
+      const cartons = num('pcsCartons') || 0;
+      const per     = num('pcsPerCarton') || 0;
+      if (!(cartons>0 && per>0)) return alert('أدخل عدد الكراتين والحبات/كرتون');
+      totalUSD = (cartons * per) * it.price;
+    } else {
+      const count = num('pcsCount') || 0;
+      if (!(count>0)) return alert('أدخل عدد الحبات');
+      totalUSD = count * it.price;
+    }
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  if (_pendingKind === 'dz'){
+    const mode = (document.getElementById('dzMode')||{}).value || 'carton';
+    if (mode==='carton'){
+      const cartons = num('dzCartons') || 0;
+      const per     = num('dzPerCarton') || 0;
+      if (!(cartons>0 && per>0)) return alert('أدخل عدد الكراتين والدُزْن/كرتون');
+      const dozens = cartons * per;
+      totalUSD = dozens * it.price; // السعر للدرزن
+    } else {
+      const pieces = num('dzPieces') || 0;
+      if (!(pieces>0)) return alert('أدخل عدد الحبات');
+      const pricePerPiece = it.price / 12;
+      totalUSD = pieces * pricePerPiece;
+    }
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  if (_pendingKind === 'yd'){
+    const rolls = num('rolls') || 0;
+    const ydPer = num('ydPerRoll') || 0;
+    if (!(rolls>0 && ydPer>0)) return alert('أدخل عدد اللفات واليارد/لفة');
+    const totalYd = rolls * ydPer;
+    totalUSD = totalYd * it.price; // السعر للياردة
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  if (_pendingKind === 'roll'){
+    const mode = (document.getElementById('rollMode')||{}).value || 'carton';
+    if (mode==='carton'){
+      const rolls = num('rollsInCarton') || 0;
+      if (!(rolls>0)) return alert('أدخل عدد اللفات في الطرد');
+      totalUSD = rolls * it.price; // السعر للّفة
+    } else {
+      const count = num('rollCount') || 0;
+      if (!(count>0)) return alert('أدخل عدد اللفات');
+      totalUSD = count * it.price;
+    }
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  if (_pendingKind === 'kg'){
+    const mode = (document.getElementById('kgMode')||{}).value || 'carton';
+    if (mode==='carton'){
+      const cartons = num('kgCartons') || 0;
+      const per     = num('kgPerCarton') || 0;
+      if (!(cartons>0 && per>0)) return alert('أدخل عدد الكراتين وكجم/كرتون');
+      const totalKg = cartons * per;
+      totalUSD = totalKg * it.price; // السعر للكيلو
+    } else {
+      const totalKg = num('kgTotal') || 0;
+      if (!(totalKg>0)) return alert('أدخل إجمالي الكيلوات');
+      totalUSD = totalKg * it.price;
+    }
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'ltr'){
+    const mode = (document.getElementById('scMode')||{}).value || 'total';
+    if (mode==='total'){
+      const total = num('scTotalVal') || 0;
+      if (!(total>0)) return alert('أدخل الإجمالي');
+      totalUSD = total * it.price; // السعر للوحدة
+    } else {
+      const count = num('scCount') || 0;
+      const per   = num('scPer') || 0;
+      if (!(count>0 && per>0)) return alert('أدخل عدد القطع والقيمة/قطعة');
+      const total = count * per;
+      totalUSD = total * it.price;
+    }
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+
+  // other
+  if (_pendingKind === 'other'){
+    const qty = num('otherQty') || 0;
+    if (!(qty>0)) return alert('أدخل الكمية');
+    totalUSD = qty * it.price;
+    goToCalc(totalUSD, 1, rate.pct); return;
+  }
+}
+
+function goToCalc(totalUSD, qty, ratePct){
+  closeSmartModal();
+  if (!(totalUSD>0)) { alert('القيمة غير صحيحة'); return; }
+  const url = `./index.html?price=${encodeURIComponent(totalUSD)}&qty=${qty||1}&ratePct=${ratePct||10}`;
   location.href = url;
+}
+
+/* ===== استخدام السعر → الحاسبة (يفتح المودال الذكي) ===== */
+window.usePrice = function(idx){
+  const it = items[idx]; if(!it) return;
+  openForItem(idx);
 };
 
 /* ===== تعديل/حذف ===== */
