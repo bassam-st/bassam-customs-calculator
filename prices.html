@@ -104,6 +104,7 @@
         <option value="ml">المليلتر (ml)</option>
         <option value="Ah">Ah/أمبير</option>
         <option value="W">W/واط</option>
+        <option value="kW">kW/كيلوواط</option><!-- تمت الإضافة -->
         <option value="bbl">البرميل</option>
         <option value="mg">مليجرام</option>
         <option value="g">جرام</option>
@@ -162,7 +163,7 @@ let editIndex = -1;
 
 // حالة المودال
 let _pendingIndex = null;
-let _pendingKind  = null; // 'tv' | 'pcs' | 'dz' | 'yd' | 'roll' | 'kg' | 'ah' | 'w' | 'ltr' | 'other'
+let _pendingKind  = null; // 'tv' | 'pcs' | 'dz' | 'yd' | 'roll' | 'kg' | 'ah' | 'w' | 'kw' | 'ltr' | 'ml' | 'other'
 
 /* ===== DOM ===== */
 const $ = id => document.getElementById(id);
@@ -186,15 +187,22 @@ function unitMap(u){
   if (s.includes('لتر') || s === 'ltr' || s === 'l' || s.includes('(l)')) return 'ltr';
   if (s.includes('مل') && (s.includes('مللتر') || s.includes('مليلتر') || s.includes('مل لتر') || s === 'ml')) return 'ml';
   if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
+
+  // طاقة/قدرة
+  if (s === 'kw' || s.includes('كيلوواط') || s.includes('كيلو وات')) return 'kW';
   if (s.startsWith('w') || s.includes('واط') || s.includes('وات')) return 'W';
+
+  // أطوال ومساحات وأحجام
   if (s === 'yd' || s.includes('يارد') || s.includes('ياردة')) return 'yd';
   if (s === 'm2' || s.includes('متر مربع')) return 'm2';
   if (s === 'm3' || s.includes('متر مكعب')) return 'm3';
-  if (s === 'm'  || s.includes('متر') && !s.includes('مربع') && !s.includes('مكعب')) return 'm';
+  if (s === 'm'  || (s.includes('متر') && !s.includes('مربع') && !s.includes('مكعب'))) return 'm';
   if (s === 'cm' || s.includes('سنتيمتر') || s.includes('سم')) return 'cm';
   if (s === 'mm' || s.includes('مليمتر') || s.includes('مم')) return 'mm';
   if (s === 'ft' || s.includes('قدم')) return 'ft';
   if (s === 'in' || s.includes('بوصه') || s.includes('بوصة') || s.includes('إنش') || s.includes('انش') || s.includes('هنش')) return 'in';
+
+  // أخرى
   if (s === 'roll' || s.includes('لفة') || s.includes('لفه')) return 'roll';
   if (s === 'pair' || s.includes('زوج')) return 'pair';
   if (s === 'bbl' || s.includes('برميل')) return 'bbl';
@@ -226,6 +234,7 @@ function unitLabel(u){
     case 'ml' : return 'المليلتر';
     case 'Ah' : return 'Ah/أمبير';
     case 'W'  : return 'W/واط';
+    case 'kW' : return 'kW/كيلوواط'; /* تمت الإضافة */
     case 'bbl': return 'البرميل';
     case 'mg' : return 'مليجرام';
     case 'g'  : return 'جرام';
@@ -442,7 +451,7 @@ function tmplKG(){
   `;
 }
 function tmplScalar(kindLabel, unitSymbol){
-  // Ah / W / Ltr / ml … السعر للوحدة
+  // Ah / W / kW / L / ml … السعر للوحدة
   return `
     <label>اختر طريقة الإدخال (${kindLabel})</label>
     <select id="scMode">
@@ -503,6 +512,10 @@ function openForItem(index){
       break;
     case 'W':
       openSmartModal(index, 'w', 'حساب بالواط (W)', '💡', tmplScalar('W','W'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
+    case 'kW':
+      openSmartModal(index, 'kw', 'حساب بالكيلوواط (kW)', '⚡', tmplScalar('kW','kW'));
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
     case 'ltr':
@@ -623,12 +636,12 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'ltr'){
+  if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'kw' || _pendingKind === 'ltr'){
     const mode = (document.getElementById('scMode')||{}).value || 'total';
     if (mode==='total'){
       const total = num('scTotalVal') || 0;
       if (!(total>0)) return alert('أدخل الإجمالي');
-      totalUSD = total * it.price; // السعر للوحدة
+      totalUSD = total * it.price; // السعر للوحدة (Ah/W/kW/L)
     } else {
       const count = num('scCount') || 0;
       const per   = num('scPer') || 0;
@@ -639,7 +652,7 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  // other (يشمل m, cm, mm, ft, in, m2, m3, bbl, mg, g …)
+  // other (يشمل m, cm, mm, ft, in, m2, m3, bbl, mg, g, ml …)
   if (_pendingKind === 'other'){
     const qty = num('otherQty') || 0;
     if (!(qty>0)) return alert('أدخل الكمية');
@@ -805,7 +818,7 @@ boot();
   });}
   const LS=localStorage; let deviceId=LS.getItem("deviceId"); if(!deviceId){deviceId=uuid();LS.setItem("deviceId",deviceId);}
   async function send(event,payload){
-    const body=JSON.stringify({event,deviceId,payload:payload||{}});
+    const body=JSON.stringify({event,deviceId,payload:payload||{}}); 
     try{
       if(navigator.sendBeacon){navigator.sendBeacon(TRACK_URL,new Blob([body],{type:"application/json"}));}
       else{await fetch(TRACK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body});}
