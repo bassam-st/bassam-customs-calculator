@@ -1,7 +1,7 @@
-fastapi==0.115.0
-uvicorn==0.30.1
-requests==2.32.3
-pydantic==2.9.1
-python-multipart==0.0.9
-jinja2==3.1.4
-aiohttp==3.9.5
+fastapi==0.115.0          # إطار الـ API (يتضمن CORS عبر Starlette)
+uvicorn==0.30.1           # خادم التشغيل
+requests==2.32.3          # استدعاء GitHub API (update_api.py)
+pydantic==2.9.1           # نماذج التحقق من البيانات
+python-multipart==0.0.9   # رفع ملفات إن لزم (استيراد JSON لاحقاً)
+jinja2==3.1.4             # إن احتجت قوالب HTML بسيطة
+aiohttp==3.9.5            # طلبات غير متزامنة (اختياري للتتبّع/الاستدعاءات)
