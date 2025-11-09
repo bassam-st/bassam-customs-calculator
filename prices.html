@@ -36,6 +36,26 @@
     .muted{color:#64748b;font-size:12px;margin-top:4px}
     .owner-only{display:none}
     .commit{min-width:200px}
+
+    /* ===== مودال البوصة (بنفس الهوية البصرية) ===== */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+    .modal.show{display:flex}
+    .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.35)}
+    .dialog{
+      position:relative;background:#fff;border-radius:20px;border:1px solid #e5e7eb;
+      max-width:420px;width:100%;padding:0;box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden
+    }
+    .dlg-head{
+      background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;
+      padding:16px 18px;font-weight:900;display:flex;align-items:center;gap:10px
+    }
+    .dlg-body{padding:16px 18px}
+    .dlg-foot{padding:14px 18px;display:flex;gap:8px;justify-content:flex-start;background:#f8fafc;border-top:1px solid #e5e7eb}
+    .dlg-body label{display:block;font-weight:800;margin-bottom:6px}
+    .dlg-body input{
+      width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;font-size:18px
+    }
+    .dlg-hint{color:#0f5132;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;padding:8px 10px;font-size:13px;margin-top:10px}
   </style>
 </head>
 <body>
@@ -108,6 +128,29 @@
 
 </div>
 
+<!-- ===== مودال إدخال البوصة للشاشات ===== -->
+<div class="modal" id="tvModal" role="dialog" aria-modal="true" aria-labelledby="tvTitle">
+  <div class="backdrop" onclick="closeTvModal()"></div>
+  <div class="dialog">
+    <div class="dlg-head">
+      <span style="font-size:20px">📺</span>
+      <div id="tvTitle">احسب سعر شاشة التلفزيون</div>
+    </div>
+    <div class="dlg-body">
+      <label for="tvInches">كم بوصة للشاشة؟</label>
+      <input id="tvInches" type="number" inputmode="decimal" placeholder="مثال: 32 أو 43" />
+      <div class="dlg-hint">
+        القاعدة: أقل من 40 بوصة = <b>$3</b> لكل بوصة — من 40 وأعلى = <b>$4</b> لكل بوصة.
+        <br>سيتم الإرسال إلى الحاسبة على فئة <b>5%</b> تلقائيًا.
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn btn-green" onclick="confirmTvModal()">متابعة</button>
+      <button class="btn btn-gray"  onclick="closeTvModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ===== إعدادات عامة ===== */
 const ADMIN_PIN = "bassam1234";
@@ -119,6 +162,9 @@ let ownerPin = null;
 let items = [];
 let editIndex = -1;
 
+// حالة المودال
+let _tvPendingIndex = null;
+
 /* ===== DOM ===== */
 const $ = id => document.getElementById(id);
 const pin = $('pin'), unlock=$('unlock'), lockBtn=$('lock'), state=$('state');
@@ -127,6 +173,7 @@ const saveBtn=$('saveBtn'), clearBtn=$('clearBtn');
 const list=$('list'), q=$('q');
 const exportBtn=$('exportBtn'), importBtn=$('importBtn'), importFile=$('importFile');
 const pushBtn=$('pushBtn'), commitMsg=$('commitMsg');
+const tvModal=$('tvModal'), tvInches=$('tvInches');
 
 /* ===== وحدات ===== */
 function unitMap(u){
@@ -204,7 +251,7 @@ async function boot(){
   render();
 }
 
-/* ===== عرض ===== */
+/* ===== عرض القائمة ===== */
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function render(){
@@ -239,33 +286,44 @@ function render(){
 /* ===== كشف أن الصنف «شاشة تلفزيون» ===== */
 function isTVItem(it){
   const txt = (String(it.name||'') + ' ' + String(it.notes||'')).toLowerCase();
-  return /تلفز|تلفزيون|tv/.test(txt);        // نتجنب "شاشات كمبيوتر" لأن شرطنا يبحث عن "تلفزيون/TV"
+  return /تلفز|تلفزيون|tv/.test(txt);
+}
+
+/* ===== مودال البوصة ===== */
+function openTvModal(index){
+  _tvPendingIndex = index;
+  tvInches.value = '';
+  tvModal.classList.add('show');
+  setTimeout(()=>tvInches?.focus(), 30);
+}
+function closeTvModal(){
+  _tvPendingIndex = null;
+  tvModal.classList.remove('show');
+}
+function confirmTvModal(){
+  const raw = tvInches.value;
+  const inches = parseFloat(String(raw||'').trim().replace(',', '.'));
+  if (!(inches>0)) { alert('الرجاء إدخال رقم صحيح للبوصة'); return; }
+  const pricePerInch = inches < 40 ? 3 : 4;
+  const totalUSD = inches * pricePerInch;
+  closeTvModal();
+  const url = `./index.html?price=${encodeURIComponent(totalUSD)}&qty=1&ratePct=5`;
+  location.href = url;
 }
 
 /* ===== استخدام السعر → الحاسبة ===== */
 window.usePrice = function(idx){
   const it = items[idx]; if(!it) return;
 
-  // إن كان تلفزيون: اسأل عن عدد البوصات واحسب حسب القاعدة
+  // إن كان تلفزيون: افتح المودال الأنيق نفسه
   if (isTVItem(it)){
-    const raw = prompt('كم بوصة للشاشة؟ (أدخل رقمًا مثل 32 أو 43)');
-    if (raw===null) return; // إلغاء
-    const inches = parseFloat(String(raw).trim().replace(',', '.'));
-    if (!(inches>0)) { alert('الرجاء إدخال رقم صحيح للبوصة'); return; }
-
-    const pricePerInch = inches < 40 ? 3 : 4; // <40 → 3$ ؛ ≥40 → 4$
-    const totalUSD = inches * pricePerInch;
-
-    // نرسلها للحاسبة مع فئة 5%
-    const url = `./index.html?price=${encodeURIComponent(totalUSD)}&qty=1&ratePct=5`;
-    location.href = url;
+    openTvModal(idx);
     return;
   }
 
   // غير ذلك: السلوك المعتاد
   const rate = parseRateFromNotes(it.notes);
-  const qty = 1;
-  const url = `./index.html?price=${encodeURIComponent(it.price)}&qty=${qty}&ratePct=${rate.pct}`;
+  const url = `./index.html?price=${encodeURIComponent(it.price)}&qty=1&ratePct=${rate.pct}`;
   location.href = url;
 };
 
