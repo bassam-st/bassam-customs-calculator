@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لوحة تتبّع الزوار — بسّام</title>
+<meta name="theme-color" content="#16a34a" />
+<style>
+  :root{--green:#16a34a;--ink:#0f172a;--muted:#64748b;--bg:#f1f5f9;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
+  .wrap{max-width:1000px;margin:16px auto;padding:12px}
+  .top{background:var(--green);color:#fff;padding:14px 16px;border-radius:12px;font-weight:900;font-size:20px;display:flex;justify-content:space-between;align-items:center}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .controls input{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+  .controls button{padding:10px 12px;border:none;border-radius:10px;background:#0ea5e9;color:#fff;font-weight:800;cursor:pointer}
+  .muted{color:var(--muted);font-size:12px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .card{flex:1 1 240px;background:var(--card);border:1px solid #e5e7eb;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+  .kpi{font-size:34px;font-weight:900;margin-top:6px}
+  .wide{flex:2 1 520px}
+  canvas{width:100%;height:260px;display:block}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;border-bottom:1px dashed #e5e7eb;text-align:start}
+  .footer{margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .small{font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>📊 لوحة تتبّع الزوار — بسّام</div>
+    <div class="controls">
+      <input id="pin" placeholder="PIN" value="bassam1234" />
+      <input id="api" placeholder="Tracker URL" style="min-width:280px" value="https://bassam-tracker.onrender.com" />
+      <button id="load">عرض</button>
+      <span class="muted" id="msg"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <div class="muted">أجهزة فريدة</div>
+      <div id="kpi_devices" class="kpi">—</div>
+    </div>
+    <div class="card">
+      <div class="muted">إجمالي الأحداث</div>
+      <div id="kpi_events" class="kpi">—</div>
+    </div>
+    <div class="card">
+      <div class="muted">إجمالي عمليات البحث</div>
+      <div id="kpi_searches" class="kpi">—</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card wide">
+      <div class="muted">المستخدمون والبحث (آخر 14 يوم)</div>
+      <canvas id="chart"></canvas>
+    </div>
+    <div class="card" style="flex:1 1 300px">
+      <div class="muted">أعلى كلمات البحث</div>
+      <table id="top"></table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="small muted">النقاط تُسحب من: <code id="src"></code></div>
+    <div class="small muted">تلميح: بدّل الـ PIN من متغيرات البيئة في خدمة التتبّع (ADMIN_PIN).</div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const pin=$('pin'), api=$('api'), btn=$('load'), msg=$('msg');
+const kpi_devices=$('kpi_devices'), kpi_events=$('kpi_events'), kpi_searches=$('kpi_searches');
+const topTbl=$('top'); const chartEl=$('chart'); const src=$('src');
+
+async function loadStats(){
+  const base = api.value.replace(/\/+$/,'');
+  const url = `${base}/stats?pin=${encodeURIComponent(pin.value)}`;
+  src.textContent = url;
+  msg.textContent='جاري التحميل…';
+  try{
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok){
+      const t = await r.text();
+      throw new Error(`HTTP ${r.status}: ${t}`);
+    }
+    const data = await r.json();
+    kpi_devices.textContent = data.unique_devices ?? 0;
+    kpi_events.textContent  = data.total_events ?? 0;
+    kpi_searches.textContent= data.total_searches ?? 0;
+
+    // أعلى الكلمات
+    const rows = (data.top_searches||[]).map(x=>`<tr><td>${escapeHtml(x.q)}</td><td>${x.count}</td></tr>`);
+    topTbl.innerHTML = `<tr><th>الكلمة</th><th>العدد</th></tr>` + (rows.join('')||'<tr><td colspan="2">لا يوجد بيانات بعد</td></tr>');
+
+    drawBars(chartEl, data.daily||[], {a:'unique_devices', b:'searches'});
+    msg.textContent='تم.';
+  }catch(e){
+    msg.textContent='فشل: '+e.message;
+  }
+}
+btn.addEventListener('click', loadStats);
+
+// —— أدوات رسم و HTML ——
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function drawBars(canvas, daily, keys){
+  const d = (daily||[]).slice(-14);
+  const labels = d.map(x=>x.date);
+  const A = d.map(x=>+x[keys.a]||0);
+  const B = d.map(x=>+x[keys.b]||0);
+
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
+  const ctx = canvas.getContext('2d'); ctx.scale(devicePixelRatio, devicePixelRatio);
+  ctx.clearRect(0,0,W,H);
+
+  const max = Math.max(1, ...A, ...B);
+  const pad = 28, innerW = W - pad*2, innerH = H - pad*2;
+  const n = labels.length || 1, groupW = innerW / n;
+
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.beginPath(); ctx.moveTo(pad, H-pad); ctx.lineTo(W-pad, H-pad); ctx.stroke();
+
+  for(let i=0;i<n;i++){
+    const x0 = pad + i*groupW;
+    const w  = Math.max(6, groupW*0.36);
+    const gap= groupW*0.08;
+
+    const hA = innerH * (A[i]/max);
+    const hB = innerH * (B[i]/max);
+
+    ctx.fillStyle = '#86efac'; // أجهزة
+    ctx.fillRect(x0 + gap, H - pad - hA, w, hA);
+
+    ctx.fillStyle = '#93c5fd'; // بحث
+    ctx.fillRect(x0 + gap + w + gap, H - pad - hB, w, hB);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px system-ui';
+    const lbl = String(labels[i]||'').slice(5); // MM-DD
+    ctx.fillText(lbl, x0 + gap, H - pad + 12);
+  }
+}
+
+// تحميل تلقائي أول مرة
+loadStats();
+</script>
+</body>
+</html>
