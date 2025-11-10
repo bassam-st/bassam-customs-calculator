@@ -104,7 +104,8 @@
         <option value="ml">المليلتر (ml)</option>
         <option value="Ah">Ah/أمبير</option>
         <option value="W">W/واط</option>
-        <option value="kW">kW/كيلوواط</option><!-- تمت الإضافة -->
+        <option value="kW">kW/كيلوواط</option>
+        <option value="kVA">kVA/كيفي وات</option><!-- ✅ إضافة kVA -->
         <option value="bbl">البرميل</option>
         <option value="mg">مليجرام</option>
         <option value="g">جرام</option>
@@ -163,7 +164,7 @@ let editIndex = -1;
 
 // حالة المودال
 let _pendingIndex = null;
-let _pendingKind  = null; // 'tv' | 'pcs' | 'dz' | 'yd' | 'roll' | 'kg' | 'ah' | 'w' | 'kw' | 'ltr' | 'ml' | 'other'
+let _pendingKind  = null; // 'tv' | 'pcs' | 'dz' | 'yd' | 'roll' | 'kg' | 'ah' | 'w' | 'kw' | 'kva' | 'ltr' | 'ml' | 'other'
 
 /* ===== DOM ===== */
 const $ = id => document.getElementById(id);
@@ -189,7 +190,8 @@ function unitMap(u){
   if (s.includes('ah') || s.includes('أمبير')) return 'Ah';
 
   // طاقة/قدرة
-  if (s === 'kw' || s.includes('كيلوواط') || s.includes('كيلو وات')) return 'kW';
+  if (s === 'kva' || s.includes('كيفي') || s.includes('كي في') || s.includes('كفا') || s.includes('ك.ف.ا') || s.includes('ك ف ا') || s.includes('كيلو فولت') || s.includes('كيلوفولت')) return 'kVA';
+  if (s === 'kw'  || s.includes('كيلوواط') || s.includes('كيلو وات')) return 'kW';
   if (s.startsWith('w') || s.includes('واط') || s.includes('وات')) return 'W';
 
   // أطوال ومساحات وأحجام
@@ -234,7 +236,8 @@ function unitLabel(u){
     case 'ml' : return 'المليلتر';
     case 'Ah' : return 'Ah/أمبير';
     case 'W'  : return 'W/واط';
-    case 'kW' : return 'kW/كيلوواط'; /* تمت الإضافة */
+    case 'kW' : return 'kW/كيلوواط';
+    case 'kVA': return 'kVA/كيفي وات'; /* ✅ */
     case 'bbl': return 'البرميل';
     case 'mg' : return 'مليجرام';
     case 'g'  : return 'جرام';
@@ -451,7 +454,7 @@ function tmplKG(){
   `;
 }
 function tmplScalar(kindLabel, unitSymbol){
-  // Ah / W / kW / L / ml … السعر للوحدة
+  // Ah / W / kW / kVA / L / ml … السعر للوحدة
   return `
     <label>اختر طريقة الإدخال (${kindLabel})</label>
     <select id="scMode">
@@ -518,6 +521,10 @@ function openForItem(index){
       openSmartModal(index, 'kw', 'حساب بالكيلوواط (kW)', '⚡', tmplScalar('kW','kW'));
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
+    case 'kVA':
+      openSmartModal(index, 'kva', 'حساب بالـ kVA (كيفي وات)', '⚡', tmplScalar('kVA','kVA'));
+      bindToggle('scMode', 'scTotal', 'scPerUnit');
+      break;
     case 'ltr':
       openSmartModal(index, 'ltr', 'حساب بالليتر (L)', '🛢️', tmplScalar('لتر','L'));
       bindToggle('scMode', 'scTotal', 'scPerUnit');
@@ -527,7 +534,7 @@ function openForItem(index){
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
     default:
-      // الافتراضي: كمية بسيطة مباشرة لأي وحدة أخرى (متر/قدم/إنش/سم/مم/م²/م³/برميل…)
+      // الافتراضي: كمية بسيطة مباشرة لأي وحدة أخرى
       openSmartModal(index, 'other', `حساب سريع — ${unitLabel(u)}`, '🧮', `
         <label>الكمية (${unitLabel(u)})</label>
         <input id="otherQty" type="number" inputmode="decimal" placeholder="مثال: 1" value="1" />
@@ -587,7 +594,7 @@ function confirmSmartModal(){
       const per     = num('dzPerCarton') || 0;
       if (!(cartons>0 && per>0)) return alert('أدخل عدد الكراتين والدُزْن/كرتون');
       const dozens = cartons * per;
-      totalUSD = dozens * it.price; // السعر للدرزن
+      totalUSD = dozens * it.price;
     } else {
       const pieces = num('dzPieces') || 0;
       if (!(pieces>0)) return alert('أدخل عدد الحبات');
@@ -602,7 +609,7 @@ function confirmSmartModal(){
     const ydPer = num('ydPerRoll') || 0;
     if (!(rolls>0 && ydPer>0)) return alert('أدخل عدد اللفات واليارد/لفة');
     const totalYd = rolls * ydPer;
-    totalUSD = totalYd * it.price; // السعر للياردة
+    totalUSD = totalYd * it.price;
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
@@ -611,7 +618,7 @@ function confirmSmartModal(){
     if (mode==='carton'){
       const rolls = num('rollsInCarton') || 0;
       if (!(rolls>0)) return alert('أدخل عدد اللفات في الطرد');
-      totalUSD = rolls * it.price; // السعر للّفة
+      totalUSD = rolls * it.price;
     } else {
       const count = num('rollCount') || 0;
       if (!(count>0)) return alert('أدخل عدد اللفات');
@@ -627,7 +634,7 @@ function confirmSmartModal(){
       const per     = num('kgPerCarton') || 0;
       if (!(cartons>0 && per>0)) return alert('أدخل عدد الكراتين وكجم/كرتون');
       const totalKg = cartons * per;
-      totalUSD = totalKg * it.price; // السعر للكيلو
+      totalUSD = totalKg * it.price;
     } else {
       const totalKg = num('kgTotal') || 0;
       if (!(totalKg>0)) return alert('أدخل إجمالي الكيلوات');
@@ -636,12 +643,13 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'kw' || _pendingKind === 'ltr'){
+  // وحدات اسكالرية: Ah / W / kW / kVA / L
+  if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'kw' || _pendingKind === 'kva' || _pendingKind === 'ltr'){
     const mode = (document.getElementById('scMode')||{}).value || 'total';
     if (mode==='total'){
       const total = num('scTotalVal') || 0;
       if (!(total>0)) return alert('أدخل الإجمالي');
-      totalUSD = total * it.price; // السعر للوحدة (Ah/W/kW/L)
+      totalUSD = total * it.price; // السعر للوحدة
     } else {
       const count = num('scCount') || 0;
       const per   = num('scPer') || 0;
@@ -652,7 +660,7 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  // other (يشمل m, cm, mm, ft, in, m2, m3, bbl, mg, g, ml …)
+  // other
   if (_pendingKind === 'other'){
     const qty = num('otherQty') || 0;
     if (!(qty>0)) return alert('أدخل الكمية');
