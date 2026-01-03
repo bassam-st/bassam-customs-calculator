@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>بسام مساعدك الجمركي</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
+  <!-- PWA (GitHub Pages safe) -->
+  <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#16a34a">
-  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="icon" href="./icons/icon-192.png">
 
   <style>
     :root{
@@ -37,13 +37,6 @@
 
     .card{background:var(--card);border-radius:18px;padding:16px;margin-top:16px;
           box-shadow:0 8px 24px rgba(0,0,0,.06);border:1px solid #e5e7eb}
-    .owner{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .owner small{color:var(--muted)}
-    .owner input[type=password]{padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
-    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
-    .btn-blue{background:var(--accent);color:#fff}
-    .btn-gray{background:#e2e8f0;color:#0f172a}
-    .owner-on{color:#065f46;font-weight:800}
 
     label{display:block;font-weight:700;margin-bottom:6px}
     input[type="number"]{
@@ -68,45 +61,21 @@
     .result .big{font-size:42px;font-weight:900;color:#065f46;letter-spacing:1px}
     .result .mini{margin-top:8px;color:var(--muted)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
     .btn.copy{background:#22c55e;color:#fff}
     .btn.pdf{background:var(--accent);color:#fff}
     .btn.wa{background:#16a34a;color:#fff}
     @media (max-width:420px){ .result .big{font-size:36px} }
 
+    /* زر التثبيت */
     #installBtn{
       position:fixed; bottom:16px; inset-inline:16px; z-index:9999;
       background:#16a34a; color:#fff; border:none; border-radius:14px;
       padding:12px 16px; font-weight:900; display:none; box-shadow:0 8px 20px rgba(22,163,74,.25);
     }
   </style>
-
-  <!-- Force PWA update & gentle reload -->
-  <script>
-  (function () {
-    if (!('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-    navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) return;
-      reg.update().catch(()=>{});
-      reg.addEventListener('updatefound', function () {
-        const worker = reg.installing;
-        if (!worker) return;
-        worker.addEventListener('statechange', function () {
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            worker.postMessage({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-    });
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (reloaded) return;
-      reloaded = true;
-      location.reload();
-    });
-  })();
-  </script>
 </head>
+
 <body>
   <div class="wrap">
     <section class="hero">
@@ -154,15 +123,37 @@
   <button id="installBtn">⤵️ تثبيت التطبيق</button>
 
 <script>
-  // PWA register (نسخة مُرقّمة لإجبار التحديث عند تغييرات كبيرة)
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=2').catch(console.error);
-  }
-  let deferredPrompt=null; const installBtn=document.getElementById('installBtn');
-  window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;installBtn.style.display='block';});
-  installBtn.addEventListener('click',async()=>{if(!deferredPrompt)return;installBtn.style.display='none';deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;});
+  // ✅ Service Worker (GitHub Pages safe)
+  (function(){
+    if(!('serviceWorker' in navigator)) return;
+    // تسجيل sw.js داخل نفس المجلد (scope صحيح)
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  })();
 
-  // الحاسبة
+  // ✅ زر التثبيت (PWA Install)
+  let deferredPrompt=null;
+  const installBtn=document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt',(e)=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    installBtn.style.display='block';
+  });
+
+  installBtn.addEventListener('click', async ()=>{
+    if(!deferredPrompt) return;
+    installBtn.style.display='none';
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(_){}
+    deferredPrompt=null;
+  });
+
+  window.addEventListener('appinstalled', ()=>{
+    installBtn.style.display='none';
+    deferredPrompt=null;
+  });
+
+  // ===== الحاسبة =====
   const usd   = document.getElementById('usd');
   const out   = document.getElementById('out');
   const formula = document.getElementById('formula');
@@ -189,11 +180,9 @@
     const rate = getRate();
     const result = v * 750 * rate;
     out.textContent = enFmt.format(Math.round(result));
-    const f = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
-    formula.textContent = f;
+    formula.textContent = `${enFmt.format(v)} × 750 × ${rate} = ${enFmt.format(Math.round(result))}`;
   }
 
-  // نسخ/واتساب
   function copyResult(){
     const text = `الرسوم الجمركية: ${out.textContent} ريال يمني`;
     navigator.clipboard.writeText(text).then(()=>alert('✔ تم النسخ'));
@@ -205,13 +194,12 @@
   window.copyResult = copyResult;
   window.shareWhatsApp = shareWhatsApp;
 
-  // ✅ التقاط السعر والكمية والفئة تلقائيًا من قائمة الأسعار
+  // ✅ التقاط السعر/الكمية/الفئة من prices.html
   (function applyFromQuery(){
     try{
       const q = new URLSearchParams(location.search);
       const price = parseFloat(q.get('price') || q.get('usd') || '0');
       const qty   = parseFloat(q.get('qty') || '1');
-      const rateMul = parseFloat(q.get('rateMul') || q.get('rate') || '');
       const ratePct = parseFloat(q.get('ratePct') || '');
 
       if (price > 0) {
@@ -228,10 +216,9 @@
           if (pills[idx]) pills[idx].classList.add('active');
         }
       };
-      if (!isNaN(rateMul) && (rateMul===0.2075 || rateMul===0.265)) {
-        setRadioByValue(String(rateMul));
-      } else if (!isNaN(ratePct)) {
-        setRadioByValue(ratePct===5 ? '0.2075' : ratePct===10 ? '0.265' : '0.265');
+
+      if (!isNaN(ratePct)) {
+        setRadioByValue(ratePct===5 ? '0.2075' : '0.265');
       }
 
       calc();
@@ -239,7 +226,6 @@
     }catch(e){}
   })();
 
-  // تشغيل أولي
   calc();
 </script>
 
@@ -262,5 +248,6 @@
   window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
 })();
 </script>
+
 </body>
 </html>
