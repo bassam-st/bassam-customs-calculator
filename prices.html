@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>قائمة الأسعار — بسام مساعدك الجمركي</title>
   <meta name="theme-color" content="#16a34a">
-  <link rel="icon" href="/icons/icon-192.png">
+
+  <!-- ✅ تعديل مهم: مسار الأيقونة يكون نسبي داخل GitHub Pages -->
+  <link rel="icon" href="./icons/icon-192.png">
+
   <style>
     :root{--green:#16a34a;--green2:#22c55e;--ink:#0f172a;--muted:#64748b;--card:#fff;--bg:#f1f5f9;--accent:#2563eb;--danger:#ef4444;--orange:#f97316}
     *{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:'Noto Kufi Arabic',system-ui,sans-serif;color:var(--ink)}
@@ -155,7 +158,9 @@
 /* ===== إعدادات عامة ===== */
 const ADMIN_PIN = "bassam1234";
 const STORAGE_KEY = 'prices_catalog_v3';
-const REMOTE_JSON = '/assets/prices_catalog.json';
+
+/* ✅ تعديل مهم: خلي المسار نسبي داخل مشروع GitHub Pages */
+const REMOTE_JSON = './assets/prices_catalog.json';
 
 let isOwner = false;
 let ownerPin = null;
