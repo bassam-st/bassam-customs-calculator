@@ -4,6 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>البنود الجمركية – بحث عربي</title>
+
+<!-- ✅ PWA (GitHub Pages safe) -->
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#16a34a">
+<link rel="icon" href="./icons/icon-192.png">
+
 <style>
   body{font-family:'Noto Kufi Arabic',system-ui,sans-serif;background:#f1f5f9;margin:0}
   .top{background:#16a34a;color:#fff;padding:14px 16px;font-weight:800;font-size:18px;text-align:center}
@@ -20,47 +26,19 @@
   .btn-copy{background:#e2e8f0}
   .btn-go{background:#16a34a;color:#fff}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0ف172a;padding:8px 12px;border-radius:10px}
+  .nav a{display:inline-block;text-decoration:none;background:#e2e8f0;color:#0f172a;padding:8px 12px;border-radius:10px}
   mark{background:#fef08a}
 </style>
 
-<!-- Force PWA update & gentle reload -->
+<!-- ✅ تسجيل Service Worker (GitHub Pages safe) -->
 <script>
-(function () {
-  if (!('serviceWorker' in navigator)) return;
-
-  // تأكيد تسجيل sw.js
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
-  navigator.serviceWorker.getRegistration().then(function (reg) {
-    if (!reg) return;
-
-    // افحص تحديث فور فتح الصفحة
-    reg.update().catch(()=>{});
-
-    // عند توفر إصدار جديد
-    reg.addEventListener('updatefound', function () {
-      const worker = reg.installing;
-      if (!worker) return;
-      worker.addEventListener('statechange', function () {
-        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-          // اطلب تجاوز الانتظار
-          worker.postMessage({ type: 'SKIP_WAITING' });
-        }
-      });
-    });
-  });
-
-  // عند تغير المتحكم → أعد التحميل مرة واحدة
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', function () {
-    if (reloaded) return;
-    reloaded = true;
-    location.reload();
-  });
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script>
 </head>
+
 <body>
   <div class="top">🔍 البحث في البنود الجمركية (يدعم العربية)</div>
   <div class="wrap">
@@ -81,16 +59,24 @@
   const rim=/[\u064B-\u065F\u0670\u06D6-\u06ED]/g;
   function normalizeArabic(s){
     if(!s) return "";
-    return s.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d=> String("0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]||d))
-            .replace(rim,'')
-            .replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
-            .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ').replace(/\s+/g,' ').trim();
+    return s
+      .replace(/[\u0660-\u0669\u06F0-\u06F9]/g, d=>{
+        const ar="٠١٢٣٤٥٦٧٨٩";
+        const idx=ar.indexOf(d);
+        return idx>=0 ? String("0123456789"[idx]) : d;
+      })
+      .replace(rim,'')
+      .replace(/[أإآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
+      .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
   }
 
   function highlight(text, q){
     if(!q) return text;
     const tn=normalizeArabic(text), qn=normalizeArabic(q);
     const i=tn.indexOf(qn); if(i<0) return text;
+
     // تقريب موضع الإبراز على النص الأصلي
     let oi=0, ni=0, start=-1, end=-1;
     while(oi<text.length && ni<=i){
@@ -110,17 +96,20 @@
 
   async function loadHS(){
     try{
-      HS = await fetch(HS_URL).then(r=>r.json());
+      const r = await fetch(HS_URL, {cache:'no-store'});
+      HS = await r.json();
       HSn = HS.map(x=>({ ...x, n: normalizeArabic(x.name||''), c: String(x.code||'') }));
       render(HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200), '');
     }catch(e){
-      document.getElementById('results').innerHTML = '<div class="muted">تعذّر تحميل البيانات. تأكد من وجود الملف assets/hs_catalog.json</div>';
+      document.getElementById('results').innerHTML =
+        '<div class="muted">تعذّر تحميل البيانات. تأكد من وجود الملف assets/hs_catalog.json</div>';
     }
   }
 
   function search(query){
     const q = normalizeArabic(query);
     if(!q) return HSn.slice().sort((a,b)=>a.n.localeCompare(b.n)).slice(0,200);
+
     const starts = [], contains = [];
     for(const x of HSn){
       if(x.n.startsWith(q) || x.c.startsWith(q)) starts.push(x);
@@ -133,19 +122,23 @@
 
   function render(list, query){
     const box = document.getElementById('results');
-    if(!list.length){ box.innerHTML='<div class="muted">لا نتائج… جرّب حرفًا آخر.</div>'; return; }
+    if(!list.length){
+      box.innerHTML='<div class="muted">لا نتائج… جرّب حرفًا آخر.</div>';
+      return;
+    }
     box.innerHTML = list.slice(0,200).map(x=>{
       const nameHTML = highlight(x.name||'', query);
       const rateTag = x.rate ? `<span class="tag">فئة ${x.rate}</span>` : '';
+      const codeSafe = String(x.code||'').replace(/'/g,"\\'");
       return `
         <div class="item">
           <div>
             <div class="name">${nameHTML} ${rateTag}</div>
-            <div class="code">البند: ${x.code}</div>
+            <div class="code">البند: ${codeSafe}</div>
           </div>
           <div class="row">
-            <button class="btn btn-copy" onclick="navigator.clipboard.writeText('${x.code}').then(()=>alert('✔ نُسخ: ${x.code}'))">نسخ الكود</button>
-            <button class="btn btn-go" onclick="location.href='./index.html?hs=${encodeURIComponent(x.code)}'">استخدام في الحاسبة</button>
+            <button class="btn btn-copy" onclick="navigator.clipboard.writeText('${codeSafe}').then(()=>alert('✔ نُسخ: ${codeSafe}'))">نسخ الكود</button>
+            <button class="btn btn-go" onclick="location.href='./index.html?hs=${encodeURIComponent(codeSafe)}'">استخدام في الحاسبة</button>
           </div>
         </div>`;
     }).join('');
@@ -180,10 +173,6 @@
     }catch(_){}
   }
   document.addEventListener("DOMContentLoaded",()=>send("page_view",{path:location.pathname,title:document.title}));
-  document.addEventListener("submit",(e)=>{try{
-    const f=e.target; const q=f.querySelector('input[type="search"],[name*="search"],[id*="search"],[name*="query"],[id*="query"]');
-    const val=q?String(q.value||"").trim():""; if(val) send("search",{q:val,page:location.pathname});
-  }catch(_){ }},true);
   window.trackSearch=(q)=>send("search",{q:String(q||"").trim(),page:location.pathname});
 })();
 </script>
