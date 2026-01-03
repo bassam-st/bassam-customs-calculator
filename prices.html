@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>قائمة الأسعار — بسام مساعدك الجمركي</title>
+
+  <!-- ✅ PWA (GitHub Pages safe) -->
+  <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#16a34a">
 
   <!-- ✅ تعديل مهم: مسار الأيقونة يكون نسبي داخل GitHub Pages -->
@@ -61,6 +64,23 @@
     .row{display:flex;gap:8px;flex-wrap:wrap}
     .row > *{flex:1}
     .hint{color:#0f5132;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;padding:8px 10px;font-size:13px;margin:8px 0}
+
+    /* ✅ زر التثبيت */
+    #installBtn{
+      position:fixed;
+      bottom:16px;
+      inset-inline:16px;
+      z-index:99999;
+      background:#16a34a;
+      color:#fff;
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:900;
+      display:none;
+      box-shadow:0 8px 20px rgba(22,163,74,.25);
+      cursor:pointer;
+    }
   </style>
 </head>
 <body>
@@ -138,6 +158,9 @@
 
 </div>
 
+<!-- ✅ زر التثبيت -->
+<button id="installBtn">⤵️ تثبيت التطبيق</button>
+
 <!-- ===== المودال الذكي ===== -->
 <div class="modal" id="smartModal" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
   <div class="backdrop" onclick="closeSmartModal()"></div>
@@ -153,6 +176,39 @@
     </div>
   </div>
 </div>
+
+<script>
+/* ✅ تسجيل Service Worker (PWA) — GitHub Pages safe */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+
+<script>
+/* ✅ زر التثبيت */
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  installBtn.style.display = 'none';
+  deferredPrompt.prompt();
+  try{ await deferredPrompt.userChoice; }catch(_){}
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', ()=>{
+  installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
+</script>
 
 <script>
 /* ===== إعدادات عامة ===== */
@@ -242,7 +298,7 @@ function unitLabel(u){
     case 'Ah' : return 'Ah/أمبير';
     case 'W'  : return 'W/واط';
     case 'kW' : return 'kW/كيلوواط';
-    case 'kVA': return 'kVA/كيفي وات'; /* ✅ */
+    case 'kVA': return 'kVA/كيفي وات';
     case 'bbl': return 'البرميل';
     case 'mg' : return 'مليجرام';
     case 'g'  : return 'جرام';
@@ -459,7 +515,6 @@ function tmplKG(){
   `;
 }
 function tmplScalar(kindLabel, unitSymbol){
-  // Ah / W / kW / kVA / L / ml … السعر للوحدة
   return `
     <label>اختر طريقة الإدخال (${kindLabel})</label>
     <select id="scMode">
@@ -483,12 +538,10 @@ function tmplScalar(kindLabel, unitSymbol){
   `;
 }
 
-/* ===== افتح المودال المناسب للصنف ===== */
 function openForItem(index){
   const it = items[index];
   const u  = unitMap(it.unit);
 
-  // تلفزيون حسب الاسم
   if (isTVItem(it)){
     openSmartModal(index, 'tv', 'احسب سعر شاشة التلفزيون', '📺', tmplTV());
     return;
@@ -539,7 +592,6 @@ function openForItem(index){
       bindToggle('scMode', 'scTotal', 'scPerUnit');
       break;
     default:
-      // الافتراضي: كمية بسيطة مباشرة لأي وحدة أخرى
       openSmartModal(index, 'other', `حساب سريع — ${unitLabel(u)}`, '🧮', `
         <label>الكمية (${unitLabel(u)})</label>
         <input id="otherQty" type="number" inputmode="decimal" placeholder="مثال: 1" value="1" />
@@ -563,7 +615,6 @@ function confirmSmartModal(){
   const idx = _pendingIndex;
   if (idx==null) return;
   const it = items[idx];
-  const u  = unitMap(it.unit);
   const rate = parseRateFromNotes(it.notes);
   let totalUSD = 0;
 
@@ -648,13 +699,12 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  // وحدات اسكالرية: Ah / W / kW / kVA / L
   if (_pendingKind === 'ah' || _pendingKind === 'w' || _pendingKind === 'kw' || _pendingKind === 'kva' || _pendingKind === 'ltr'){
     const mode = (document.getElementById('scMode')||{}).value || 'total';
     if (mode==='total'){
       const total = num('scTotalVal') || 0;
       if (!(total>0)) return alert('أدخل الإجمالي');
-      totalUSD = total * it.price; // السعر للوحدة
+      totalUSD = total * it.price;
     } else {
       const count = num('scCount') || 0;
       const per   = num('scPer') || 0;
@@ -665,7 +715,6 @@ function confirmSmartModal(){
     goToCalc(totalUSD, 1, rate.pct); return;
   }
 
-  // other
   if (_pendingKind === 'other'){
     const qty = num('otherQty') || 0;
     if (!(qty>0)) return alert('أدخل الكمية');
