@@ -2,9 +2,12 @@
 // main.js — Bassam Customs Pro
 // ===============================
 
-// تسجيل Service Worker (PWA)
+// ✅ تسجيل Service Worker (PWA) — بطريقة تعمل على GitHub Pages (بدون مسار /)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  try{
+    const swUrl = new URL('./sw.js', window.location.href);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }catch(e){}
 }
 
 // ===============================
@@ -213,3 +216,246 @@ document.addEventListener("DOMContentLoaded", ()=>{
   });
   arm();
 })();
+
+// ===============================
+// القسم 3: ✅ صفحة الأسعار prices.html
+// تحميل catalog من assets/prices_catalog.json + دمج المحلي + عرض + بحث
+// ===============================
+
+// مفاتيح تخزين مرنة (لن نكسر أي نسخة سابقة)
+const PRICES_LOCAL_KEYS = [
+  "pricesCatalogLocal",
+  "prices_local",
+  "local_prices",
+  "PRICE_CATALOG_LOCAL",
+  "prices_catalog_local"
+];
+
+// محاولة إيجاد عناصر الصفحة دون الاعتماد على ID واحد
+function pickElByIds(ids){
+  for(const id of ids){
+    const el = document.getElementById(id);
+    if(el) return el;
+  }
+  return null;
+}
+function pickFirstSelector(selectors){
+  for(const s of selectors){
+    const el = document.querySelector(s);
+    if(el) return el;
+  }
+  return null;
+}
+
+function normalizeStr(s){
+  return String(s || "").trim();
+}
+
+// قراءة المحلي إن وجد
+function readLocalPrices(){
+  for(const k of PRICES_LOCAL_KEYS){
+    try{
+      const raw = localStorage.getItem(k);
+      if(!raw) continue;
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) return parsed;
+      // بعض النسخ تحفظ كائن {items:[...]} أو {data:[...]}
+      if(parsed && Array.isArray(parsed.items)) return parsed.items;
+      if(parsed && Array.isArray(parsed.data)) return parsed.data;
+      if(parsed && Array.isArray(parsed.catalog)) return parsed.catalog;
+    }catch(e){}
+  }
+  return [];
+}
+
+// دمج: الأساسي + المحلي (باسم السلعة كـ مفتاح)
+function mergeCatalog(baseArr, localArr){
+  const map = new Map();
+  (baseArr||[]).forEach(x=>{
+    const name = normalizeStr(x?.name);
+    if(name) map.set(name, x);
+  });
+  (localArr||[]).forEach(x=>{
+    const name = normalizeStr(x?.name);
+    if(name) map.set(name, x); // المحلي يغطي الأساسي
+  });
+  return Array.from(map.values());
+}
+
+async function loadBaseCatalog(){
+  // مسار صحيح على GitHub Pages
+  const url = new URL("assets/prices_catalog.json", window.location.href);
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  if(!res.ok) throw new Error("catalog_fetch_failed");
+  const data = await res.json();
+  // ملفك Array مباشرة
+  if(Array.isArray(data)) return data;
+  // احتياط
+  if(data && Array.isArray(data.items)) return data.items;
+  if(data && Array.isArray(data.data)) return data.data;
+  if(data && Array.isArray(data.catalog)) return data.catalog;
+  return [];
+}
+
+// إنشاء/تحديد مكان عرض العناصر
+function ensureListContainer(){
+  // جرّب IDs شائعة
+  let box = pickElByIds(["catalogList","itemsList","priceList","list","results","catalog"]);
+  if(box) return box;
+
+  // جرّب selectors شائعة
+  box = pickFirstSelector([
+    "[data-catalog]",
+    ".catalog-list",
+    ".items-list",
+    ".results",
+    ".list"
+  ]);
+  if(box) return box;
+
+  // إذا لم نجد: أنشئ قائمة أسفل مربع البحث إن وجد
+  const search = ensureSearchInput();
+  const wrap = document.createElement("div");
+  wrap.id = "catalogList";
+  wrap.style.padding = "12px";
+  wrap.style.marginTop = "8px";
+
+  if(search && search.parentElement){
+    search.parentElement.appendChild(wrap);
+  }else{
+    document.body.appendChild(wrap);
+  }
+  return wrap;
+}
+
+function ensureSearchInput(){
+  // IDs محتملة حسب تصميمك
+  let inp = pickElByIds(["search","searchInput","q","query","nameSearch"]);
+  if(inp) return inp;
+
+  // جرّب placeholder عربي
+  inp = pickFirstSelector([
+    'input[placeholder*="ابحث"]',
+    'input[type="search"]'
+  ]);
+  return inp;
+}
+
+// رسم العناصر
+function renderCatalog(items){
+  const list = ensureListContainer();
+  if(!list) return;
+
+  list.innerHTML = "";
+
+  if(!items || !items.length){
+    const empty = document.createElement("div");
+    empty.textContent = "لا توجد عناصر مطابقة.";
+    empty.style.textAlign = "center";
+    empty.style.opacity = "0.8";
+    empty.style.padding = "16px";
+    list.appendChild(empty);
+    return;
+  }
+
+  // بطاقة بسيطة لكل عنصر
+  items.forEach(it=>{
+    const name  = normalizeStr(it?.name);
+    const price = it?.price;
+    const unit  = normalizeStr(it?.unit);
+    const notes = normalizeStr(it?.notes);
+
+    if(!name) return;
+
+    const row = document.createElement("div");
+    row.className = "catalog-item";
+    row.style.border = "1px solid rgba(0,0,0,0.08)";
+    row.style.borderRadius = "12px";
+    row.style.padding = "12px";
+    row.style.margin = "8px 0";
+    row.style.background = "#fff";
+    row.style.cursor = "pointer";
+
+    const t = document.createElement("div");
+    t.textContent = name;
+    t.style.fontWeight = "700";
+    t.style.marginBottom = "6px";
+
+    const meta = document.createElement("div");
+    meta.style.opacity = "0.85";
+    meta.style.fontSize = "14px";
+    meta.textContent = `السعر: ${price} ${unit ? "(" + unit + ")" : ""}`;
+
+    row.appendChild(t);
+    row.appendChild(meta);
+
+    if(notes){
+      const n = document.createElement("div");
+      n.style.marginTop = "6px";
+      n.style.opacity = "0.75";
+      n.style.fontSize = "13px";
+      n.textContent = notes;
+      row.appendChild(n);
+    }
+
+    // عند الضغط: افتح الحاسبة ومرر السعر
+    row.addEventListener("click", ()=>{
+      try{
+        const u = new URL("index.html", window.location.href);
+        u.searchParams.set("price", String(price ?? ""));
+        // يمكنك لاحقًا إضافة qty من الواجهة: u.searchParams.set("qty", "1");
+        window.location.href = u.toString();
+      }catch(e){}
+    });
+
+    list.appendChild(row);
+  });
+}
+
+// تشغيل صفحة الأسعار إذا كانت موجودة
+document.addEventListener("DOMContentLoaded", async ()=>{
+  // إذا الصفحة ليست prices.html ولا تحتوي عناصر الأسعار، لا تعمل شيء
+  const isPricesPage =
+    /prices\.html$/i.test(location.pathname) ||
+    document.getElementById("ownerPin") || // موجود في صفحة الأسعار عندك
+    ensureSearchInput();
+
+  if(!isPricesPage) return;
+
+  try{
+    const base = await loadBaseCatalog();
+    const local = readLocalPrices();
+    const merged = mergeCatalog(base, local);
+
+    // خزّن في نافذة عامة إن احتجت في HTML
+    window.PRICE_CATALOG = merged;
+
+    renderCatalog(merged);
+
+    // البحث
+    const search = ensureSearchInput();
+    if(search){
+      const handler = ()=>{
+        const q = normalizeStr(search.value).toLowerCase();
+        const filtered = !q
+          ? merged
+          : merged.filter(x => normalizeStr(x?.name).toLowerCase().includes(q));
+        renderCatalog(filtered);
+      };
+      search.addEventListener("input", handler);
+    }
+  }catch(e){
+    // لو فشل التحميل لأي سبب، اعرض رسالة واضحة
+    const list = ensureListContainer();
+    if(list){
+      list.innerHTML = "";
+      const msg = document.createElement("div");
+      msg.textContent = "تعذر تحميل قائمة الأسعار. تأكد من وجود الملف assets/prices_catalog.json";
+      msg.style.textAlign = "center";
+      msg.style.opacity = "0.85";
+      msg.style.padding = "16px";
+      list.appendChild(msg);
+    }
+    console.error(e);
+  }
+});
